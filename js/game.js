@@ -1,95 +1,144 @@
-// ===============================
-// BACKGROUND 共通スクリプト
-// ===============================
+/*
+========================================
 
-// フェードイン
-document.addEventListener("DOMContentLoaded", () => {
+game.js
 
-    document.body.classList.add("fade");
+ゲーム全体制御
+
+役割
+・初期化
+・画面演出
+・BGM管理（今後）
+・効果音管理（今後）
+・ページ共通イベント
+
+========================================
+*/
+
+
+// =====================================
+// ページ読み込み
+// =====================================
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    initializeGame();
 
 });
 
-// Enterキーで回答
-function submitByEnter(event, callback){
 
-    if(event.key==="Enter"){
 
-        callback();
 
-    }
+// =====================================
+// 初期化
+// =====================================
 
-}
+function initializeGame(){
 
-// 正解判定
-function checkAnswer(correct,nextPage){
+    console.log("ゲーム開始");
 
-    const input=document.getElementById("answer");
-
-    if(!input)return;
-
-    const value=input.value.trim();
-
-    if(value===correct){
-
-        location.href=nextPage;
-
-    }else{
-
-        alert("違います。");
-
-    }
+    fadeInScreen();
 
 }
 
-// テキストを一文字ずつ表示
-function typeWriter(id,text,speed=35){
 
-    const target=document.getElementById(id);
 
-    if(!target)return;
 
-    target.innerHTML="";
+// =====================================
+// フェードイン
+// =====================================
 
-    let i=0;
+function fadeInScreen(){
 
-    const timer=setInterval(()=>{
+    document.body.classList.add("fade");
 
-        target.innerHTML+=text.charAt(i);
+}
 
-        i++;
 
-        if(i>=text.length){
 
-            clearInterval(timer);
+
+// =====================================
+// フェードアウト
+// =====================================
+
+function fadeOutScreen(callback){
+
+    document.body.style.opacity = "0";
+
+    setTimeout(function(){
+
+        if(callback){
+
+            callback();
 
         }
 
-    },speed);
+    },500);
 
 }
 
-// ページ切り替え演出
-function next(url){
 
-    document.body.style.opacity=0;
 
-    setTimeout(()=>{
 
-        location.href=url;
+// =====================================
+// BGM再生
+// （後から実装）
+// =====================================
 
-    },600);
+function playBGM(){
+
+    // audio/bgm.mp3
 
 }
 
-// ランダム演出
-function randomFlash(){
 
-    document.body.style.filter="brightness(1.5)";
 
-    setTimeout(()=>{
 
-        document.body.style.filter="brightness(1)";
+// =====================================
+// 効果音
+// （後から実装）
+// =====================================
 
-    },120);
+function playSE(name){
+
+    console.log("SE：" + name);
+
+}
+
+
+
+
+// =====================================
+// メッセージ表示
+// =====================================
+
+function showMessage(text){
+
+    const area = document.getElementById("message");
+
+    if(area){
+
+        area.innerHTML = text;
+
+    }
+
+}
+
+
+
+
+// =====================================
+// タイトル変更
+// =====================================
+
+function changeTitle(text){
+
+    const title = document.querySelector("h1");
+
+    if(title){
+
+        title.innerHTML = text;
+
+    }
 
 }
