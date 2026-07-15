@@ -1,1 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTRO</title>
 
+<link rel="stylesheet" href="css/style.css">
+
+<style>
+
+#paperPlane{
+    font-size:70px;
+    position:fixed;
+    top:180px;
+    left:-120px;
+    cursor:pointer;
+    transition:2.5s linear;
+}
+
+.hidden{
+    display:none;
+}
+
+.highlight{
+    color:#ffcc33;
+    font-weight:bold;
+}
+
+.center{
+    text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 style="font-size:40px;">INTRO</h1>
+
+<div id="story" class="story">
+
+<p>この世は理不尽でできている。</p>
+
+<p>スマホに流れた映像に時間を浪費され、自分の時間が奪われていく。</p>
+
+<p>電車の中は俯く人ばかりだ。</p>
+
+<p>何か転機を待っているのに、降ってくるのは雨や仕事ばかり。</p>
+
+<p>「今日も残業頼む」</p>
+
+<p>「はい。」</p>
+
+<p>どこか遠くへ行きたい。</p>
+
+</div>
+
+<div class="center">
+
+<button id="nextBtn">
+
+次へ
+
+</button>
+
+</div>
+
+<div id="paperPlane">
+
+✈️
+
+</div>
+
+<div id="letter" class="letter hidden">
+
+<p>
+
+拝啓、この手紙を受け取ってくれた人へ
+
+</p>
+
+<br>
+
+<p>
+
+明日、僕は空の世界へ飛び立つようです。
+
+</p>
+
+<p>
+
+病室から見た空は、とても綺麗でした。
+
+</p>
+
+<p>
+
+一度でいいから、
+
+<span class="highlight">
+
+世界を照らす自由の像
+
+</span>
+
+をこの目で見たかった。
+
+</p>
+
+<p>
+
+<span class="highlight">
+
+物事の背景って面白いよね
+
+</span>
+
+</p>
+
+<br>
+
+<div class="center">
+
+<a class="button" href="stage1.html">
+
+調査を始める
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const plane=document.getElementById("paperPlane");
+
+const next=document.getElementById("nextBtn");
+
+next.onclick=()=>{
+
+plane.style.left="110%";
+
+}
+
+plane.addEventListener("transitionend",()=>{
+
+plane.style.left="45%";
+
+plane.style.top="120px";
+
+});
+
+plane.onclick=()=>{
+
+document.getElementById("letter").classList.remove("hidden");
+
+plane.style.display="none";
+
+next.style.display="none";
+
+}
+
+</script>
+
+<script src="js/game.js"></script>
+
+</body>
+
+</html>
