@@ -5,40 +5,55 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<title>BACKGROUND</title>
+<title>謎解きゲーム</title>
 
 <link rel="stylesheet" href="css/style.css">
 
 </head>
 
-<body class="fade">
+<body>
 
-<div class="container">
+<div class="background">
 
-<h1>BACKGROUND</h1>
+<main class="game-container fade">
 
-<p class="subtitle">
+<h1>
+謎解きゲーム
+</h1>
 
-世界は、知るたびに姿を変える。
+<p class="story-text">
+
+知識を得ることで、
+世界の見え方は変わる。
+
+あなたは、
+一人の少年が残した
+「手紙」と「地図」を手に取る。
+
+その先に待つ真実へ、
+たどり着けるだろうか。
 
 </p>
 
-<div style="text-align:center;">
+<button
+class="game-button"
+onclick="location.href='intro.html'">
 
-<a href="intro.html" class="button">
+ゲームを始める
 
-▶ START
+</button>
 
-</a>
+</main>
 
 </div>
 
-</div>
-
+<script src="js/save.js"></script>
+<script src="js/inventory.js"></script>
+<script src="js/puzzle.js"></script>
 <script src="js/game.js"></script>
 
 </body>
-
 </html>
