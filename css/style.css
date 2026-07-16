@@ -2159,3 +2159,123 @@ button {
 .map-modal__map{position:relative;width:100%;aspect-ratio:4/3;margin-top:24px;background:#e9dfc9}.map-modal__sea,.map-modal__shop{position:absolute;color:#473827;font-family:"Yu Mincho",serif;font-weight:700}.map-modal__sea{left:10%;bottom:13%}.map-modal__shop{right:9%;top:12%;padding:7px 10px;border:2px solid #473827}.map-modal__road{position:absolute;left:20%;top:65%;width:62%;border-top:4px dashed #8c7150;transform:rotate(-37deg)}.map-modal__arrow{position:absolute;left:55%;top:35%;color:#b44232;font-size:2rem;transform:rotate(39deg)}.map-modal__fold-line{position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed rgba(70,52,31,.28)}.map-modal__note{margin:17px 0 22px;color:rgba(255,255,255,.67);font-size:.8rem}
 .inventory-button{appearance:none;position:fixed;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:1300;display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:7px 11px;border:1px solid rgba(255,255,255,.26);border-radius:999px;background:rgba(0,0,0,.52);color:#fff}
 .inventory-list{display:grid;gap:12px;margin:24px 0}.inventory-list__item{display:flex;align-items:center;gap:13px;padding:13px 14px;border:1px solid rgba(255,255,255,.13);border-radius:11px;background:rgba(255,255,255,.05);text-align:left}.inventory-list__icon{display:grid;place-items:center;width:42px;height:42px;border-radius:8px;background:#dfd2b8;color:#493825}
+
+
+/* =========================================================
+   Version 0.7.1：NOW HERE 地図修正
+   ========================================================= */
+
+/*
+    小さいアイテム地図。
+    NOW と HERE の中央に、縦の折り目を配置します。
+*/
+.map-item-card__now,
+.map-item-card__here {
+    position: absolute;
+    top: 47%;
+
+    color: rgba(67, 53, 37, 0.88);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: clamp(0.62rem, 3vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.map-item-card__now {
+    right: calc(50% + 5px);
+}
+
+.map-item-card__here {
+    left: calc(50% + 5px);
+}
+
+.map-item-card__fold-line {
+    position: absolute;
+    left: 50%;
+    top: 7%;
+    bottom: 7%;
+
+    width: 1px;
+
+    border-left:
+        1px dashed
+        rgba(70, 52, 31, 0.35);
+
+    transform: translateX(-50%);
+}
+
+
+/*
+    拡大地図の NOW HERE。
+    折る前の状態を明確に見せつつ、
+    間にある折り目が不自然に目立ちすぎないようにしています。
+*/
+.map-modal__now-here {
+    position: absolute;
+    left: 50%;
+    top: 47%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+
+    width: 78%;
+
+    color: #473827;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: clamp(1.05rem, 5vw, 1.55rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+
+    transform: translate(-50%, -50%);
+}
+
+.map-modal__now,
+.map-modal__here {
+    display: inline-block;
+}
+
+.map-modal__fold-line {
+    z-index: 2;
+
+    border-left:
+        1px dashed
+        rgba(70, 52, 31, 0.38);
+}
+
+/*
+    折り目が NOW と HERE の中央を通っていることを
+    わずかに分かりやすくします。
+*/
+.map-modal__fold-line::before,
+.map-modal__fold-line::after {
+    content: "";
+
+    position: absolute;
+    left: -3px;
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(70, 52, 31, 0.24);
+}
+
+.map-modal__fold-line::before {
+    top: 5%;
+}
+
+.map-modal__fold-line::after {
+    bottom: 5%;
+}
