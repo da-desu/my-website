@@ -347,9 +347,16 @@ async function showChapterCard() {
     */
     letterCard.hidden = true;
 
-    letterCard.classList.remove(
-        "is-leaving"
-    );
+    /*
+        重要:
+        ここでは is-leaving を外しません。
+
+        iPhone Safariでは、hiddenを付けた直後に退場クラスを外すと、
+        再描画のタイミングによって手紙が1フレームだけ
+        元の表示状態へ戻ることがあります。
+
+        退場クラスは次回の resetIntroScene() まで保持します。
+    */
 
     await wait(220);
 
