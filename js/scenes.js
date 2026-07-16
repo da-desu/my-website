@@ -738,7 +738,9 @@ function getResumeSceneLabel(sceneName) {
         "stage2-clear": "海を見つけた場面",
         stage3: "第三問",
         "stage3-clear": "寿司屋への地図を入手した場面",
-        stage4: "第四問"
+        stage4: "寿司屋の扉",
+        "stage4-clear": "寿司屋へ入る場面",
+        stage5: "第五問"
     };
 
     return labels[sceneName] || "前回の続き";
@@ -942,3 +944,12 @@ if (document.readyState === "loading") {
 /* Version 0.7 map modal */
 function initializeMapControls(){const modal=document.getElementById("mapModal");document.getElementById("openMapButton")?.addEventListener("click",()=>{modal.hidden=false});document.getElementById("closeMapButton")?.addEventListener("click",()=>{modal.hidden=true});document.getElementById("mapModalBackdrop")?.addEventListener("click",()=>{modal.hidden=true})}
 document.addEventListener("DOMContentLoaded",initializeMapControls);
+
+/* Version 0.8 stage4 navigation */
+function initializeStage4Navigation(){
+ const to4=document.getElementById("stage3ContinueButton");
+ if(to4&&!to4.dataset.v08){to4.addEventListener("click",()=>window.resetStage4Puzzle?.(),{capture:true});to4.dataset.v08="1"}
+ const to5=document.getElementById("stage4ContinueButton");
+ if(to5&&!to5.dataset.v08){to5.addEventListener("click",async()=>{to5.disabled=true;await SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860});to5.disabled=false});to5.dataset.v08="1"}
+}
+document.addEventListener("DOMContentLoaded",initializeStage4Navigation);
