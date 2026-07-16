@@ -632,7 +632,7 @@
                 <p class="coast-stage-scene__lead">海のそばに、古びた看板が立っている。</p>
 
                 <figure class="single-puzzle-card">
-                    <img class="single-puzzle-card__image" src="img/stage3/puzzle.jpg" alt="上下のイラストを組み合わせ、進む方向を導く一枚謎">
+                    <img class="single-puzzle-card__image" src="img/stage3/puzzle.png" alt="上下のイラストを組み合わせ、進む方向を導く一枚謎">
                     <figcaption class="single-puzzle-card__caption">看板を解いて、進む方向を答えよう。</figcaption>
                 </figure>
 
@@ -661,6 +661,14 @@
                         <span class="map-item-card__route"></span>
                         <span class="map-item-card__start">海</span>
                         <span class="map-item-card__goal">寿司</span>
+
+                        <!--
+                            第4問へつながる伏線。
+                            NOW と HERE の間に折り目があります。
+                        -->
+                        <span class="map-item-card__now">NOW</span>
+                        <span class="map-item-card__here">HERE</span>
+                        <span class="map-item-card__fold-line"></span>
                     </div>
                     <p class="map-item-card__name">寿司屋への地図</p>
                 </div>
@@ -682,6 +690,16 @@
                     <div class="map-modal__road"></div>
                     <div class="map-modal__arrow">↑</div>
                     <div class="map-modal__shop">寿司屋</div>
+
+                    <!--
+                        折る前は NOW  HERE。
+                        Version 0.8で中央を折り、NOWHEREへ変化させます。
+                    -->
+                    <div class="map-modal__now-here">
+                        <span class="map-modal__now">NOW</span>
+                        <span class="map-modal__here">HERE</span>
+                    </div>
+
                     <div class="map-modal__fold-line"></div>
                 </div>
                 <p class="map-modal__note">地図には、うっすらと折り目がついている。</p>
