@@ -708,71 +708,88 @@
         </div>
 
         <!-- =======================================================
-             STAGE4：寿司屋の扉
+             STAGE4 REBUILD：寿司屋の扉
         ======================================================== -->
-        <section id="scene-stage4" class="scene sushi-door-scene" data-scene="stage4" aria-labelledby="stage4-title" hidden>
-            <div class="scene__inner sushi-door-scene__inner">
+        <section id="scene-stage4" class="scene stage4-scene" data-scene="stage4" aria-labelledby="stage4-title" hidden>
+            <div class="scene__inner stage4-scene__inner">
                 <p class="scene-label">第四問</p>
-                <h1 id="stage4-title" class="sushi-door-scene__title">寿司屋の扉</h1>
-                <p class="sushi-door-scene__lead">お店の扉を開けるには、<br>暗号解読が必要だよ〜好きだよね、こういうの。</p>
+                <h1 id="stage4-title" class="stage4-scene__title">寿司屋の扉</h1>
+                <p class="stage4-scene__lead">お店の扉を開けるには暗号解読が必要だよ〜<br>好きだよね、こういうの。</p>
 
-                <div class="sushi-street">
-                    <aside class="utility-pole" aria-label="電柱に貼られた広告">
-                        <div class="utility-pole__post" aria-hidden="true"></div>
-                        <div class="street-ad street-ad--tutor">家庭教師<br>生徒募集</div>
-                        <div class="street-ad street-ad--car">中古車<br>高価買取</div>
-                        <div class="street-ad street-ad--sample">ハンドクリーム<br>試供品配布中</div>
-                        <div class="street-ad street-ad--job">アルバイト<br>募集中</div>
-                        <div class="street-ad street-ad--cat">猫を<br>探しています</div>
+                <div class="stage4-street">
+                    <aside class="stage4-pole" aria-label="電柱に貼られた広告">
+                        <div class="stage4-pole__body" aria-hidden="true"></div>
+                        <div class="stage4-ad stage4-ad--1">家庭教師<br>生徒募集</div>
+                        <div class="stage4-ad stage4-ad--2">中古車<br>高価買取</div>
+                        <div class="stage4-ad stage4-ad--3">ハンドクリーム<br>試供品配布中</div>
+                        <div class="stage4-ad stage4-ad--4">アルバイト<br>募集中</div>
+                        <div class="stage4-ad stage4-ad--5">猫を<br>探しています</div>
                     </aside>
 
-                    <div class="sushi-shop">
-                        <div class="sushi-shop__sign">寿司屋</div>
-                        <div class="sushi-door-frame">
-                            <div id="sushiDoor" class="sushi-door" aria-hidden="true">
-                                <div class="sushi-door__panel"></div>
-                                <div class="sushi-door__handle"></div>
-                                <div class="sushi-door__writing">NOW&nbsp;&nbsp;HERE</div>
+                    <div class="stage4-shop">
+                        <div class="stage4-shop__sign">寿司屋</div>
+                        <div class="stage4-door-frame">
+                            <div id="stage4Door" class="stage4-door">
+                                <div class="stage4-door__inner-line"></div>
+                                <div class="stage4-door__handle"></div>
+                                <div id="stage4DoorWord" class="stage4-door__word">
+                                    <span>NOW</span><span>HERE</span>
+                                </div>
                             </div>
-                            <div class="sushi-interior" aria-hidden="true"><span>いらっしゃい。</span></div>
+                            <div class="stage4-interior" aria-hidden="true">いらっしゃい。</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="fold-map-area">
-                    <p class="fold-map-area__title">寿司屋への地図</p>
-                    <div id="foldableMap" class="foldable-map" role="application" aria-label="中央に折り目がある寿司屋への地図">
-                        <div class="foldable-map__paper">
-                            <span class="foldable-map__sea">海</span>
-                            <span class="foldable-map__shop">寿司屋</span>
-                            <span class="foldable-map__route"></span>
-                            <div class="foldable-map__word"><span>NOW</span><span>HERE</span></div>
-                            <div class="foldable-map__crease" aria-hidden="true"></div>
-                            <div class="foldable-map__flap" aria-hidden="true"></div>
+                <section class="stage4-map-panel" aria-labelledby="stage4-map-title">
+                    <h2 id="stage4-map-title" class="stage4-map-panel__title">寿司屋への地図</h2>
+
+                    <div id="stage4FoldMap" class="stage4-fold-map" role="application" aria-label="中央に折り目のある地図">
+                        <div class="stage4-fold-map__paper">
+                            <span class="stage4-fold-map__sea">海</span>
+                            <span class="stage4-fold-map__shop">寿司屋</span>
+                            <span class="stage4-fold-map__route"></span>
+
+                            <div id="stage4MapWord" class="stage4-fold-map__word">
+                                <span>NOW</span><span>HERE</span>
+                            </div>
+
+                            <div class="stage4-fold-map__crease"></div>
+                            <div class="stage4-fold-map__right-half"></div>
                         </div>
                     </div>
-                    <p id="foldMapMessage" class="fold-map-message" aria-live="polite">地図の折り目が気になる。</p>
-                    <button id="foldMapButton" class="sub-button" type="button">地図を折る</button>
-                </div>
 
-                <div id="doorChoiceArea" class="door-choice-area" hidden>
-                    <p class="door-choice-area__question">扉をどうする？</p>
-                    <div class="door-choice-area__buttons">
-                        <button class="door-choice-button" type="button">手前に引く</button>
-                        <button class="door-choice-button" type="button">奥に押す</button>
-                        <button class="door-choice-button" type="button">撫でる</button>
+                    <p id="stage4MapMessage" class="stage4-status" aria-live="polite">地図には、うっすらと折り目がついている。</p>
+                    <button id="stage4FoldButton" class="sub-button" type="button">地図を折る</button>
+                </section>
+
+                <section id="stage4ChoicePanel" class="stage4-choice-panel" hidden>
+                    <h2 class="stage4-choice-panel__title">扉をどうする？</h2>
+
+                    <div class="stage4-choice-panel__buttons">
+                        <button class="stage4-choice-button" type="button">手前に引く</button>
+                        <button class="stage4-choice-button" type="button">奥に押す</button>
+                        <button class="stage4-choice-button" type="button">撫でる</button>
                     </div>
-                    <p id="doorChoiceMessage" class="door-choice-message" aria-live="polite">よく考えて選ぼう。</p>
-                    <div id="doorWaitIndicator" class="door-wait-indicator" aria-hidden="true"><span></span></div>
-                </div>
+
+                    <p id="stage4ChoiceMessage" class="stage4-status" aria-live="polite">よく考えて選ぼう。</p>
+
+                    <div id="stage4Silence" class="stage4-silence" aria-hidden="true">
+                        <span>……</span>
+                    </div>
+
+                    <div id="stage4WaitBar" class="stage4-wait-bar" aria-hidden="true">
+                        <span></span>
+                    </div>
+                </section>
             </div>
         </section>
 
-        <section id="scene-stage4-clear" class="scene sushi-entry-scene" data-scene="stage4-clear" aria-labelledby="stage4-clear-title" hidden>
-            <div class="scene__inner sushi-entry-scene__inner">
+        <section id="scene-stage4-clear" class="scene stage4-clear-scene" data-scene="stage4-clear" aria-labelledby="stage4-clear-title" hidden>
+            <div class="scene__inner stage4-clear-scene__inner">
                 <p class="scene-label">OPEN</p>
-                <h1 id="stage4-clear-title" class="sushi-entry-scene__title">扉は、横に開いた。</h1>
-                <p class="sushi-entry-scene__text">押すことも、引くことも、<br>必要ではなかった。</p>
+                <h1 id="stage4-clear-title" class="stage4-clear-scene__title">扉は、横に開いた。</h1>
+                <p class="stage4-clear-scene__text">押すことも、引くことも、<br>必要ではなかった。</p>
                 <button id="stage4ContinueButton" class="start-button" type="button">店内へ入る</button>
             </div>
         </section>
