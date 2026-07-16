@@ -978,3 +978,132 @@ continueSavedGame=async function(){
         window.restoreStage4Puzzle?.();
     }
 };
+
+
+/* =========================================================
+   Version 0.8.1：第3問→第4問 遷移の最終修正
+   ========================================================= */
+
+/*
+    DOMContentLoadedや個別イベント登録の成否に依存せず、
+    document全体で「寿司屋へ向かう」ボタンのクリックを拾います。
+
+    capture:true により、他の要素や処理より先に反応します。
+*/
+document.addEventListener(
+    "click",
+    async function stage3ToStage4Fallback(event) {
+
+        const button =
+            event.target.closest(
+                "#stage3ContinueButton"
+            );
+
+        if (!button) {
+            return;
+        }
+
+        /*
+            既存イベントとの二重実行を防止します。
+        */
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (
+            button.dataset.transitioning ===
+            "true"
+        ) {
+            return;
+        }
+
+        button.dataset.transitioning =
+            "true";
+
+        button.disabled = true;
+
+        try {
+
+            /*
+                地図モーダルが開いたままでも、
+                必ず閉じてから次へ進みます。
+            */
+            const mapModal =
+                document.getElementById(
+                    "mapModal"
+                );
+
+            if (mapModal) {
+                mapModal.hidden = true;
+            }
+
+            /*
+                第4問を初期状態へ戻します。
+            */
+            if (
+                window.Stage4Controller &&
+                typeof window.Stage4Controller.reset ===
+                    "function"
+            ) {
+                window.Stage4Controller.reset();
+
+            } else if (
+                typeof window.resetStage4Puzzle ===
+                    "function"
+            ) {
+                window.resetStage4Puzzle();
+            }
+
+            /*
+                SceneManagerをwindow経由で直接呼びます。
+                これによりスコープ差による失敗を避けます。
+            */
+            if (
+                !window.SceneManager ||
+                typeof window.SceneManager.changeScene !==
+                    "function"
+            ) {
+                throw new Error(
+                    "SceneManager is unavailable."
+                );
+            }
+
+            await window.SceneManager.changeScene(
+                "stage4",
+                {
+                    fadeOutTime: 720,
+                    blackTime: 320,
+                    fadeInTime: 860
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "第4問への遷移に失敗しました。",
+                error
+            );
+
+            /*
+                万一アニメーション遷移が失敗した場合も、
+                最終手段として第4問を即時表示します。
+            */
+            if (
+                window.SceneManager &&
+                typeof window.SceneManager.showImmediately ===
+                    "function"
+            ) {
+                window.SceneManager.showImmediately(
+                    "stage4"
+                );
+            }
+
+        } finally {
+
+            button.disabled = false;
+
+            button.dataset.transitioning =
+                "false";
+        }
+    },
+    true
+);
