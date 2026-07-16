@@ -1,245 +1,360 @@
 /*
-========================================
-
-謎解きサイト
-セーブ管理システム
-
+============================================================
 save.js
+Version 0.4
 
-役割：
-・ステージ進行保存
-・クリア情報管理
-・アイテム管理との連携
+役割
+・現在シーンの保存
+・クリア済みステージの保存
+・アイテムの保存
+・続きから / 最初から
+・壊れたセーブデータへの安全対策
 
-========================================
+localStorageはブラウザ内だけに保存されます。
+サーバーや外部サービスは使用しません。
+============================================================
 */
 
 
-// ================================
-// セーブデータ初期状態
-// ================================
+"use strict";
 
 
-const defaultSaveData = {
+/* =========================================================
+   1. セーブ設定
+   ========================================================= */
 
+const SAVE_KEY = "nazotoki_save_v2";
 
-    // 現在ステージ
-
-    currentStage:1,
-
-
-    // クリア済みステージ
-
-    clearedStages:[],
-
-
-    // 入手アイテム
-
-    items:[]
-
-
+const DEFAULT_SAVE_DATA = {
+    version: 2,
+    currentScene: "top",
+    clearedStages: [],
+    items: [],
+    hasStarted: false,
+    updatedAt: null
 };
 
 
+/*
+    保存可能なシーンの一覧です。
+    不正な文字列を保存・復元しないために使用します。
+*/
+const SAVEABLE_SCENES = new Set([
+    "intro",
+    "stage1",
+    "stage1-clear",
+    "stage2"
+]);
 
 
+/* =========================================================
+   2. データ整形
+   ========================================================= */
 
-// ================================
-// セーブデータ取得
-// ================================
+/**
+ * セーブデータを安全な形へ整えます。
+ *
+ * @param {object} source
+ * @returns {object}
+ */
+function normalizeSaveData(source) {
 
-
-function getSaveData(){
-
-
-    const data = localStorage.getItem(
-        "nazotoki_save"
+    const data = Object.assign(
+        {},
+        DEFAULT_SAVE_DATA,
+        source || {}
     );
 
-
-    if(data){
-
-
-        return JSON.parse(data);
-
-
+    if (
+        !SAVEABLE_SCENES.has(
+            data.currentScene
+        )
+    ) {
+        data.currentScene = "top";
     }
 
+    if (!Array.isArray(data.clearedStages)) {
+        data.clearedStages = [];
+    }
 
-    return defaultSaveData;
+    if (!Array.isArray(data.items)) {
+        data.items = [];
+    }
 
-
-}
-
-
-
-
-
-
-// ================================
-// セーブ実行
-// ================================
-
-
-function saveData(data){
-
-
-    localStorage.setItem(
-
-        "nazotoki_save",
-
-        JSON.stringify(data)
-
+    data.clearedStages = Array.from(
+        new Set(
+            data.clearedStages.filter(
+                Number.isFinite
+            )
+        )
     );
 
+    data.items = Array.from(
+        new Set(
+            data.items.filter(function (item) {
+                return (
+                    typeof item === "string" &&
+                    item.length > 0
+                );
+            })
+        )
+    );
 
+    data.hasStarted =
+        Boolean(data.hasStarted);
+
+    return data;
 }
 
 
+/* =========================================================
+   3. 読み込み・保存
+   ========================================================= */
+
+/**
+ * 現在のセーブデータを取得します。
+ *
+ * @returns {object}
+ */
+function getSaveData() {
+
+    try {
+        const raw =
+            window.localStorage.getItem(
+                SAVE_KEY
+            );
+
+        if (!raw) {
+            return normalizeSaveData(
+                DEFAULT_SAVE_DATA
+            );
+        }
+
+        return normalizeSaveData(
+            JSON.parse(raw)
+        );
+
+    } catch (error) {
+        console.warn(
+            "セーブデータを読み込めませんでした。",
+            error
+        );
+
+        return normalizeSaveData(
+            DEFAULT_SAVE_DATA
+        );
+    }
+}
 
 
+/**
+ * セーブデータを保存します。
+ *
+ * @param {object} source
+ */
+function saveData(source) {
+
+    const data = normalizeSaveData(source);
+
+    data.updatedAt =
+        new Date().toISOString();
+
+    try {
+        window.localStorage.setItem(
+            SAVE_KEY,
+            JSON.stringify(data)
+        );
+
+    } catch (error) {
+        console.warn(
+            "進行状況を保存できませんでした。",
+            error
+        );
+    }
+}
 
 
+/* =========================================================
+   4. 現在シーン
+   ========================================================= */
 
-// ================================
-// ステージクリア保存
-// ================================
+/**
+ * 現在のシーンを保存します。
+ *
+ * TOPと再開確認画面は保存しません。
+ *
+ * @param {string} sceneName
+ */
+function saveCurrentScene(sceneName) {
 
-
-function clearStage(stageNumber){
-
-
+    if (!SAVEABLE_SCENES.has(sceneName)) {
+        return;
+    }
 
     const data = getSaveData();
 
-
-
-    if(
-        !data.clearedStages.includes(stageNumber)
-    ){
-
-
-        data.clearedStages.push(stageNumber);
-
-
-    }
-
-
-
-    data.currentStage =
-    stageNumber + 1;
-
-
+    data.currentScene = sceneName;
+    data.hasStarted = true;
 
     saveData(data);
-
-
-
 }
 
 
-
-
-
-
-
-// ================================
-// ステージクリア確認
-// ================================
-
-
-function isStageCleared(stageNumber){
-
+/**
+ * 続きから開始できるか確認します。
+ *
+ * @returns {boolean}
+ */
+function hasResumeData() {
 
     const data = getSaveData();
 
-
-
-    return data.clearedStages.includes(
-        stageNumber
+    return (
+        data.hasStarted === true &&
+        SAVEABLE_SCENES.has(
+            data.currentScene
+        )
     );
-
-
-
 }
 
 
-
-
-
-
-// ================================
-// アイテム追加
-// ================================
-
-
-function addItem(itemName){
-
+/**
+ * 保存されている再開シーンを取得します。
+ *
+ * @returns {string}
+ */
+function getResumeScene() {
 
     const data = getSaveData();
 
+    if (!hasResumeData()) {
+        return "top";
+    }
+
+    return data.currentScene;
+}
 
 
-    if(
-        !data.items.includes(itemName)
-    ){
+/* =========================================================
+   5. ステージクリア
+   ========================================================= */
+
+/**
+ * ステージクリアを保存します。
+ *
+ * 以前作成したpuzzle.jsからも呼べるよう、
+ * 関数名 clearStage を維持しています。
+ *
+ * @param {number} stageNumber
+ */
+function clearStage(stageNumber) {
+
+    if (!Number.isFinite(stageNumber)) {
+        return;
+    }
+
+    const data = getSaveData();
+
+    if (
+        !data.clearedStages.includes(
+            stageNumber
+        )
+    ) {
+        data.clearedStages.push(
+            stageNumber
+        );
+    }
+
+    saveData(data);
+}
 
 
+/**
+ * ステージがクリア済みか確認します。
+ *
+ * @param {number} stageNumber
+ * @returns {boolean}
+ */
+function isStageCleared(stageNumber) {
+
+    return getSaveData()
+        .clearedStages
+        .includes(stageNumber);
+}
+
+
+/* =========================================================
+   6. アイテム
+   ========================================================= */
+
+function addItem(itemName) {
+
+    if (
+        typeof itemName !== "string" ||
+        itemName.length === 0
+    ) {
+        return;
+    }
+
+    const data = getSaveData();
+
+    if (!data.items.includes(itemName)) {
         data.items.push(itemName);
-
-
     }
 
-
-
     saveData(data);
-
-
-
 }
 
 
+function hasItem(itemName) {
 
-
-
-
-// ================================
-// アイテム所持確認
-// ================================
-
-
-function hasItem(itemName){
-
-
-    const data = getSaveData();
-
-
-
-    return data.items.includes(
-        itemName
-    );
-
-
+    return getSaveData()
+        .items
+        .includes(itemName);
 }
 
 
+/* =========================================================
+   7. 最初から
+   ========================================================= */
 
+/**
+ * セーブデータを完全に削除します。
+ */
+function resetSave() {
 
+    try {
+        window.localStorage.removeItem(
+            SAVE_KEY
+        );
 
+        /*
+            初期版で使っていたキーも削除します。
+        */
+        window.localStorage.removeItem(
+            "nazotoki_save"
+        );
 
-
-// ================================
-// セーブ削除
-// テスト用
-// ================================
-
-
-function resetSave(){
-
-
-    localStorage.removeItem(
-        "nazotoki_save"
-    );
-
-
+    } catch (error) {
+        console.warn(
+            "セーブデータを削除できませんでした。",
+            error
+        );
+    }
 }
+
+
+/* =========================================================
+   8. グローバル公開
+   ========================================================= */
+
+window.getSaveData = getSaveData;
+window.saveData = saveData;
+window.saveCurrentScene = saveCurrentScene;
+window.hasResumeData = hasResumeData;
+window.getResumeScene = getResumeScene;
+window.clearStage = clearStage;
+window.isStageCleared = isStageCleared;
+window.addItem = addItem;
+window.hasItem = hasItem;
+window.resetSave = resetSave;
