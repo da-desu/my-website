@@ -601,6 +601,51 @@ function initializeScenes() {
 
                 resetTopScene();
                 resetIntroScene();
+
+                if (
+                    typeof window.resetStage1Puzzle ===
+                    "function"
+                ) {
+                    window.resetStage1Puzzle();
+                }
+            }
+        );
+    }
+
+
+    /*
+        第一問の選択イベントを登録します。
+    */
+    if (
+        typeof window.initializePuzzles ===
+        "function"
+    ) {
+        window.initializePuzzles();
+    }
+
+
+    /*
+        第一問正解後、「桜の前へ進む」で次の場面へ移動します。
+    */
+    const stage1ContinueButton =
+        document.getElementById(
+            "stage1ContinueButton"
+        );
+
+    if (stage1ContinueButton) {
+        stage1ContinueButton.addEventListener(
+            "click",
+            async function () {
+
+                await SceneManager.changeScene(
+                    "stage2",
+                    {
+                        fadeOutTime: 720,
+                        blackTime: 320,
+                        fadeInTime: 860
+                    }
+                );
+
             }
         );
     }
