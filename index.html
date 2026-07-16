@@ -3,45 +3,25 @@
 <head>
     <meta charset="UTF-8">
 
-    <!--
-        iPhone / Android で正しく表示するための設定
-        viewport-fit=cover により、ノッチ付き端末にも対応します。
-    -->
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
-    <!--
-        ブラウザ上部の色を黒に統一
-        対応ブラウザでは、ページ周辺も黒く表示されます。
-    -->
     <meta name="theme-color" content="#000000">
 
     <title>知るたびに世界は姿を変える</title>
 
-    <!-- 共通デザイン -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <!--
-        ============================================================
-        アプリ全体
-        ============================================================
-
-        この作品は1ページ構成です。
-        各場面を section.scene として用意し、
-        JavaScriptで表示する場面だけを切り替えます。
-    -->
     <div id="app" class="app">
 
-        <!--
-            ========================================================
-            TOPシーン
-            ========================================================
-        -->
+        <!-- =======================================================
+             TOPシーン
+        ======================================================== -->
         <section
             id="scene-top"
             class="scene is-active"
@@ -50,7 +30,6 @@
         >
             <div class="scene__inner top-scene__inner">
 
-                <!-- 作品タイトルは表示せず、テーマだけを提示します -->
                 <p class="top-scene__lead">
                     知るたびに
                 </p>
@@ -63,10 +42,6 @@
                     >世界</span><span>は姿を変える。</span>
                 </p>
 
-                <!--
-                    type="button" を指定し、
-                    フォーム送信として扱われないようにしています。
-                -->
                 <button
                     id="startButton"
                     class="start-button"
@@ -80,35 +55,123 @@
         </section>
 
 
-        <!--
-            ========================================================
-            INTROシーン（Version 0.1では仮表示）
-            ========================================================
-
-            次のVersionで、手紙・文字送り・物語導入を実装します。
-        -->
+        <!-- =======================================================
+             INTROシーン
+        ======================================================== -->
         <section
             id="scene-intro"
             class="scene"
             data-scene="intro"
-            aria-labelledby="intro-title"
+            aria-labelledby="intro-heading"
             hidden
         >
             <div class="scene__inner intro-scene__inner">
 
+                <!-- 最初に現れる無音の間 -->
+                <div
+                    id="introSilence"
+                    class="intro-silence"
+                    aria-hidden="true"
+                >
+                    <span class="intro-silence__dots">……</span>
+                </div>
+
+
+                <!-- 手紙カード -->
+                <article
+                    id="letterCard"
+                    class="letter-card"
+                    aria-live="polite"
+                    hidden
+                >
+                    <p class="letter-card__eyebrow">
+                        見知らぬ手紙
+                    </p>
+
+                    <h1
+                        id="intro-heading"
+                        class="letter-card__title"
+                    >
+                        拾った紙には、こう書かれていた。
+                    </h1>
+
+                    <div class="letter-card__body">
+
+                        <p
+                            id="typewriterText"
+                            class="typewriter-text"
+                        ></p>
+
+                        <span
+                            id="typewriterCursor"
+                            class="typewriter-cursor"
+                            aria-hidden="true"
+                        ></span>
+
+                    </div>
+
+                    <button
+                        id="introNextButton"
+                        class="tap-next-button"
+                        type="button"
+                        hidden
+                    >
+                        タップして進む
+                    </button>
+
+                </article>
+
+
+                <!-- 第一章への導入 -->
+                <div
+                    id="chapterCard"
+                    class="chapter-card"
+                    hidden
+                >
+                    <p class="chapter-card__number">
+                        第一章
+                    </p>
+
+                    <h2 class="chapter-card__title">
+                        少年が残した地図
+                    </h2>
+
+                    <button
+                        id="chapterStartButton"
+                        class="start-button chapter-card__button"
+                        type="button"
+                    >
+                        進む
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =======================================================
+             STAGE1シーン（次Versionのための仮画面）
+        ======================================================== -->
+        <section
+            id="scene-stage1"
+            class="scene"
+            data-scene="stage1"
+            aria-labelledby="stage1-title"
+            hidden
+        >
+            <div class="scene__inner stage-placeholder__inner">
+
                 <p class="scene-label">
-                    INTRO
+                    STAGE 1
                 </p>
 
-                <h1 id="intro-title" class="intro-title">
-                    何かが、始まろうとしている。
+                <h1
+                    id="stage1-title"
+                    class="stage-placeholder__title"
+                >
+                    第一問は、次のVersionで実装します。
                 </h1>
 
-                <p class="intro-note">
-                    イントロは次のVersionで実装します。
-                </p>
-
-                <!-- 開発中の確認用。公開前に削除または変更できます -->
                 <button
                     id="backToTopButton"
                     class="sub-button"
@@ -121,14 +184,9 @@
         </section>
 
 
-        <!--
-            ========================================================
-            画面暗転レイヤー
-            ========================================================
-
-            シーン切替時に画面全体を黒く覆います。
-            aria-hidden="true" により読み上げ対象から外します。
-        -->
+        <!-- =======================================================
+             画面暗転レイヤー
+        ======================================================== -->
         <div
             id="transitionLayer"
             class="transition-layer"
@@ -138,20 +196,6 @@
     </div>
 
 
-    <!--
-        ============================================================
-        JavaScript読み込み
-        ============================================================
-
-        game.js:
-        ・シーン切替
-        ・画面暗転
-        ・共通処理
-
-        scenes.js:
-        ・TOP固有の演出
-        ・ボタン操作
-    -->
     <script src="js/game.js"></script>
     <script src="js/scenes.js"></script>
 
