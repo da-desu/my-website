@@ -151,7 +151,7 @@
 
 
         <!-- =======================================================
-             STAGE1シーン（次Versionのための仮画面）
+             STAGE1：桜の画像選択
         ======================================================== -->
         <section
             id="scene-stage1"
@@ -160,17 +160,248 @@
             aria-labelledby="stage1-title"
             hidden
         >
-            <div class="scene__inner stage-placeholder__inner">
+            <div class="scene__inner stage1-scene__inner">
 
                 <p class="scene-label">
-                    STAGE 1
+                    第一問
+                </p>
+
+                <h1 id="stage1-title" class="stage1-scene__title">
+                    まずは、ここへ向かってね。
+                </h1>
+
+                <p class="stage1-scene__note">
+                    必要なら、検索しても構いません。
+                </p>
+
+
+                <!--
+                    reCAPTCHA風の画像選択パネルです。
+                    後から各ボタン内を本物の写真へ差し替えられます。
+                -->
+                <div
+                    id="sakuraPuzzle"
+                    class="captcha-card"
+                    aria-describedby="stage1Instruction stage1Message"
+                >
+                    <div class="captcha-card__header">
+
+                        <div>
+                            <p class="captcha-card__small">
+                                次の画像をすべて選択してください
+                            </p>
+
+                            <p
+                                id="stage1Instruction"
+                                class="captcha-card__target"
+                            >
+                                ソメイヨシノ
+                            </p>
+
+                            <p class="captcha-card__small">
+                                該当する画像がなくなったら確認を押してください
+                            </p>
+                        </div>
+
+                        <div
+                            class="captcha-card__mark"
+                            aria-hidden="true"
+                        >
+                            ✓
+                        </div>
+
+                    </div>
+
+
+                    <!--
+                        全16マスが正解です。
+                        見た目が異なっても、すべて同じソメイヨシノです。
+                    -->
+                    <div
+                        id="sakuraGrid"
+                        class="sakura-grid"
+                        role="group"
+                        aria-label="ソメイヨシノの画像選択"
+                    >
+
+                        <button class="sakura-tile sakura-tile--01" type="button" data-correct="true" aria-pressed="false" aria-label="画像1">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--02" type="button" data-correct="true" aria-pressed="false" aria-label="画像2">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--03" type="button" data-correct="true" aria-pressed="false" aria-label="画像3">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--04" type="button" data-correct="true" aria-pressed="false" aria-label="画像4">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--05" type="button" data-correct="true" aria-pressed="false" aria-label="画像5">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--06" type="button" data-correct="true" aria-pressed="false" aria-label="画像6">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--07" type="button" data-correct="true" aria-pressed="false" aria-label="画像7">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--08" type="button" data-correct="true" aria-pressed="false" aria-label="画像8">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--09" type="button" data-correct="true" aria-pressed="false" aria-label="画像9">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--10" type="button" data-correct="true" aria-pressed="false" aria-label="画像10">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--11" type="button" data-correct="true" aria-pressed="false" aria-label="画像11">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--12" type="button" data-correct="true" aria-pressed="false" aria-label="画像12">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--13" type="button" data-correct="true" aria-pressed="false" aria-label="画像13">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--14" type="button" data-correct="true" aria-pressed="false" aria-label="画像14">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--15" type="button" data-correct="true" aria-pressed="false" aria-label="画像15">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                        <button class="sakura-tile sakura-tile--16" type="button" data-correct="true" aria-pressed="false" aria-label="画像16">
+                            <span class="sakura-tile__image" aria-hidden="true"></span>
+                            <span class="sakura-tile__check" aria-hidden="true">✓</span>
+                        </button>
+
+                    </div>
+
+
+                    <div class="captcha-card__footer">
+
+                        <p
+                            id="stage1Message"
+                            class="captcha-card__message"
+                            aria-live="polite"
+                        ></p>
+
+                        <button
+                            id="stage1VerifyButton"
+                            class="captcha-card__verify"
+                            type="button"
+                        >
+                            確認
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- =======================================================
+             STAGE1正解後：満開の桜
+        ======================================================== -->
+        <section
+            id="scene-stage1-clear"
+            class="scene sakura-clear-scene"
+            data-scene="stage1-clear"
+            aria-labelledby="stage1-clear-title"
+            hidden
+        >
+            <div class="sakura-clear-scene__sky" aria-hidden="true"></div>
+            <div class="sakura-clear-scene__tree" aria-hidden="true"></div>
+
+            <div class="petal petal--01" aria-hidden="true">◆</div>
+            <div class="petal petal--02" aria-hidden="true">◆</div>
+            <div class="petal petal--03" aria-hidden="true">◆</div>
+            <div class="petal petal--04" aria-hidden="true">◆</div>
+            <div class="petal petal--05" aria-hidden="true">◆</div>
+            <div class="petal petal--06" aria-hidden="true">◆</div>
+
+            <div class="scene__inner sakura-clear-scene__inner">
+
+                <p class="scene-label scene-label--dark">
+                    正解
                 </p>
 
                 <h1
-                    id="stage1-title"
+                    id="stage1-clear-title"
+                    class="sakura-clear-scene__title"
+                >
+                    たどり着いた先には、<br>
+                    満開の桜が咲いていた。
+                </h1>
+
+                <p class="sakura-clear-scene__text">
+                    同じ名前で呼ばれていても、<br>
+                    見え方はひとつではない。
+                </p>
+
+                <button
+                    id="stage1ContinueButton"
+                    class="dark-button"
+                    type="button"
+                >
+                    桜の前へ進む
+                </button>
+
+            </div>
+        </section>
+
+
+        <!-- =======================================================
+             STAGE2仮画面
+        ======================================================== -->
+        <section
+            id="scene-stage2"
+            class="scene"
+            data-scene="stage2"
+            aria-labelledby="stage2-title"
+            hidden
+        >
+            <div class="scene__inner stage-placeholder__inner">
+
+                <p class="scene-label">
+                    STAGE 2
+                </p>
+
+                <h1
+                    id="stage2-title"
                     class="stage-placeholder__title"
                 >
-                    第一問は、次のVersionで実装します。
+                    第二問は、次のVersionで実装します。
                 </h1>
 
                 <button
@@ -198,6 +429,7 @@
 
 
     <script src="js/game.js"></script>
+    <script src="js/puzzle.js"></script>
     <script src="js/scenes.js"></script>
 
 </body>
