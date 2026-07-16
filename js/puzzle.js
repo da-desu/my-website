@@ -499,16 +499,132 @@ function toggleStage3Hint(){const h=document.getElementById("stage3Hint"),b=docu
 function resetStage3Puzzle(){const i=document.getElementById("stage3Answer"),b=document.getElementById("stage3SubmitButton"),h=document.getElementById("stage3Hint"),hb=document.getElementById("stage3HintButton");if(i){i.value="";i.disabled=false}if(b)b.disabled=false;if(h)h.hidden=true;if(hb)hb.textContent="ヒントを見る";setStage3AnswerMessage("","");isStage3Clearing=false}
 const prevInit=window.initializePuzzles;window.initializePuzzles=function(){prevInit?.();const f=document.getElementById("stage3Form"),h=document.getElementById("stage3HintButton");if(f&&!f.dataset.initialized){f.addEventListener("submit",verifyStage3Answer);f.dataset.initialized="true"}if(h&&!h.dataset.initialized){h.addEventListener("click",toggleStage3Hint);h.dataset.initialized="true"}};window.resetStage3Puzzle=resetStage3Puzzle;
 
-/* Version 0.8: STAGE4 */
-let stage4Initialized=false,stage4Folded=false,stage4WaitTimer=null,stage4Completed=false;
-const STAGE4_WAIT_TIME=10000;
-function setFoldMapMessage(t,type){const m=document.getElementById("foldMapMessage");if(!m)return;m.textContent=t;m.classList.toggle("is-success",type==="success")}
-function setDoorChoiceMessage(t,type){const m=document.getElementById("doorChoiceMessage");if(!m)return;m.textContent=t;m.classList.remove("is-error","is-success");if(type)m.classList.add("is-"+type)}
-function stopStage4WaitTimer(){if(stage4WaitTimer!==null){clearTimeout(stage4WaitTimer);stage4WaitTimer=null}const i=document.getElementById("doorWaitIndicator");if(i){i.classList.remove("is-counting");void i.offsetWidth}}
-function startStage4WaitTimer(){if(!stage4Folded||stage4Completed)return;stopStage4WaitTimer();document.getElementById("doorWaitIndicator")?.classList.add("is-counting");stage4WaitTimer=setTimeout(completeStage4,STAGE4_WAIT_TIME)}
-async function foldStage4Map(){if(stage4Folded||stage4Completed)return;stage4Folded=true;const map=document.getElementById("foldableMap"),button=document.getElementById("foldMapButton"),choices=document.getElementById("doorChoiceArea");if(!map||!button||!choices)return;button.disabled=true;map.classList.add("is-folded");setFoldMapMessage("NOW  HERE が、NOWHERE に見える。","success");await window.wait(980);choices.hidden=false;startStage4WaitTimer()}
-function handleDoorChoice(){if(!stage4Folded||stage4Completed)return;stopStage4WaitTimer();setDoorChoiceMessage("扉は動かない。選ばないことも、選択かもしれない。","error");startStage4WaitTimer()}
-async function completeStage4(){if(stage4Completed)return;stage4Completed=true;stage4WaitTimer=null;document.querySelectorAll(".door-choice-button").forEach(b=>b.disabled=true);setDoorChoiceMessage("何もしなかった。すると――","success");document.getElementById("sushiDoor")?.classList.add("is-open");window.clearStage?.(4);await window.wait(1500);await window.SceneManager.changeScene("stage4-clear",{fadeOutTime:680,blackTime:280,fadeInTime:850})}
-function resetStage4Puzzle(){stopStage4WaitTimer();stage4Folded=false;stage4Completed=false;document.getElementById("foldableMap")?.classList.remove("is-folded");const fb=document.getElementById("foldMapButton");if(fb)fb.disabled=false;const ca=document.getElementById("doorChoiceArea");if(ca)ca.hidden=true;document.getElementById("sushiDoor")?.classList.remove("is-open");document.querySelectorAll(".door-choice-button").forEach(b=>b.disabled=false);setFoldMapMessage("地図の折り目が気になる.","");setDoorChoiceMessage("よく考えて選ぼう。","")}
-function initializeStage4Puzzle(){if(stage4Initialized)return;document.getElementById("foldMapButton")?.addEventListener("click",foldStage4Map);document.querySelectorAll(".door-choice-button").forEach(b=>b.addEventListener("click",handleDoorChoice));stage4Initialized=true}
-const initBeforeV08=window.initializePuzzles;window.initializePuzzles=function(){initBeforeV08?.();initializeStage4Puzzle()};window.resetStage4Puzzle=resetStage4Puzzle;
+/* =========================================================
+   Version 0.8 Rebuild：第4問コントローラー
+   ========================================================= */
+const Stage4Controller={
+    initialized:false,
+    folded:false,
+    completed:false,
+    timer:null,
+    waitMs:10000,
+
+    el(id){return document.getElementById(id)},
+
+    setStatus(id,text,type=""){
+        const el=this.el(id);
+        if(!el)return;
+        el.textContent=text;
+        el.classList.remove("is-error","is-success");
+        if(type)el.classList.add("is-"+type);
+    },
+
+    stopTimer(){
+        if(this.timer!==null){
+            clearTimeout(this.timer);
+            this.timer=null;
+        }
+        const bar=this.el("stage4WaitBar");
+        if(bar){
+            bar.classList.remove("is-running");
+            void bar.offsetWidth;
+        }
+        this.el("stage4Silence")?.classList.remove("is-visible");
+    },
+
+    startTimer(){
+        if(!this.folded||this.completed)return;
+        this.stopTimer();
+        this.el("stage4WaitBar")?.classList.add("is-running");
+        setTimeout(()=>this.el("stage4Silence")?.classList.add("is-visible"),4200);
+        this.timer=setTimeout(()=>this.complete(),this.waitMs);
+    },
+
+    async fold(){
+        if(this.folded||this.completed)return;
+        this.folded=true;
+        this.el("stage4FoldButton").disabled=true;
+        this.el("stage4FoldMap")?.classList.add("is-folded");
+        this.el("stage4DoorWord")?.classList.add("is-read-as-one");
+        this.setStatus("stage4MapMessage","NOW  HERE が、NOWHERE に見える。","success");
+        window.saveStage4State?.({folded:true});
+        await window.wait(1050);
+        const panel=this.el("stage4ChoicePanel");
+        if(panel)panel.hidden=false;
+        this.setStatus("stage4ChoiceMessage","よく考えて選ぼう。");
+        this.startTimer();
+    },
+
+    choose(){
+        if(!this.folded||this.completed)return;
+        this.stopTimer();
+        this.setStatus("stage4ChoiceMessage","扉は動かない。選ばないことも、選択かもしれない。","error");
+        this.startTimer();
+    },
+
+    async complete(){
+        if(this.completed)return;
+        this.completed=true;
+        this.stopTimer();
+        document.querySelectorAll(".stage4-choice-button").forEach(b=>b.disabled=true);
+        this.setStatus("stage4ChoiceMessage","何もしなかった。すると――","success");
+        this.el("stage4Door")?.classList.add("is-open");
+        window.clearStage?.(4);
+        window.saveStage4State?.({folded:true,doorOpened:true});
+        await window.wait(1550);
+        await window.SceneManager.changeScene("stage4-clear",{fadeOutTime:680,blackTime:280,fadeInTime:850});
+    },
+
+    reset({preserveSave=false}={}){
+        this.stopTimer();
+        this.folded=false;
+        this.completed=false;
+        this.el("stage4FoldMap")?.classList.remove("is-folded");
+        this.el("stage4DoorWord")?.classList.remove("is-read-as-one");
+        this.el("stage4Door")?.classList.remove("is-open");
+        const foldButton=this.el("stage4FoldButton");
+        if(foldButton)foldButton.disabled=false;
+        const choice=this.el("stage4ChoicePanel");
+        if(choice)choice.hidden=true;
+        document.querySelectorAll(".stage4-choice-button").forEach(b=>b.disabled=false);
+        this.setStatus("stage4MapMessage","地図には、うっすらと折り目がついている。");
+        this.setStatus("stage4ChoiceMessage","よく考えて選ぼう。");
+        if(!preserveSave)window.resetStage4State?.();
+    },
+
+    restore(){
+        this.reset({preserveSave:true});
+        const state=window.getStage4State?.()||{};
+        if(state.folded){
+            this.folded=true;
+            this.el("stage4FoldButton").disabled=true;
+            this.el("stage4FoldMap")?.classList.add("is-folded");
+            this.el("stage4DoorWord")?.classList.add("is-read-as-one");
+            this.setStatus("stage4MapMessage","NOW  HERE が、NOWHERE に見える。","success");
+            const panel=this.el("stage4ChoicePanel");
+            if(panel)panel.hidden=false;
+        }
+        if(state.doorOpened){
+            this.completed=true;
+            this.el("stage4Door")?.classList.add("is-open");
+            document.querySelectorAll(".stage4-choice-button").forEach(b=>b.disabled=true);
+        }else if(state.folded){
+            this.startTimer();
+        }
+    },
+
+    init(){
+        if(this.initialized)return;
+        this.el("stage4FoldButton")?.addEventListener("click",()=>this.fold());
+        document.querySelectorAll(".stage4-choice-button").forEach(b=>b.addEventListener("click",()=>this.choose()));
+        this.initialized=true;
+    }
+};
+const initBeforeRebuild=window.initializePuzzles;
+window.initializePuzzles=function(){
+    initBeforeRebuild?.();
+    Stage4Controller.init();
+};
+window.Stage4Controller=Stage4Controller;
+window.resetStage4Puzzle=()=>Stage4Controller.reset();
+window.restoreStage4Puzzle=()=>Stage4Controller.restore();
