@@ -497,6 +497,31 @@ button {
     animation: letter-appear 980ms ease forwards;
 }
 
+
+/*
+    手紙を閉じる際の退場演出。
+    INTROシーン自体は切り替えず、同じ画面内で手紙だけを消します。
+*/
+.letter-card.is-leaving {
+    animation: letter-leave 520ms ease forwards;
+}
+
+@keyframes letter-leave {
+    from {
+        opacity: 1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform:
+            translateY(-10px)
+            scale(0.99);
+    }
+}
+
 @keyframes letter-appear {
     to {
         opacity: 1;
