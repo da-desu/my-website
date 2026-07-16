@@ -529,6 +529,17 @@ function resetIntroScene() {
 
 function initializeScenes() {
 
+    const continueButton =
+        document.getElementById(
+            "continueButton"
+        );
+
+    const restartButton =
+        document.getElementById(
+            "restartButton"
+        );
+
+
     const startButton =
         document.getElementById(
             "startButton"
@@ -548,6 +559,22 @@ function initializeScenes() {
         document.getElementById(
             "backToTopButton"
         );
+
+
+    if (continueButton) {
+        continueButton.addEventListener(
+            "click",
+            continueSavedGame
+        );
+    }
+
+
+    if (restartButton) {
+        restartButton.addEventListener(
+            "click",
+            restartGameFromBeginning
+        );
+    }
 
 
     if (startButton) {
@@ -653,8 +680,155 @@ function initializeScenes() {
 }
 
 
+
+
 /* =========================================================
-   8. game.jsから使えるように公開
+   8. 再開確認画面
    ========================================================= */
 
-window.initializeScenes = initializeScenes;
+/**
+ * 保存シーン名を、プレイヤー向けの表示へ変換します。
+ *
+ * @param {string} sceneName
+ * @returns {string}
+ */
+function getResumeSceneLabel(sceneName) {
+
+    const labels = {
+        intro: "手紙を見つけた場面",
+        stage1: "第一問",
+        "stage1-clear": "満開の桜の前",
+        stage2: "第二問"
+    };
+
+    return labels[sceneName] || "前回の続き";
+}
+
+
+/**
+ * 再開確認画面へ現在の保存位置を表示します。
+ */
+function updateResumeScene() {
+
+    const label =
+        document.getElementById(
+            "resumeSceneLabel"
+        );
+
+    if (!label) {
+        return;
+    }
+
+    const sceneName =
+        typeof window.getResumeScene ===
+            "function"
+            ? window.getResumeScene()
+            : "top";
+
+    label.textContent =
+        "保存位置：" +
+        getResumeSceneLabel(sceneName);
+}
+
+
+/**
+ * 保存位置から再開します。
+ */
+async function continueSavedGame() {
+
+    const sceneName =
+        typeof window.getResumeScene ===
+            "function"
+            ? window.getResumeScene()
+            : "top";
+
+    if (sceneName === "top") {
+        await SceneManager.changeScene(
+            "top"
+        );
+
+        return;
+    }
+
+    await SceneManager.changeScene(
+        sceneName,
+        {
+            fadeOutTime: 620,
+            blackTime: 260,
+            fadeInTime: 760
+        }
+    );
+
+
+    /*
+        INTROは内部演出を再生する必要があります。
+        リロード前の文字送り途中状態までは保存せず、
+        手紙の冒頭から再開します。
+    */
+    if (
+        sceneName === "intro" &&
+        typeof runIntroScene === "function"
+    ) {
+        await runIntroScene();
+    }
+
+
+    /*
+        第一問の途中選択状態は保存しないため、
+        未選択状態から再開します。
+    */
+    if (
+        sceneName === "stage1" &&
+        typeof window.resetStage1Puzzle ===
+            "function"
+    ) {
+        window.resetStage1Puzzle();
+    }
+}
+
+
+/**
+ * 保存を削除して最初から開始します。
+ */
+async function restartGameFromBeginning() {
+
+    if (
+        typeof window.resetSave ===
+        "function"
+    ) {
+        window.resetSave();
+    }
+
+    resetTopScene();
+    resetIntroScene();
+
+    if (
+        typeof window.resetStage1Puzzle ===
+        "function"
+    ) {
+        window.resetStage1Puzzle();
+    }
+
+    await SceneManager.changeScene(
+        "top",
+        {
+            fadeOutTime: 520,
+            blackTime: 220,
+            fadeInTime: 680
+        }
+    );
+}
+
+
+/* =========================================================
+   9. game.jsから使えるように公開
+   ========================================================= */
+
+window.initializeScenes =
+    initializeScenes;
+
+window.updateResumeScene =
+    updateResumeScene;
+
+window.runIntroScene =
+    runIntroScene;
