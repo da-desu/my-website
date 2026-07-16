@@ -45,7 +45,9 @@ const SAVEABLE_SCENES = new Set([
     "stage1-clear",
     "stage2",
     "stage2-clear",
-    "stage3"
+    "stage3",
+    "stage3-clear",
+    "stage4"
 ]);
 
 
