@@ -880,3 +880,42 @@ window.updateResumeScene =
 
 window.runIntroScene =
     runIntroScene;
+
+
+/* Version 0.5.1：第二問の次へボタンを確実に登録 */
+function initializeStage2ContinueButton() {
+    const button = document.getElementById("stage2ContinueButton");
+
+    if (!button || button.dataset.stage2ContinueReady === "true") {
+        return;
+    }
+
+    button.addEventListener("click", async function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        button.disabled = true;
+
+        await SceneManager.changeScene(
+            "stage3",
+            {
+                fadeOutTime: 720,
+                blackTime: 320,
+                fadeInTime: 860
+            }
+        );
+
+        button.disabled = false;
+    });
+
+    button.dataset.stage2ContinueReady = "true";
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeStage2ContinueButton
+    );
+} else {
+    initializeStage2ContinueButton();
+}
