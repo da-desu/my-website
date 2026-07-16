@@ -212,15 +212,35 @@ async function runIntroScene() {
 
 
     /* 最初に無音の間を作る */
+    introSilence.hidden = false;
+
+    /*
+        hidden解除直後にクラスを付けると、
+        Safariでアニメーションが始まらない場合があるため、
+        描画を1回確定させます。
+    */
+    await new Promise(function (resolve) {
+        window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(resolve);
+        });
+    });
+
     introSilence.classList.add(
         "is-visible"
     );
 
     await wait(980);
 
+    /*
+        「……」を確実に消します。
+        classを外すだけでなく hidden も指定することで、
+        iPhone Safariでも表示が残りません。
+    */
     introSilence.classList.remove(
         "is-visible"
     );
+
+    introSilence.hidden = true;
 
     await wait(420);
 
@@ -370,6 +390,8 @@ function resetIntroScene() {
         introSilence.classList.remove(
             "is-visible"
         );
+
+        introSilence.hidden = true;
     }
 
     if (letterCard) {
