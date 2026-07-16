@@ -659,13 +659,44 @@ function initializeScenes() {
             "stage1ContinueButton"
         );
 
+    const stage2ContinueButton =
+        document.getElementById(
+            "stage2ContinueButton"
+        );
+
     if (stage1ContinueButton) {
         stage1ContinueButton.addEventListener(
             "click",
             async function () {
 
+                if (
+                    typeof window.resetStage2Puzzle ===
+                    "function"
+                ) {
+                    window.resetStage2Puzzle();
+                }
+
                 await SceneManager.changeScene(
                     "stage2",
+                    {
+                        fadeOutTime: 720,
+                        blackTime: 320,
+                        fadeInTime: 860
+                    }
+                );
+
+            }
+        );
+    }
+
+
+    if (stage2ContinueButton) {
+        stage2ContinueButton.addEventListener(
+            "click",
+            async function () {
+
+                await SceneManager.changeScene(
+                    "stage3",
                     {
                         fadeOutTime: 720,
                         blackTime: 320,
@@ -698,7 +729,9 @@ function getResumeSceneLabel(sceneName) {
         intro: "手紙を見つけた場面",
         stage1: "第一問",
         "stage1-clear": "満開の桜の前",
-        stage2: "第二問"
+        stage2: "第二問",
+        "stage2-clear": "海を見つけた場面",
+        stage3: "第三問"
     };
 
     return labels[sceneName] || "前回の続き";
@@ -784,6 +817,14 @@ async function continueSavedGame() {
     ) {
         window.resetStage1Puzzle();
     }
+
+    if (
+        sceneName === "stage2" &&
+        typeof window.resetStage2Puzzle ===
+            "function"
+    ) {
+        window.resetStage2Puzzle();
+    }
 }
 
 
@@ -807,6 +848,13 @@ async function restartGameFromBeginning() {
         "function"
     ) {
         window.resetStage1Puzzle();
+    }
+
+    if (
+        typeof window.resetStage2Puzzle ===
+        "function"
+    ) {
+        window.resetStage2Puzzle();
     }
 
     await SceneManager.changeScene(
