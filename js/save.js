@@ -364,3 +364,25 @@ window.isStageCleared = isStageCleared;
 window.addItem = addItem;
 window.hasItem = hasItem;
 window.resetSave = resetSave;
+
+/* Version 0.8 Rebuild: 第4問内部状態 */
+function getStage4State(){
+    const data=getSaveData();
+    const state=data.stage4State;
+    return state&&typeof state==="object"
+        ? Object.assign({folded:false,doorOpened:false},state)
+        : {folded:false,doorOpened:false};
+}
+function saveStage4State(partial){
+    const data=getSaveData();
+    data.stage4State=Object.assign(getStage4State(),partial||{});
+    saveData(data);
+}
+function resetStage4State(){
+    const data=getSaveData();
+    data.stage4State={folded:false,doorOpened:false};
+    saveData(data);
+}
+window.getStage4State=getStage4State;
+window.saveStage4State=saveStage4State;
+window.resetStage4State=resetStage4State;
