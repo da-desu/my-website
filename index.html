@@ -2,40 +2,158 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--
+        iPhone / Android で正しく表示するための設定
+        viewport-fit=cover により、ノッチ付き端末にも対応します。
+    -->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <!--
+        ブラウザ上部の色を黒に統一
+        対応ブラウザでは、ページ周辺も黒く表示されます。
+    -->
+    <meta name="theme-color" content="#000000">
+
     <title>知るたびに世界は姿を変える</title>
+
+    <!-- 共通デザイン -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<div id="app">
+    <!--
+        ============================================================
+        アプリ全体
+        ============================================================
 
-    <!-- =========================
-         TOPシーン
-    ========================== -->
-    <section id="scene-top" class="scene active">
+        この作品は1ページ構成です。
+        各場面を section.scene として用意し、
+        JavaScriptで表示する場面だけを切り替えます。
+    -->
+    <div id="app" class="app">
 
-        <p class="catch-copy">
-            知るたびに
-        </p>
+        <!--
+            ========================================================
+            TOPシーン
+            ========================================================
+        -->
+        <section
+            id="scene-top"
+            class="scene is-active"
+            data-scene="top"
+            aria-labelledby="top-message"
+        >
+            <div class="scene__inner top-scene__inner">
 
-        <h1 class="title">
-            <span id="world-word">世界</span>は姿を変える。
-        </h1>
+                <!-- 作品タイトルは表示せず、テーマだけを提示します -->
+                <p class="top-scene__lead">
+                    知るたびに
+                </p>
 
-        <button id="startButton">
-            はじめる
-        </button>
+                <p id="top-message" class="top-scene__message">
+                    <span
+                        id="worldWord"
+                        class="world-word"
+                        aria-label="世界"
+                    >世界</span><span>は姿を変える。</span>
+                </p>
 
-    </section>
+                <!--
+                    type="button" を指定し、
+                    フォーム送信として扱われないようにしています。
+                -->
+                <button
+                    id="startButton"
+                    class="start-button"
+                    type="button"
+                    aria-label="物語を始める"
+                >
+                    はじめる
+                </button>
 
-    <!-- INTRO（後で実装） -->
-    <section id="scene-intro" class="scene hidden">
-    </section>
+            </div>
+        </section>
 
-</div>
 
-<script src="js/game.js"></script>
+        <!--
+            ========================================================
+            INTROシーン（Version 0.1では仮表示）
+            ========================================================
+
+            次のVersionで、手紙・文字送り・物語導入を実装します。
+        -->
+        <section
+            id="scene-intro"
+            class="scene"
+            data-scene="intro"
+            aria-labelledby="intro-title"
+            hidden
+        >
+            <div class="scene__inner intro-scene__inner">
+
+                <p class="scene-label">
+                    INTRO
+                </p>
+
+                <h1 id="intro-title" class="intro-title">
+                    何かが、始まろうとしている。
+                </h1>
+
+                <p class="intro-note">
+                    イントロは次のVersionで実装します。
+                </p>
+
+                <!-- 開発中の確認用。公開前に削除または変更できます -->
+                <button
+                    id="backToTopButton"
+                    class="sub-button"
+                    type="button"
+                >
+                    TOPへ戻る
+                </button>
+
+            </div>
+        </section>
+
+
+        <!--
+            ========================================================
+            画面暗転レイヤー
+            ========================================================
+
+            シーン切替時に画面全体を黒く覆います。
+            aria-hidden="true" により読み上げ対象から外します。
+        -->
+        <div
+            id="transitionLayer"
+            class="transition-layer"
+            aria-hidden="true"
+        ></div>
+
+    </div>
+
+
+    <!--
+        ============================================================
+        JavaScript読み込み
+        ============================================================
+
+        game.js:
+        ・シーン切替
+        ・画面暗転
+        ・共通処理
+
+        scenes.js:
+        ・TOP固有の演出
+        ・ボタン操作
+    -->
+    <script src="js/game.js"></script>
+    <script src="js/scenes.js"></script>
 
 </body>
 </html>
