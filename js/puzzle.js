@@ -229,3 +229,263 @@ document.addEventListener(
 
 window.initializePuzzles = initializePuzzles;
 window.resetStage1Puzzle = resetStage1Puzzle;
+
+
+/* =========================================================
+   8. 第二問「海」
+   ========================================================= */
+
+let stage2WrongCount = 0;
+let isStage2Clearing = false;
+
+
+/**
+ * 表記揺れを吸収するため、回答を整形します。
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+function normalizeStage2Answer(value) {
+    return String(value || "")
+        .trim()
+        .replace(/\s+/g, "")
+        .toLowerCase();
+}
+
+
+function setStage2Message(text, type) {
+    const message =
+        document.getElementById("stage2Message");
+
+    if (!message) {
+        return;
+    }
+
+    message.textContent = text;
+    message.classList.remove(
+        "is-error",
+        "is-success"
+    );
+
+    if (type === "error") {
+        message.classList.add("is-error");
+    }
+
+    if (type === "success") {
+        message.classList.add("is-success");
+    }
+}
+
+
+async function verifyStage2Answer(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    if (isStage2Clearing) {
+        return;
+    }
+
+    const input =
+        document.getElementById("stage2Answer");
+
+    const submitButton =
+        document.getElementById(
+            "stage2SubmitButton"
+        );
+
+    if (!input || !submitButton) {
+        return;
+    }
+
+    const answer =
+        normalizeStage2Answer(input.value);
+
+    if (!answer) {
+        setStage2Message(
+            "答えを入力してください。",
+            "error"
+        );
+
+        input.focus();
+        return;
+    }
+
+    const correctAnswers = [
+        "海",
+        "うみ",
+        "ウミ"
+    ];
+
+    if (!correctAnswers.includes(answer)) {
+        stage2WrongCount += 1;
+
+        setStage2Message(
+            "違うようだ。もう一度、波の前後を見てみよう。",
+            "error"
+        );
+
+        input.select();
+
+        if (stage2WrongCount >= 2) {
+            const hintButton =
+                document.getElementById(
+                    "stage2HintButton"
+                );
+
+            if (hintButton) {
+                hintButton.textContent =
+                    "ヒントを見る";
+            }
+        }
+
+        return;
+    }
+
+    isStage2Clearing = true;
+    submitButton.disabled = true;
+    input.disabled = true;
+
+    setStage2Message(
+        "正解。",
+        "success"
+    );
+
+    if (
+        typeof window.clearStage ===
+        "function"
+    ) {
+        window.clearStage(2);
+    }
+
+    await window.wait(650);
+
+    await window.SceneManager.changeScene(
+        "stage2-clear",
+        {
+            fadeOutTime: 700,
+            blackTime: 260,
+            fadeInTime: 900
+        }
+    );
+
+    isStage2Clearing = false;
+}
+
+
+function toggleStage2Hint() {
+    const hint =
+        document.getElementById("stage2Hint");
+
+    const button =
+        document.getElementById(
+            "stage2HintButton"
+        );
+
+    if (!hint || !button) {
+        return;
+    }
+
+    hint.hidden = !hint.hidden;
+
+    button.textContent =
+        hint.hidden
+            ? "ヒントを見る"
+            : "ヒントを閉じる";
+}
+
+
+function resetStage2Puzzle() {
+    const input =
+        document.getElementById("stage2Answer");
+
+    const submitButton =
+        document.getElementById(
+            "stage2SubmitButton"
+        );
+
+    const hint =
+        document.getElementById("stage2Hint");
+
+    const hintButton =
+        document.getElementById(
+            "stage2HintButton"
+        );
+
+    if (input) {
+        input.value = "";
+        input.disabled = false;
+    }
+
+    if (submitButton) {
+        submitButton.disabled = false;
+    }
+
+    if (hint) {
+        hint.hidden = true;
+    }
+
+    if (hintButton) {
+        hintButton.textContent =
+            "ヒントを見る";
+    }
+
+    setStage2Message("", "");
+
+    stage2WrongCount = 0;
+    isStage2Clearing = false;
+}
+
+
+/* 既存の初期化関数を拡張します */
+const originalInitializePuzzles =
+    window.initializePuzzles;
+
+function initializeAllPuzzles() {
+    if (
+        typeof originalInitializePuzzles ===
+        "function"
+    ) {
+        originalInitializePuzzles();
+    }
+
+    const stage2Form =
+        document.getElementById("stage2Form");
+
+    const hintButton =
+        document.getElementById(
+            "stage2HintButton"
+        );
+
+    if (
+        stage2Form &&
+        !stage2Form.dataset.initialized
+    ) {
+        stage2Form.addEventListener(
+            "submit",
+            verifyStage2Answer
+        );
+
+        stage2Form.dataset.initialized =
+            "true";
+    }
+
+    if (
+        hintButton &&
+        !hintButton.dataset.initialized
+    ) {
+        hintButton.addEventListener(
+            "click",
+            toggleStage2Hint
+        );
+
+        hintButton.dataset.initialized =
+            "true";
+    }
+}
+
+window.initializePuzzles =
+    initializeAllPuzzles;
+
+window.resetStage2Puzzle =
+    resetStage2Puzzle;
