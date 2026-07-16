@@ -137,6 +137,19 @@ const SceneManager = {
 
         this.currentScene = sceneName;
 
+        /*
+            TOPと再開確認画面以外は、
+            シーンが表示された時点で保存します。
+        */
+        if (
+            typeof window.saveCurrentScene ===
+            "function"
+        ) {
+            window.saveCurrentScene(
+                sceneName
+            );
+        }
+
         console.log(
             "SceneManager: 現在のシーン =",
             sceneName
@@ -220,13 +233,48 @@ document.addEventListener(
     "DOMContentLoaded",
     function () {
 
-        SceneManager.showImmediately("top");
-
+        /*
+            先に各シーンと謎のイベントを登録します。
+        */
         if (
             typeof window.initializeScenes ===
             "function"
         ) {
             window.initializeScenes();
+        }
+
+        if (
+            typeof window.initializePuzzles ===
+            "function"
+        ) {
+            window.initializePuzzles();
+        }
+
+
+        /*
+            保存データがあれば再開確認画面、
+            なければTOP画面を表示します。
+        */
+        if (
+            typeof window.hasResumeData ===
+                "function" &&
+            window.hasResumeData()
+        ) {
+            SceneManager.showImmediately(
+                "resume"
+            );
+
+            if (
+                typeof window.updateResumeScene ===
+                "function"
+            ) {
+                window.updateResumeScene();
+            }
+
+        } else {
+            SceneManager.showImmediately(
+                "top"
+            );
         }
 
     }
