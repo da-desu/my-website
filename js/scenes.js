@@ -324,46 +324,86 @@ async function showChapterCard() {
         連打による二重実行を防ぎます。
     */
     introNextButton.disabled = true;
+
     introNextButton.classList.remove(
         "is-visible"
     );
 
-    /*
-        INTRO → INTRO のシーン切替は行いません。
-        同じINTROシーン内で手紙だけを静かに消します。
-    */
-    letterCard.classList.remove(
-        "is-visible"
-    );
-
-    letterCard.classList.add(
-        "is-leaving"
-    );
-
-    await wait(540);
 
     /*
-        退場演出が終わってから手紙を完全に非表示にします。
+        =====================================================
+        手紙を確実に消す
+        =====================================================
+
+        Safariでは、hidden属性やアニメーションクラスの変更が
+        同じ描画タイミングに重なると、ごく短時間だけ元の状態が
+        再描画される場合があります。
+
+        そのため今回は、CSSクラスではなくインラインスタイルで
+        手紙を強制的に非表示にします。
     */
+
+    letterCard.style.setProperty(
+        "opacity",
+        "0",
+        "important"
+    );
+
+    letterCard.style.setProperty(
+        "visibility",
+        "hidden",
+        "important"
+    );
+
+    letterCard.style.setProperty(
+        "pointer-events",
+        "none",
+        "important"
+    );
+
+    letterCard.style.setProperty(
+        "transform",
+        "translateY(-8px)",
+        "important"
+    );
+
+    /*
+        少しだけ消える間を置きます。
+    */
+    await wait(260);
+
+    /*
+        display:none !important を付けることで、
+        以降の再描画でも手紙が復活しないようにします。
+    */
+    letterCard.style.setProperty(
+        "display",
+        "none",
+        "important"
+    );
+
     letterCard.hidden = true;
 
-    /*
-        重要:
-        ここでは is-leaving を外しません。
-
-        iPhone Safariでは、hiddenを付けた直後に退場クラスを外すと、
-        再描画のタイミングによって手紙が1フレームだけ
-        元の表示状態へ戻ることがあります。
-
-        退場クラスは次回の resetIntroScene() まで保持します。
-    */
-
-    await wait(220);
 
     /*
-        章タイトルを表示します。
+        =====================================================
+        章タイトルを表示
+        =====================================================
     */
+
     chapterCard.hidden = false;
+
+    chapterCard.style.removeProperty(
+        "display"
+    );
+
+    chapterCard.style.removeProperty(
+        "visibility"
+    );
+
+    chapterCard.style.removeProperty(
+        "opacity"
+    );
 
     await new Promise(function (resolve) {
         window.requestAnimationFrame(function () {
@@ -427,6 +467,30 @@ function resetIntroScene() {
         letterCard.classList.remove(
             "is-visible",
             "is-leaving"
+        );
+
+        /*
+            次回INTROを再生できるように、
+            前回付けた強制非表示スタイルを初期化します。
+        */
+        letterCard.style.removeProperty(
+            "display"
+        );
+
+        letterCard.style.removeProperty(
+            "visibility"
+        );
+
+        letterCard.style.removeProperty(
+            "opacity"
+        );
+
+        letterCard.style.removeProperty(
+            "pointer-events"
+        );
+
+        letterCard.style.removeProperty(
+            "transform"
         );
     }
 
