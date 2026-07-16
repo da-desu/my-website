@@ -1051,25 +1051,6 @@ button {
 }
 
 
-/* 各マスの見え方を変えるための設定 */
-.sakura-tile--01 { --flower-x: 26%; --flower-y: 24%; --tile-scale: 1.40; --branch-angle: 135deg; }
-.sakura-tile--02 { --flower-x: 58%; --flower-y: 18%; --tile-scale: 1.18; --tile-shift-x: -3%; --sky-1: #c9dce8; }
-.sakura-tile--03 { --flower-x: 42%; --flower-y: 52%; --tile-scale: 1.55; --tile-brightness: 0.92; }
-.sakura-tile--04 { --flower-x: 70%; --flower-y: 38%; --tile-scale: 1.30; --branch-angle: 42deg; }
-.sakura-tile--05 { --flower-x: 20%; --flower-y: 60%; --tile-scale: 1.12; --tile-saturation: 0.78; }
-.sakura-tile--06 { --flower-x: 54%; --flower-y: 26%; --tile-scale: 1.72; --tile-shift-y: 4%; }
-.sakura-tile--07 { --flower-x: 76%; --flower-y: 64%; --tile-scale: 1.24; --sky-2: #d6bcc8; }
-.sakura-tile--08 { --flower-x: 34%; --flower-y: 38%; --tile-scale: 1.06; --branch-angle: 18deg; }
-.sakura-tile--09 { --flower-x: 62%; --flower-y: 72%; --tile-scale: 1.46; --tile-brightness: 1.08; }
-.sakura-tile--10 { --flower-x: 28%; --flower-y: 20%; --tile-scale: 1.20; --tile-saturation: 1.18; }
-.sakura-tile--11 { --flower-x: 44%; --flower-y: 64%; --tile-scale: 1.64; --branch-angle: 160deg; }
-.sakura-tile--12 { --flower-x: 78%; --flower-y: 22%; --tile-scale: 1.10; --sky-1: #a9cedf; }
-.sakura-tile--13 { --flower-x: 18%; --flower-y: 42%; --tile-scale: 1.38; --tile-shift-x: 5%; }
-.sakura-tile--14 { --flower-x: 52%; --flower-y: 34%; --tile-scale: 1.82; --tile-brightness: 0.86; }
-.sakura-tile--15 { --flower-x: 66%; --flower-y: 58%; --tile-scale: 1.16; --branch-angle: 72deg; }
-.sakura-tile--16 { --flower-x: 36%; --flower-y: 74%; --tile-scale: 1.52; --tile-saturation: 0.88; }
-
-
 /* パネル下部 */
 .captcha-card__footer {
     display: flex;
@@ -1363,20 +1344,269 @@ button {
 }
 
 
-/* Safari安全版：各マスの見え方の差 */
-.sakura-tile--01 { filter: brightness(1.02); }
-.sakura-tile--02 { background-position: 10% 0; filter: saturate(0.88); }
-.sakura-tile--03 { background-size: 125% 125%; }
-.sakura-tile--04 { transform: rotate(0.001deg); filter: brightness(0.93); }
-.sakura-tile--05 { background-position: 20% 20%; filter: saturate(1.18); }
-.sakura-tile--06 { background-size: 145% 145%; }
-.sakura-tile--07 { filter: contrast(0.92); }
-.sakura-tile--08 { background-position: 70% 40%; }
-.sakura-tile--09 { filter: brightness(1.08); }
-.sakura-tile--10 { background-size: 112% 112%; filter: saturate(0.78); }
-.sakura-tile--11 { background-position: 0 70%; }
-.sakura-tile--12 { filter: contrast(1.08); }
-.sakura-tile--13 { background-size: 136% 136%; }
-.sakura-tile--14 { filter: brightness(0.86); }
-.sakura-tile--15 { background-position: 80% 80%; filter: saturate(1.22); }
-.sakura-tile--16 { background-size: 118% 118%; filter: brightness(1.04); }
+/* =========================================================
+   第一問：16枚の構図設定
+   =========================================================
+
+   すべてソメイヨシノを表していますが、
+   見た目の構図は大きく異なります。
+
+   03番と14番だけは、背景・花・枝・明るさを含めて
+   完全に同じ構図です。
+
+   プレイヤーは最初、この2枚だけを「同じもの」と
+   判断しやすくなっています。
+
+   しかし、ソメイヨシノは接ぎ木などで増やされた
+   クローンであるため、正解は16枚すべてです。
+   ========================================================= */
+
+
+/* 01：花を大きく写した接写 */
+.sakura-tile--01 {
+    background:
+        radial-gradient(circle at 48% 45%, #fffdfd 0 12%, #f7bfd1 13% 25%, transparent 26%),
+        radial-gradient(circle at 65% 58%, #fff8fb 0 7%, #efa8c1 8% 16%, transparent 17%),
+        linear-gradient(145deg, #b8d9e8, #ebcbd6);
+}
+
+.sakura-tile--01 .sakura-tile__image {
+    font-size: 3.4rem;
+    transform: rotate(-8deg) scale(1.12);
+}
+
+
+/* 02：青空を背景に、細い枝が横切る */
+.sakura-tile--02 {
+    background:
+        radial-gradient(circle at 18% 28%, #fff 0 5%, #f7c5d5 6% 11%, transparent 12%),
+        radial-gradient(circle at 78% 22%, #fff 0 4%, #efb2c8 5% 10%, transparent 11%),
+        linear-gradient(12deg, transparent 45%, #6f4c3e 46% 50%, transparent 51%),
+        linear-gradient(180deg, #8fc9ee, #d8edf7);
+}
+
+.sakura-tile--02 .sakura-tile__image {
+    justify-items: end;
+    align-items: start;
+    padding: 8px;
+    font-size: 1.7rem;
+}
+
+
+/* 03：同一構図A（14番と完全一致） */
+.sakura-tile--03,
+.sakura-tile--14 {
+    background:
+        radial-gradient(circle at 31% 32%, #fff 0 5%, #f5bdd0 6% 12%, transparent 13%),
+        radial-gradient(circle at 52% 24%, #fffafd 0 5%, #efabc4 6% 12%, transparent 13%),
+        radial-gradient(circle at 70% 43%, #fff 0 6%, #f7c8d7 7% 13%, transparent 14%),
+        linear-gradient(132deg, transparent 44%, #714d3f 45% 50%, transparent 51%),
+        linear-gradient(160deg, #b7d8e7, #ead0d9);
+}
+
+.sakura-tile--03 .sakura-tile__image,
+.sakura-tile--14 .sakura-tile__image {
+    align-items: end;
+    justify-items: start;
+    padding: 9px;
+    font-size: 2.1rem;
+    transform: rotate(12deg);
+}
+
+
+/* 04：桜並木を奥行きのある構図で表現 */
+.sakura-tile--04 {
+    background:
+        radial-gradient(ellipse at 20% 36%, #f6bfd1 0 13%, transparent 14%),
+        radial-gradient(ellipse at 80% 36%, #f4b7cb 0 13%, transparent 14%),
+        linear-gradient(83deg, transparent 38%, #765344 39% 43%, transparent 44%),
+        linear-gradient(97deg, transparent 57%, #765344 58% 62%, transparent 63%),
+        linear-gradient(180deg, #b9dcef 0 56%, #cbbfae 57% 100%);
+}
+
+.sakura-tile--04 .sakura-tile__image {
+    align-items: end;
+    font-size: 1.5rem;
+    padding-bottom: 5px;
+}
+
+
+/* 05：夜桜 */
+.sakura-tile--05 {
+    background:
+        radial-gradient(circle at 72% 18%, rgba(255,255,220,.95) 0 7%, transparent 8%),
+        radial-gradient(circle at 26% 40%, #f8c5d6 0 8%, transparent 9%),
+        radial-gradient(circle at 68% 62%, #ef9fbd 0 10%, transparent 11%),
+        linear-gradient(35deg, transparent 45%, #382b2b 46% 51%, transparent 52%),
+        linear-gradient(180deg, #17243d, #51364c);
+}
+
+.sakura-tile--05 .sakura-tile__image {
+    color: rgba(255, 201, 222, 0.8);
+    font-size: 2rem;
+    text-shadow: 0 0 10px rgba(255,170,205,.65);
+}
+
+
+/* 06：幹を下から見上げる構図 */
+.sakura-tile--06 {
+    background:
+        radial-gradient(circle at 18% 18%, #f9d0dd 0 10%, transparent 11%),
+        radial-gradient(circle at 82% 14%, #f4bfd1 0 12%, transparent 13%),
+        radial-gradient(circle at 50% 34%, #fde5ec 0 14%, transparent 15%),
+        linear-gradient(88deg, transparent 43%, #68483a 44% 56%, transparent 57%),
+        linear-gradient(180deg, #a9d3eb, #e4edf1);
+}
+
+.sakura-tile--06 .sakura-tile__image {
+    align-items: start;
+    font-size: 1.8rem;
+    padding-top: 4px;
+}
+
+
+/* 07：水面に映る桜 */
+.sakura-tile--07 {
+    background:
+        radial-gradient(ellipse at 28% 25%, #f5bfd2 0 12%, transparent 13%),
+        radial-gradient(ellipse at 74% 22%, #f8d0dc 0 11%, transparent 12%),
+        linear-gradient(180deg, transparent 49%, rgba(255,255,255,.5) 50% 52%, transparent 53%),
+        repeating-linear-gradient(175deg, transparent 0 8px, rgba(244,190,210,.45) 9px 11px),
+        linear-gradient(180deg, #b9daea 0 50%, #88b3c4 51% 100%);
+}
+
+.sakura-tile--07 .sakura-tile__image {
+    font-size: 1.45rem;
+    transform: translateY(17px) scaleY(-1);
+    opacity: 0.72;
+}
+
+
+/* 08：一輪だけを中央に配置 */
+.sakura-tile--08 {
+    background:
+        radial-gradient(circle at 50% 50%, #fff 0 13%, #f3b7cd 14% 28%, transparent 29%),
+        radial-gradient(circle at 50% 50%, #d99b45 0 3%, transparent 4%),
+        linear-gradient(145deg, #d8ecef, #eff5f4);
+}
+
+.sakura-tile--08 .sakura-tile__image {
+    font-size: 0;
+}
+
+
+/* 09：地面に散った花びら */
+.sakura-tile--09 {
+    background:
+        radial-gradient(ellipse at 20% 72%, #f5c1d2 0 6%, transparent 7%),
+        radial-gradient(ellipse at 43% 56%, #efacc5 0 5%, transparent 6%),
+        radial-gradient(ellipse at 72% 76%, #f8d1dd 0 7%, transparent 8%),
+        radial-gradient(ellipse at 84% 38%, #f3b6cb 0 5%, transparent 6%),
+        linear-gradient(155deg, #beb4a7, #8e8479);
+}
+
+.sakura-tile--09 .sakura-tile__image {
+    align-items: end;
+    justify-items: start;
+    font-size: 1.35rem;
+    padding: 7px;
+}
+
+
+/* 10：遠景の一本桜 */
+.sakura-tile--10 {
+    background:
+        radial-gradient(ellipse at 50% 52%, #f2b8cc 0 20%, #f8d7e1 21% 29%, transparent 30%),
+        linear-gradient(90deg, transparent 47%, #694b3d 48% 52%, transparent 53%),
+        linear-gradient(180deg, #a9d2ec 0 65%, #a7bd83 66% 100%);
+}
+
+.sakura-tile--10 .sakura-tile__image {
+    align-items: end;
+    font-size: 1rem;
+    padding-bottom: 2px;
+}
+
+
+/* 11：建物越しに見る桜 */
+.sakura-tile--11 {
+    background:
+        linear-gradient(90deg, #56545a 0 20%, transparent 21% 79%, #56545a 80% 100%),
+        radial-gradient(circle at 50% 37%, #f6bfd1 0 18%, transparent 19%),
+        linear-gradient(180deg, #9fcce7, #e8d7dc);
+}
+
+.sakura-tile--11 .sakura-tile__image {
+    font-size: 1.75rem;
+    opacity: 0.86;
+}
+
+
+/* 12：枝先の小さな花房 */
+.sakura-tile--12 {
+    background:
+        radial-gradient(circle at 78% 25%, #fff 0 5%, #f2b4ca 6% 13%, transparent 14%),
+        radial-gradient(circle at 63% 38%, #fff8fb 0 5%, #f7c5d5 6% 12%, transparent 13%),
+        linear-gradient(28deg, transparent 54%, #6a493c 55% 59%, transparent 60%),
+        linear-gradient(180deg, #badcee, #ecf3f4);
+}
+
+.sakura-tile--12 .sakura-tile__image {
+    align-items: start;
+    justify-items: end;
+    padding: 6px;
+    font-size: 1.3rem;
+}
+
+
+/* 13：満開の樹冠を真下から見上げる */
+.sakura-tile--13 {
+    background:
+        radial-gradient(circle at 15% 20%, #f6bfd0 0 16%, transparent 17%),
+        radial-gradient(circle at 48% 15%, #f9d5df 0 20%, transparent 21%),
+        radial-gradient(circle at 82% 24%, #f1afc7 0 17%, transparent 18%),
+        radial-gradient(circle at 28% 66%, #f7c8d7 0 18%, transparent 19%),
+        radial-gradient(circle at 72% 72%, #f5bdd0 0 20%, transparent 21%),
+        linear-gradient(180deg, #a6d2eb, #d8eaf1);
+}
+
+.sakura-tile--13 .sakura-tile__image {
+    font-size: 2.4rem;
+    opacity: 0.72;
+}
+
+
+/* 14：03番と完全に同じ構図（上で共通指定済み） */
+
+
+/* 15：電車の窓越しに流れる桜 */
+.sakura-tile--15 {
+    background:
+        linear-gradient(90deg, rgba(45,48,55,.82) 0 8%, transparent 9% 91%, rgba(45,48,55,.82) 92% 100%),
+        linear-gradient(0deg, rgba(45,48,55,.82) 0 10%, transparent 11% 90%, rgba(45,48,55,.82) 91% 100%),
+        repeating-linear-gradient(100deg, transparent 0 14px, rgba(245,178,202,.58) 15px 20px),
+        linear-gradient(180deg, #a9d4ea, #d6e7e9);
+}
+
+.sakura-tile--15 .sakura-tile__image {
+    justify-items: end;
+    font-size: 1.2rem;
+    padding-right: 8px;
+    filter: blur(0.6px);
+}
+
+
+/* 16：花びらが空を舞う余白の多い構図 */
+.sakura-tile--16 {
+    background:
+        radial-gradient(ellipse at 18% 18%, #f4b7cd 0 4%, transparent 5%),
+        radial-gradient(ellipse at 72% 28%, #f9d0dc 0 5%, transparent 6%),
+        radial-gradient(ellipse at 42% 72%, #efabc4 0 4%, transparent 5%),
+        radial-gradient(ellipse at 84% 82%, #f7c5d4 0 4%, transparent 5%),
+        linear-gradient(180deg, #92c9e9, #dceef5);
+}
+
+.sakura-tile--16 .sakura-tile__image {
+    font-size: 1rem;
+    opacity: 0.48;
+}
