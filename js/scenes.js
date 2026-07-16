@@ -320,33 +320,53 @@ async function showChapterCard() {
         return;
     }
 
+    /*
+        連打による二重実行を防ぎます。
+    */
     introNextButton.disabled = true;
-
-    await SceneManager.changeScene(
-        "intro",
-        {
-            fadeOutTime: 520,
-            blackTime: 220,
-            fadeInTime: 640
-        }
+    introNextButton.classList.remove(
+        "is-visible"
     );
 
     /*
-        同じINTROシーン内で、
-        手紙を消して章タイトルを表示します。
+        INTRO → INTRO のシーン切替は行いません。
+        同じINTROシーン内で手紙だけを静かに消します。
     */
-    letterCard.hidden = true;
     letterCard.classList.remove(
         "is-visible"
     );
 
+    letterCard.classList.add(
+        "is-leaving"
+    );
+
+    await wait(540);
+
+    /*
+        退場演出が終わってから手紙を完全に非表示にします。
+    */
+    letterCard.hidden = true;
+
+    letterCard.classList.remove(
+        "is-leaving"
+    );
+
+    await wait(220);
+
+    /*
+        章タイトルを表示します。
+    */
     chapterCard.hidden = false;
 
-    window.requestAnimationFrame(function () {
-        chapterCard.classList.add(
-            "is-visible"
-        );
+    await new Promise(function (resolve) {
+        window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(resolve);
+        });
     });
+
+    chapterCard.classList.add(
+        "is-visible"
+    );
 }
 
 
@@ -398,7 +418,8 @@ function resetIntroScene() {
         letterCard.hidden = true;
 
         letterCard.classList.remove(
-            "is-visible"
+            "is-visible",
+            "is-leaving"
         );
     }
 
