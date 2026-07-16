@@ -465,37 +465,42 @@
 
 
                 <!--
-                    12個の印と、前後2層の波を使った一枚謎です。
-                    4番目と6番目が波に半分隠れています。
+                    上級者向けの一枚謎です。
+
+                    前方の波には「4/12」、
+                    後方の波には「6/12」が隠れています。
+
+                    数字はほぼ波の中に沈み、
+                    4と6の一部だけがわずかに見えます。
                 -->
                 <div
-                    class="wave-puzzle"
+                    class="wave-puzzle wave-puzzle--advanced"
                     role="img"
-                    aria-label="12個の印のうち、4番目と6番目が波に半分隠れている図"
+                    aria-label="前の波に4分の12、後ろの波に6分の12という文字がほぼ隠れている図"
                 >
                     <div class="wave-puzzle__sky" aria-hidden="true"></div>
 
-                    <div class="wave-puzzle__marks" aria-hidden="true">
-                        <span>1</span>
-                        <span>2</span>
-                        <span>3</span>
-                        <span class="is-hidden-mark">4</span>
-                        <span>5</span>
-                        <span class="is-hidden-mark">6</span>
-                        <span>7</span>
-                        <span>8</span>
-                        <span>9</span>
-                        <span>10</span>
-                        <span>11</span>
-                        <span>12</span>
+                    <div
+                        class="hidden-fraction hidden-fraction--back"
+                        aria-hidden="true"
+                    >
+                        <span class="hidden-fraction__numerator">6</span>
+                        <span class="hidden-fraction__line"></span>
+                        <span class="hidden-fraction__denominator">12</span>
                     </div>
 
                     <div class="wave-puzzle__back-wave" aria-hidden="true"></div>
-                    <div class="wave-puzzle__front-wave" aria-hidden="true"></div>
 
-                    <p class="wave-puzzle__caption">
-                        4 / 12　・　6 / 12
-                    </p>
+                    <div
+                        class="hidden-fraction hidden-fraction--front"
+                        aria-hidden="true"
+                    >
+                        <span class="hidden-fraction__numerator">4</span>
+                        <span class="hidden-fraction__line"></span>
+                        <span class="hidden-fraction__denominator">12</span>
+                    </div>
+
+                    <div class="wave-puzzle__front-wave" aria-hidden="true"></div>
                 </div>
 
 
@@ -553,8 +558,8 @@
                     class="stage2-hint"
                     hidden
                 >
-                    4番目と6番目。<br>
-                    それぞれの「半分」に注目しよう。
+                    波は二つある。<br>
+                    手前と奥を、別々に読もう。
                 </p>
 
             </div>
@@ -606,39 +611,58 @@
 
 
         <!-- =======================================================
-             STAGE3仮画面
+             STAGE3：紙飛行機を飛ばす
         ======================================================== -->
-        <section
-            id="scene-stage3"
-            class="scene"
-            data-scene="stage3"
-            aria-labelledby="stage3-title"
-            hidden
-        >
-            <div class="scene__inner stage-placeholder__inner">
+        <section id="scene-stage3" class="scene" data-scene="stage3" aria-labelledby="stage3-title" hidden>
+            <div class="scene__inner stage3-scene__inner">
+                <p class="scene-label">第三問</p>
+                <h1 id="stage3-title" class="stage3-scene__title">紙飛行機を、空へ。</h1>
+                <p class="stage3-scene__lead">画面の左下から右上へ、<br>紙飛行機を飛ばそう。</p>
 
-                <p class="scene-label">
-                    STAGE 3
-                </p>
+                <div id="paperPlaneArea" class="paper-plane-area" role="application" aria-label="紙飛行機を左下から右上へ飛ばす操作">
+                    <div class="paper-plane-area__sky" aria-hidden="true"></div>
+                    <div class="paper-plane-area__cloud paper-plane-area__cloud--1" aria-hidden="true"></div>
+                    <div class="paper-plane-area__cloud paper-plane-area__cloud--2" aria-hidden="true"></div>
+                    <div id="paperPlaneTrail" class="paper-plane-trail" aria-hidden="true"></div>
+                    <button id="paperPlane" class="paper-plane" type="button" aria-label="紙飛行機"><span aria-hidden="true">➤</span></button>
+                    <div class="paper-plane-area__start" aria-hidden="true">START</div>
+                    <div class="paper-plane-area__goal" aria-hidden="true">GOAL</div>
+                </div>
 
-                <h1
-                    id="stage3-title"
-                    class="stage-placeholder__title"
-                >
-                    第三問は、次のVersionで実装します。
-                </h1>
-
-                <button
-                    id="backToTopButton"
-                    class="sub-button"
-                    type="button"
-                >
-                    TOPへ戻る
-                </button>
-
+                <p id="stage3Message" class="stage3-message" aria-live="polite">紙飛行機に触れて、そのまま右上へ。</p>
+                <button id="stage3AssistButton" class="hint-button" type="button">操作のヒント</button>
+                <p id="stage3Assist" class="stage2-hint" hidden>紙飛行機を押したまま、<br>斜め右上へ大きく動かしてください。</p>
             </div>
         </section>
 
+        <!-- =======================================================
+             STAGE3正解後：秋
+        ======================================================== -->
+        <section id="scene-stage3-clear" class="scene autumn-clear-scene" data-scene="stage3-clear" aria-labelledby="stage3-clear-title" hidden>
+            <div class="autumn-clear-scene__sun" aria-hidden="true"></div>
+            <div class="autumn-leaf autumn-leaf--1" aria-hidden="true">◆</div>
+            <div class="autumn-leaf autumn-leaf--2" aria-hidden="true">◆</div>
+            <div class="autumn-leaf autumn-leaf--3" aria-hidden="true">◆</div>
+            <div class="autumn-leaf autumn-leaf--4" aria-hidden="true">◆</div>
+            <div class="autumn-leaf autumn-leaf--5" aria-hidden="true">◆</div>
+            <div class="scene__inner autumn-clear-scene__inner">
+                <p class="scene-label">秋</p>
+                <h1 id="stage3-clear-title" class="autumn-clear-scene__title">紙飛行機は、<br>遠くの家へ向かっていった。</h1>
+                <p class="autumn-clear-scene__text">庭には落ち葉が積もり、<br>誰かが待っているようだった。</p>
+                <button id="stage3ContinueButton" class="autumn-button" type="button">家へ向かう</button>
+            </div>
+        </section>
+
+        <!-- =======================================================
+             STAGE4仮画面
+        ======================================================== -->
+        <section id="scene-stage4" class="scene" data-scene="stage4" aria-labelledby="stage4-title" hidden>
+            <div class="scene__inner stage-placeholder__inner">
+                <p class="scene-label">STAGE 4</p>
+                <h1 id="stage4-title" class="stage-placeholder__title">第四問は、次のVersionで実装します。</h1>
+                <button id="backToTopButton" class="sub-button" type="button">TOPへ戻る</button>
+            </div>
+        </section>
 
         <!-- =======================================================
              画面暗転レイヤー
