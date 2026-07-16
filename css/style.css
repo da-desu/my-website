@@ -1,13 +1,13 @@
 /*
 ============================================================
 謎解きサイト 共通CSS
-Version 0.1
+Version 0.2
 
-目的
-・GitHub Pagesで動作
-・iPhone / Android対応
-・1ページ構成
-・後から画像、BGM、演出を追加しやすくする
+追加内容
+・INTRO手紙カード
+・文字送り表示
+・章タイトル演出
+・スマホ向け操作改善
 ============================================================
 */
 
@@ -23,6 +23,10 @@ Version 0.1
     --color-border: rgba(255, 255, 255, 0.28);
     --color-button-background: rgba(255, 255, 255, 0.05);
     --color-button-hover: rgba(255, 255, 255, 0.12);
+
+    --color-paper: #e8e0d2;
+    --color-paper-text: #1b1814;
+    --color-paper-muted: rgba(27, 24, 20, 0.58);
 
     --content-width: 680px;
     --page-padding: 24px;
@@ -102,7 +106,6 @@ button {
 
 .app {
     position: relative;
-
     width: 100%;
     min-height: 100vh;
     min-height: 100svh;
@@ -173,7 +176,6 @@ button {
 .top-scene__lead,
 .top-scene__message {
     margin: 0;
-
     letter-spacing: 0.14em;
     text-wrap: balance;
 }
@@ -191,13 +193,12 @@ button {
     line-height: 1.7;
 }
 
-
-/* 「世界」の文字専用 */
 .world-word {
     position: relative;
     display: inline-block;
 
     min-width: 2em;
+
     color: var(--color-text);
 
     transform: translateZ(0);
@@ -212,11 +213,12 @@ button {
 
 
 /* =========================================================
-   6. はじめるボタン
+   6. 共通ボタン
    ========================================================= */
 
 .start-button,
-.sub-button {
+.sub-button,
+.tap-next-button {
     appearance: none;
 
     display: inline-flex;
@@ -250,18 +252,21 @@ button {
 }
 
 .start-button:hover,
-.sub-button:hover {
+.sub-button:hover,
+.tap-next-button:hover {
     background: var(--color-button-hover);
     border-color: rgba(255, 255, 255, 0.48);
 }
 
 .start-button:active,
-.sub-button:active {
+.sub-button:active,
+.tap-next-button:active {
     transform: scale(0.97);
 }
 
 .start-button:focus-visible,
-.sub-button:focus-visible {
+.sub-button:focus-visible,
+.tap-next-button:focus-visible {
     outline: 2px solid var(--color-text);
     outline-offset: 5px;
 }
@@ -276,12 +281,6 @@ button {
 /* =========================================================
    7. 「世界」が崩れる演出
    ========================================================= */
-
-/*
-    JavaScriptが段階的にクラスを付け替えます。
-    filter / transform / text-shadowのみで構成しているため、
-    外部ライブラリは不要です。
-*/
 
 .world-word.is-glitching {
     animation:
@@ -315,8 +314,6 @@ button {
     animation: world-restore 240ms ease-out both;
 }
 
-
-/* 小刻みな横揺れ */
 @keyframes world-jitter {
     0% {
         transform: translate(0, 0) skewX(0deg);
@@ -339,8 +336,6 @@ button {
     }
 }
 
-
-/* 明滅 */
 @keyframes world-flicker {
     0%,
     100% {
@@ -360,8 +355,6 @@ button {
     }
 }
 
-
-/* 最後に一瞬だけ元へ戻る */
 @keyframes world-restore {
     from {
         filter: blur(5px);
@@ -404,10 +397,287 @@ button {
 
 
 /* =========================================================
-   9. INTRO仮画面
+   9. INTROシーン
    ========================================================= */
 
 .intro-scene__inner {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    min-height: min(720px, 88svh);
+}
+
+
+/* 最初の「……」 */
+.intro-silence {
+    position: absolute;
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.intro-silence.is-visible {
+    animation: silence-appear 720ms ease forwards;
+}
+
+.intro-silence__dots {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 1.05rem;
+    letter-spacing: 0.34em;
+}
+
+@keyframes silence-appear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* 手紙カード */
+.letter-card {
+    position: relative;
+
+    width: min(100%, 560px);
+
+    padding:
+        clamp(28px, 7vw, 52px)
+        clamp(22px, 6vw, 46px);
+
+    border-radius: 4px;
+
+    background:
+        linear-gradient(
+            rgba(255, 255, 255, 0.08),
+            rgba(0, 0, 0, 0.04)
+        ),
+        var(--color-paper);
+
+    color: var(--color-paper-text);
+
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+
+    opacity: 0;
+    transform:
+        translateY(18px)
+        scale(0.985);
+
+    overflow: hidden;
+}
+
+.letter-card::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0.38;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(65, 45, 25, 0.035) 0,
+            rgba(65, 45, 25, 0.035) 1px,
+            transparent 1px,
+            transparent 4px
+        );
+}
+
+.letter-card.is-visible {
+    animation: letter-appear 980ms ease forwards;
+}
+
+@keyframes letter-appear {
+    to {
+        opacity: 1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+.letter-card__eyebrow {
+    position: relative;
+
+    margin: 0 0 18px;
+
+    color: var(--color-paper-muted);
+
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+}
+
+.letter-card__title {
+    position: relative;
+
+    margin: 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(1.08rem, 4.5vw, 1.45rem);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1.9;
+}
+
+.letter-card__body {
+    position: relative;
+
+    margin-top: 32px;
+    min-height: 9.5em;
+
+    text-align: left;
+}
+
+.typewriter-text {
+    display: inline;
+
+    margin: 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(1rem, 4.1vw, 1.18rem);
+    line-height: 2.15;
+    letter-spacing: 0.06em;
+
+    white-space: pre-wrap;
+}
+
+.typewriter-cursor {
+    display: inline-block;
+
+    width: 0.55em;
+    height: 1.05em;
+
+    margin-left: 0.12em;
+
+    vertical-align: -0.08em;
+
+    background: rgba(27, 24, 20, 0.76);
+
+    animation: cursor-blink 820ms steps(1, end) infinite;
+}
+
+.typewriter-cursor.is-hidden {
+    display: none;
+}
+
+@keyframes cursor-blink {
+    0%,
+    48% {
+        opacity: 1;
+    }
+
+    49%,
+    100% {
+        opacity: 0;
+    }
+}
+
+
+/* タップして進む */
+.tap-next-button {
+    position: relative;
+
+    margin-top: 34px;
+
+    min-width: 176px;
+    min-height: 46px;
+
+    border-color: rgba(27, 24, 20, 0.25);
+
+    background: rgba(27, 24, 20, 0.04);
+    color: rgba(27, 24, 20, 0.72);
+
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    text-indent: 0.14em;
+}
+
+.tap-next-button.is-visible {
+    animation: tap-next-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes tap-next-pulse {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* 章タイトル */
+.chapter-card {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+.chapter-card.is-visible {
+    animation: chapter-appear 900ms ease forwards;
+}
+
+.chapter-card__number {
+    margin: 0;
+
+    color: var(--color-muted);
+
+    font-size: 0.78rem;
+    letter-spacing: 0.30em;
+    text-indent: 0.30em;
+}
+
+.chapter-card__title {
+    margin: 22px 0 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(1.6rem, 7vw, 2.7rem);
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    line-height: 1.7;
+}
+
+.chapter-card__button {
+    margin-top: 62px;
+}
+
+@keyframes chapter-appear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   10. STAGE1仮画面
+   ========================================================= */
+
+.stage-placeholder__inner {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -417,25 +687,19 @@ button {
     margin: 0 0 28px;
 
     color: var(--color-muted);
+
     font-size: 0.74rem;
     letter-spacing: 0.30em;
     text-indent: 0.30em;
 }
 
-.intro-title {
+.stage-placeholder__title {
     margin: 0;
 
-    font-size: clamp(1.35rem, 5vw, 2rem);
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
     font-weight: 500;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.08em;
     line-height: 1.8;
-}
-
-.intro-note {
-    margin: 28px 0 0;
-
-    color: var(--color-muted);
-    font-size: 0.85rem;
 }
 
 .sub-button {
@@ -450,7 +714,7 @@ button {
 
 
 /* =========================================================
-   10. 小さなスマートフォン向け調整
+   11. 小さなスマートフォン向け調整
    ========================================================= */
 
 @media (max-width: 380px) {
@@ -466,11 +730,21 @@ button {
         min-width: 152px;
         min-height: 50px;
     }
+
+    .letter-card {
+        padding:
+            26px
+            19px;
+    }
+
+    .letter-card__body {
+        min-height: 10.5em;
+    }
 }
 
 
 /* =========================================================
-   11. 横向きスマートフォン向け調整
+   12. 横向きスマートフォン向け調整
    ========================================================= */
 
 @media (max-height: 520px) and (orientation: landscape) {
@@ -483,18 +757,23 @@ button {
         min-height: 100svh;
     }
 
-    .top-scene__inner {
+    .top-scene__inner,
+    .intro-scene__inner {
         min-height: auto;
     }
 
     .start-button {
         margin-top: 34px;
     }
+
+    .letter-card {
+        margin-block: 18px;
+    }
 }
 
 
 /* =========================================================
-   12. 動きを減らす設定を使用している方への配慮
+   13. 動きを減らす設定を使用している方への配慮
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
