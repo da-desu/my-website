@@ -18,6 +18,17 @@
 <body>
 
     <div id="app" class="app">
+        <button id="inventoryButton" class="inventory-button" type="button" aria-label="持ち物を開く" hidden><span aria-hidden="true">▤</span><span id="inventoryCount">0</span></button>
+        <div id="inventoryPanel" class="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventory-title" hidden>
+            <div id="inventoryBackdrop" class="inventory-panel__backdrop" aria-hidden="true"></div>
+            <div class="inventory-panel__body">
+                <p class="scene-label">ITEMS</p>
+                <h2 id="inventory-title" class="inventory-panel__title">持ち物</h2>
+                <div id="inventoryList" class="inventory-list"></div>
+                <button id="inventoryCloseButton" class="sub-button" type="button">閉じる</button>
+            </div>
+        </div>
+
 
 
         <!-- =======================================================
@@ -611,47 +622,72 @@
 
 
         <!-- =======================================================
-             STAGE3：紙飛行機を飛ばす
+             STAGE3：海辺の看板謎
         ======================================================== -->
-        <section id="scene-stage3" class="scene" data-scene="stage3" aria-labelledby="stage3-title" hidden>
-            <div class="scene__inner stage3-scene__inner">
+        <section id="scene-stage3" class="scene coast-stage-scene" data-scene="stage3" aria-labelledby="stage3-title" hidden>
+            <div class="coast-stage-scene__background" aria-hidden="true"></div>
+            <div class="scene__inner coast-stage-scene__inner">
                 <p class="scene-label">第三問</p>
-                <h1 id="stage3-title" class="stage3-scene__title">紙飛行機を、空へ。</h1>
-                <p class="stage3-scene__lead">画面の左下から右上へ、<br>紙飛行機を飛ばそう。</p>
+                <h1 id="stage3-title" class="coast-stage-scene__title">海辺の看板</h1>
+                <p class="coast-stage-scene__lead">海のそばに、古びた看板が立っている。</p>
 
-                <div id="paperPlaneArea" class="paper-plane-area" role="application" aria-label="紙飛行機を左下から右上へ飛ばす操作">
-                    <div class="paper-plane-area__sky" aria-hidden="true"></div>
-                    <div class="paper-plane-area__cloud paper-plane-area__cloud--1" aria-hidden="true"></div>
-                    <div class="paper-plane-area__cloud paper-plane-area__cloud--2" aria-hidden="true"></div>
-                    <div id="paperPlaneTrail" class="paper-plane-trail" aria-hidden="true"></div>
-                    <button id="paperPlane" class="paper-plane" type="button" aria-label="紙飛行機"><span aria-hidden="true">➤</span></button>
-                    <div class="paper-plane-area__start" aria-hidden="true">START</div>
-                    <div class="paper-plane-area__goal" aria-hidden="true">GOAL</div>
-                </div>
+                <figure class="single-puzzle-card">
+                    <img class="single-puzzle-card__image" src="img/stage3/puzzle.jpg" alt="上下のイラストを組み合わせ、進む方向を導く一枚謎">
+                    <figcaption class="single-puzzle-card__caption">看板を解いて、進む方向を答えよう。</figcaption>
+                </figure>
 
-                <p id="stage3Message" class="stage3-message" aria-live="polite">紙飛行機に触れて、そのまま右上へ。</p>
-                <button id="stage3AssistButton" class="hint-button" type="button">操作のヒント</button>
-                <p id="stage3Assist" class="stage2-hint" hidden>紙飛行機を押したまま、<br>斜め右上へ大きく動かしてください。</p>
+                <form id="stage3Form" class="answer-form stage3-answer-form" novalidate>
+                    <label class="answer-form__label" for="stage3Answer">正解の方向はどこ？</label>
+                    <input id="stage3Answer" class="answer-form__input" type="text" inputmode="text" autocomplete="off" maxlength="4" placeholder="漢字一文字">
+                    <button id="stage3SubmitButton" class="answer-form__submit" type="submit">送信</button>
+                </form>
+
+                <p id="stage3Message" class="stage3-answer-message" aria-live="polite"></p>
+                <button id="stage3HintButton" class="hint-button" type="button">ヒントを見る</button>
+                <p id="stage3Hint" class="stage2-hint" hidden>看板の答えは、進むべき方角を表している。</p>
             </div>
         </section>
 
         <!-- =======================================================
-             STAGE3正解後：秋
+             STAGE3正解後：地図入手
         ======================================================== -->
-        <section id="scene-stage3-clear" class="scene autumn-clear-scene" data-scene="stage3-clear" aria-labelledby="stage3-clear-title" hidden>
-            <div class="autumn-clear-scene__sun" aria-hidden="true"></div>
-            <div class="autumn-leaf autumn-leaf--1" aria-hidden="true">◆</div>
-            <div class="autumn-leaf autumn-leaf--2" aria-hidden="true">◆</div>
-            <div class="autumn-leaf autumn-leaf--3" aria-hidden="true">◆</div>
-            <div class="autumn-leaf autumn-leaf--4" aria-hidden="true">◆</div>
-            <div class="autumn-leaf autumn-leaf--5" aria-hidden="true">◆</div>
-            <div class="scene__inner autumn-clear-scene__inner">
-                <p class="scene-label">秋</p>
-                <h1 id="stage3-clear-title" class="autumn-clear-scene__title">紙飛行機は、<br>遠くの家へ向かっていった。</h1>
-                <p class="autumn-clear-scene__text">庭には落ち葉が積もり、<br>誰かが待っているようだった。</p>
-                <button id="stage3ContinueButton" class="autumn-button" type="button">家へ向かう</button>
+        <section id="scene-stage3-clear" class="scene map-acquisition-scene" data-scene="stage3-clear" aria-labelledby="map-acquisition-title" hidden>
+            <div class="map-acquisition-scene__glow" aria-hidden="true"></div>
+            <div class="scene__inner map-acquisition-scene__inner">
+                <p class="scene-label">ITEM GET</p>
+                <h1 id="map-acquisition-title" class="map-acquisition-scene__title">北へ向かうと、<br>一枚の地図が落ちていた。</h1>
+                <div id="mapItemCard" class="map-item-card" aria-label="寿司屋への地図">
+                    <div class="map-item-card__paper" aria-hidden="true">
+                        <span class="map-item-card__route"></span>
+                        <span class="map-item-card__start">海</span>
+                        <span class="map-item-card__goal">寿司</span>
+                    </div>
+                    <p class="map-item-card__name">寿司屋への地図</p>
+                </div>
+                <p class="map-acquisition-scene__message">「寿司屋への地図」を手に入れた。</p>
+                <div class="map-acquisition-scene__buttons">
+                    <button id="openMapButton" class="sub-button map-acquisition-scene__button" type="button">地図を見る</button>
+                    <button id="stage3ContinueButton" class="start-button map-acquisition-scene__button" type="button">寿司屋へ向かう</button>
+                </div>
             </div>
         </section>
+
+        <div id="mapModal" class="map-modal" role="dialog" aria-modal="true" aria-labelledby="map-modal-title" hidden>
+            <div id="mapModalBackdrop" class="map-modal__backdrop" aria-hidden="true"></div>
+            <div class="map-modal__panel">
+                <p class="scene-label">MAP</p>
+                <h2 id="map-modal-title" class="map-modal__title">寿司屋への地図</h2>
+                <div class="map-modal__map" aria-hidden="true">
+                    <div class="map-modal__sea">海</div>
+                    <div class="map-modal__road"></div>
+                    <div class="map-modal__arrow">↑</div>
+                    <div class="map-modal__shop">寿司屋</div>
+                    <div class="map-modal__fold-line"></div>
+                </div>
+                <p class="map-modal__note">地図には、うっすらと折り目がついている。</p>
+                <button id="closeMapButton" class="sub-button" type="button">閉じる</button>
+            </div>
+        </div>
 
         <!-- =======================================================
              STAGE4仮画面
@@ -680,6 +716,7 @@
         セーブ管理は、ゲーム本体より先に読み込みます。
     -->
     <script src="js/save.js"></script>
+    <script src="js/inventory.js"></script>
     <script src="js/game.js"></script>
     <script src="js/puzzle.js"></script>
     <script src="js/scenes.js"></script>
