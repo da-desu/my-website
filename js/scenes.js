@@ -945,11 +945,36 @@ if (document.readyState === "loading") {
 function initializeMapControls(){const modal=document.getElementById("mapModal");document.getElementById("openMapButton")?.addEventListener("click",()=>{modal.hidden=false});document.getElementById("closeMapButton")?.addEventListener("click",()=>{modal.hidden=true});document.getElementById("mapModalBackdrop")?.addEventListener("click",()=>{modal.hidden=true})}
 document.addEventListener("DOMContentLoaded",initializeMapControls);
 
-/* Version 0.8 stage4 navigation */
-function initializeStage4Navigation(){
- const to4=document.getElementById("stage3ContinueButton");
- if(to4&&!to4.dataset.v08){to4.addEventListener("click",()=>window.resetStage4Puzzle?.(),{capture:true});to4.dataset.v08="1"}
- const to5=document.getElementById("stage4ContinueButton");
- if(to5&&!to5.dataset.v08){to5.addEventListener("click",async()=>{to5.disabled=true;await SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860});to5.disabled=false});to5.dataset.v08="1"}
+/* =========================================================
+   Version 0.8 Rebuild：安定したナビゲーション
+   ========================================================= */
+function bindOnce(element,eventName,key,handler){
+    if(!element||element.dataset[key]==="true")return;
+    element.addEventListener(eventName,handler);
+    element.dataset[key]="true";
 }
-document.addEventListener("DOMContentLoaded",initializeStage4Navigation);
+
+function initializeRebuildNavigation(){
+    bindOnce(document.getElementById("stage3ContinueButton"),"click","v08ToStage4",async function(){
+        this.disabled=true;
+        window.Stage4Controller?.reset();
+        await SceneManager.changeScene("stage4",{fadeOutTime:720,blackTime:320,fadeInTime:860});
+        this.disabled=false;
+    });
+
+    bindOnce(document.getElementById("stage4ContinueButton"),"click","v08ToStage5",async function(){
+        this.disabled=true;
+        await SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860});
+        this.disabled=false;
+    });
+}
+document.addEventListener("DOMContentLoaded",initializeRebuildNavigation);
+
+const continueSavedGameBeforeV08=continueSavedGame;
+continueSavedGame=async function(){
+    const sceneName=typeof window.getResumeScene==="function"?window.getResumeScene():"top";
+    await continueSavedGameBeforeV08();
+    if(sceneName==="stage4"){
+        window.restoreStage4Puzzle?.();
+    }
+};
