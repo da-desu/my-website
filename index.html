@@ -465,42 +465,37 @@
 
 
                 <!--
-                    上級者向けの一枚謎です。
-
-                    前方の波には「4/12」、
-                    後方の波には「6/12」が隠れています。
-
-                    数字はほぼ波の中に沈み、
-                    4と6の一部だけがわずかに見えます。
+                    12個の印と、前後2層の波を使った一枚謎です。
+                    4番目と6番目が波に半分隠れています。
                 -->
                 <div
-                    class="wave-puzzle wave-puzzle--advanced"
+                    class="wave-puzzle"
                     role="img"
-                    aria-label="前の波に4分の12、後ろの波に6分の12という文字がほぼ隠れている図"
+                    aria-label="12個の印のうち、4番目と6番目が波に半分隠れている図"
                 >
                     <div class="wave-puzzle__sky" aria-hidden="true"></div>
 
-                    <div
-                        class="hidden-fraction hidden-fraction--back"
-                        aria-hidden="true"
-                    >
-                        <span class="hidden-fraction__numerator">6</span>
-                        <span class="hidden-fraction__line"></span>
-                        <span class="hidden-fraction__denominator">12</span>
+                    <div class="wave-puzzle__marks" aria-hidden="true">
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span class="is-hidden-mark">4</span>
+                        <span>5</span>
+                        <span class="is-hidden-mark">6</span>
+                        <span>7</span>
+                        <span>8</span>
+                        <span>9</span>
+                        <span>10</span>
+                        <span>11</span>
+                        <span>12</span>
                     </div>
 
                     <div class="wave-puzzle__back-wave" aria-hidden="true"></div>
-
-                    <div
-                        class="hidden-fraction hidden-fraction--front"
-                        aria-hidden="true"
-                    >
-                        <span class="hidden-fraction__numerator">4</span>
-                        <span class="hidden-fraction__line"></span>
-                        <span class="hidden-fraction__denominator">12</span>
-                    </div>
-
                     <div class="wave-puzzle__front-wave" aria-hidden="true"></div>
+
+                    <p class="wave-puzzle__caption">
+                        4 / 12　・　6 / 12
+                    </p>
                 </div>
 
 
@@ -558,8 +553,8 @@
                     class="stage2-hint"
                     hidden
                 >
-                    波は二つある。<br>
-                    手前と奥を、別々に読もう。
+                    4番目と6番目。<br>
+                    それぞれの「半分」に注目しよう。
                 </p>
 
             </div>
