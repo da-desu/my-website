@@ -19,6 +19,60 @@
 
     <div id="app" class="app">
 
+
+        <!-- =======================================================
+             再開確認シーン
+        ======================================================== -->
+        <section
+            id="scene-resume"
+            class="scene"
+            data-scene="resume"
+            aria-labelledby="resume-title"
+            hidden
+        >
+            <div class="scene__inner resume-scene__inner">
+
+                <p class="scene-label">
+                    CONTINUE
+                </p>
+
+                <h1
+                    id="resume-title"
+                    class="resume-scene__title"
+                >
+                    途中の場面から<br>
+                    再開しますか？
+                </h1>
+
+                <p
+                    id="resumeSceneLabel"
+                    class="resume-scene__checkpoint"
+                ></p>
+
+                <div class="resume-scene__buttons">
+
+                    <button
+                        id="continueButton"
+                        class="start-button resume-scene__button"
+                        type="button"
+                    >
+                        続きから
+                    </button>
+
+                    <button
+                        id="restartButton"
+                        class="sub-button resume-scene__button"
+                        type="button"
+                    >
+                        最初から
+                    </button>
+
+                </div>
+
+            </div>
+        </section>
+
+
         <!-- =======================================================
              TOPシーン
         ======================================================== -->
@@ -428,6 +482,10 @@
     </div>
 
 
+    <!--
+        セーブ管理は、ゲーム本体より先に読み込みます。
+    -->
+    <script src="js/save.js"></script>
     <script src="js/game.js"></script>
     <script src="js/puzzle.js"></script>
     <script src="js/scenes.js"></script>
