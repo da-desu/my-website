@@ -1714,133 +1714,112 @@ button {
 /* 一枚謎カード */
 .wave-puzzle {
     position: relative;
-
     width: min(100%, 430px);
     aspect-ratio: 4 / 3;
-
     border-radius: 14px;
-
     background: #cce8f4;
-
     overflow: hidden;
     box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
+    isolation: isolate;
 }
 
 .wave-puzzle__sky {
     position: absolute;
     inset: 0;
-
+    z-index: 0;
     background:
-        radial-gradient(
-            circle at 78% 18%,
-            rgba(255, 250, 206, 0.95) 0 8%,
-            transparent 9%
-        ),
-        linear-gradient(
-            180deg,
-            #9dd3ed 0%,
-            #d9edf5 58%,
-            #b8d6df 59% 100%
-        );
+        radial-gradient(circle at 78% 18%, rgba(255, 250, 206, 0.82) 0 6%, transparent 7%),
+        linear-gradient(180deg, #8bc8e6 0%, #cfe8f2 52%, #91bbc9 100%);
 }
 
-.wave-puzzle__marks {
+.hidden-fraction {
     position: absolute;
-    top: 18%;
-    left: 7%;
-    right: 7%;
-    z-index: 2;
-
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 13px 8px;
-}
-
-.wave-puzzle__marks span {
-    display: grid;
-    place-items: center;
-
-    aspect-ratio: 1 / 1;
-
-    border: 1px solid rgba(36, 65, 77, 0.26);
-    border-radius: 50%;
-
-    background: rgba(255, 255, 255, 0.72);
-    color: #31586b;
-
-    font-size: clamp(0.72rem, 3vw, 0.92rem);
+    grid-template-rows: auto 2px auto;
+    justify-items: center;
+    width: 66px;
+    color: rgba(16, 54, 72, 0.30);
+    font-family: "Times New Roman", "Yu Mincho", serif;
     font-weight: 700;
-
-    box-shadow: 0 5px 12px rgba(53, 93, 110, 0.13);
+    line-height: 1;
+    filter: blur(0.45px) contrast(0.92);
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.14),
+        0 0 6px rgba(14, 58, 78, 0.10);
+    pointer-events: none;
 }
 
-.wave-puzzle__marks .is-hidden-mark {
-    color: #173a4b;
-    background: rgba(255, 255, 255, 0.9);
+.hidden-fraction__numerator {
+    font-size: clamp(2.2rem, 10vw, 3.5rem);
 }
 
-.wave-puzzle__back-wave,
-.wave-puzzle__front-wave {
-    position: absolute;
-    left: -10%;
-    width: 120%;
+.hidden-fraction__line {
+    width: 46px;
+    height: 2px;
+    margin-block: 1px;
+    background: currentColor;
+}
 
-    border-radius: 46% 54% 0 0 / 100% 100% 0 0;
+.hidden-fraction__denominator {
+    font-size: clamp(1.15rem, 5vw, 1.7rem);
+    letter-spacing: -0.08em;
+}
+
+.hidden-fraction--back {
+    left: 61%;
+    top: 32%;
+    z-index: 1;
+    transform: translateX(-50%) rotate(-4deg);
+    opacity: 0.72;
+}
+
+.hidden-fraction--front {
+    left: 34%;
+    top: 53%;
+    z-index: 3;
+    transform: translateX(-50%) rotate(3deg);
+    opacity: 0.78;
 }
 
 .wave-puzzle__back-wave {
+    position: absolute;
+    left: -12%;
     bottom: 21%;
-    z-index: 3;
-
-    height: 29%;
-
+    z-index: 2;
+    width: 124%;
+    height: 37%;
+    border-radius: 54% 46% 0 0 / 78% 84% 0 0;
     background:
-        linear-gradient(
-            180deg,
-            rgba(87, 169, 201, 0.84),
-            rgba(48, 126, 163, 0.94)
-        );
-
-    transform: rotate(-2deg);
+        radial-gradient(ellipse at 61% 2%, rgba(224, 246, 251, 0.55) 0 7%, transparent 8%),
+        linear-gradient(180deg, rgba(73, 158, 191, 0.94), rgba(28, 105, 142, 0.98));
+    transform: rotate(-2.5deg);
+    box-shadow: inset 0 7px 10px rgba(255, 255, 255, 0.12);
 }
 
 .wave-puzzle__front-wave {
-    bottom: -6%;
+    position: absolute;
+    left: -13%;
+    bottom: -7%;
     z-index: 4;
-
-    height: 43%;
-
+    width: 126%;
+    height: 52%;
+    border-radius: 47% 53% 0 0 / 68% 82% 0 0;
     background:
-        radial-gradient(
-            ellipse at 28% 3%,
-            rgba(255, 255, 255, 0.92) 0 7%,
-            transparent 8%
-        ),
-        linear-gradient(
-            180deg,
-            #4da6ca,
-            #17658d
-        );
-
-    transform: rotate(1.5deg);
+        radial-gradient(ellipse at 31% 2%, rgba(237, 250, 252, 0.78) 0 7%, transparent 8%),
+        radial-gradient(ellipse at 76% 5%, rgba(231, 249, 252, 0.38) 0 5%, transparent 6%),
+        linear-gradient(180deg, #3d9ac0, #0a527c);
+    transform: rotate(1.8deg);
+    box-shadow: inset 0 8px 12px rgba(255, 255, 255, 0.16);
 }
 
-.wave-puzzle__caption {
+.wave-puzzle--advanced::after {
+    content: "";
     position: absolute;
-    left: 50%;
-    bottom: 7%;
+    inset: 0;
     z-index: 5;
-
-    margin: 0;
-
-    color: rgba(255, 255, 255, 0.94);
-
-    font-size: clamp(0.86rem, 3.5vw, 1.02rem);
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-indent: 0.18em;
-
-    transform: translateX(-50%);
+    background:
+        linear-gradient(180deg, transparent 0 43%, rgba(26, 117, 153, 0.06) 44% 100%);
+    pointer-events: none;
 }
 
 
@@ -2115,4 +2094,22 @@ button {
     .answer-form__submit {
         width: 100%;
     }
+}
+
+
+/* Version 0.5.1 操作修正 */
+.ocean-clear-scene__sun,
+.ocean-clear-scene__water {
+    pointer-events: none;
+}
+
+.ocean-clear-scene__inner,
+.paper-plane-button {
+    pointer-events: auto;
+}
+
+.paper-plane-button {
+    position: relative;
+    z-index: 10;
+    -webkit-tap-highlight-color: transparent;
 }
