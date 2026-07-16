@@ -1668,3 +1668,451 @@ button {
 .resume-scene__buttons .sub-button {
     color: var(--color-muted);
 }
+
+
+/* =========================================================
+   18. STAGE2：海の一枚謎
+   ========================================================= */
+
+.stage2-scene__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.stage2-scene__inner::-webkit-scrollbar {
+    display: none;
+}
+
+.stage2-scene__title {
+    margin: 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(1.35rem, 5.8vw, 2rem);
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    line-height: 1.8;
+}
+
+.stage2-scene__lead {
+    margin: 14px 0 26px;
+
+    color: var(--color-muted);
+    font-size: 0.86rem;
+    line-height: 1.9;
+}
+
+
+/* 一枚謎カード */
+.wave-puzzle {
+    position: relative;
+
+    width: min(100%, 430px);
+    aspect-ratio: 4 / 3;
+
+    border-radius: 14px;
+
+    background: #cce8f4;
+
+    overflow: hidden;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
+}
+
+.wave-puzzle__sky {
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at 78% 18%,
+            rgba(255, 250, 206, 0.95) 0 8%,
+            transparent 9%
+        ),
+        linear-gradient(
+            180deg,
+            #9dd3ed 0%,
+            #d9edf5 58%,
+            #b8d6df 59% 100%
+        );
+}
+
+.wave-puzzle__marks {
+    position: absolute;
+    top: 18%;
+    left: 7%;
+    right: 7%;
+    z-index: 2;
+
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 13px 8px;
+}
+
+.wave-puzzle__marks span {
+    display: grid;
+    place-items: center;
+
+    aspect-ratio: 1 / 1;
+
+    border: 1px solid rgba(36, 65, 77, 0.26);
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.72);
+    color: #31586b;
+
+    font-size: clamp(0.72rem, 3vw, 0.92rem);
+    font-weight: 700;
+
+    box-shadow: 0 5px 12px rgba(53, 93, 110, 0.13);
+}
+
+.wave-puzzle__marks .is-hidden-mark {
+    color: #173a4b;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.wave-puzzle__back-wave,
+.wave-puzzle__front-wave {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+
+    border-radius: 46% 54% 0 0 / 100% 100% 0 0;
+}
+
+.wave-puzzle__back-wave {
+    bottom: 21%;
+    z-index: 3;
+
+    height: 29%;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(87, 169, 201, 0.84),
+            rgba(48, 126, 163, 0.94)
+        );
+
+    transform: rotate(-2deg);
+}
+
+.wave-puzzle__front-wave {
+    bottom: -6%;
+    z-index: 4;
+
+    height: 43%;
+
+    background:
+        radial-gradient(
+            ellipse at 28% 3%,
+            rgba(255, 255, 255, 0.92) 0 7%,
+            transparent 8%
+        ),
+        linear-gradient(
+            180deg,
+            #4da6ca,
+            #17658d
+        );
+
+    transform: rotate(1.5deg);
+}
+
+.wave-puzzle__caption {
+    position: absolute;
+    left: 50%;
+    bottom: 7%;
+    z-index: 5;
+
+    margin: 0;
+
+    color: rgba(255, 255, 255, 0.94);
+
+    font-size: clamp(0.86rem, 3.5vw, 1.02rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+
+    transform: translateX(-50%);
+}
+
+
+/* 回答フォーム */
+.answer-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+
+    width: min(100%, 430px);
+
+    margin-top: 26px;
+}
+
+.answer-form__label {
+    grid-column: 1 / -1;
+
+    color: var(--color-muted);
+
+    font-size: 0.76rem;
+    letter-spacing: 0.10em;
+    text-align: left;
+}
+
+.answer-form__input {
+    min-width: 0;
+    min-height: 50px;
+
+    padding: 10px 15px;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
+
+    font-size: 1rem;
+}
+
+.answer-form__input::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+}
+
+.answer-form__input:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.72);
+    outline-offset: 2px;
+}
+
+.answer-form__submit {
+    appearance: none;
+
+    min-width: 82px;
+    min-height: 50px;
+
+    border: 1px solid rgba(255, 255, 255, 0.36);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--color-text);
+
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.answer-form__submit:active {
+    transform: scale(0.97);
+}
+
+.answer-form__submit:disabled {
+    opacity: 0.55;
+}
+
+.stage2-message {
+    min-height: 1.8em;
+    margin: 15px 0 0;
+
+    font-size: 0.82rem;
+}
+
+.stage2-message.is-error {
+    color: #ffaaaa;
+}
+
+.stage2-message.is-success {
+    color: #b7efc2;
+}
+
+.hint-button {
+    appearance: none;
+
+    margin-top: 8px;
+    padding: 8px 12px;
+
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+
+    background: transparent;
+    color: var(--color-muted);
+
+    font-size: 0.78rem;
+
+    cursor: pointer;
+}
+
+.stage2-hint {
+    margin: 15px 0 0;
+    padding: 14px 18px;
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+
+    font-size: 0.8rem;
+    line-height: 1.8;
+}
+
+
+/* =========================================================
+   19. STAGE2正解画面
+   ========================================================= */
+
+.ocean-clear-scene {
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            #78c4e7 0%,
+            #cbeafa 48%,
+            #267da5 49%,
+            #0d496c 100%
+        );
+}
+
+.ocean-clear-scene__sun {
+    position: absolute;
+    top: 13%;
+    right: 16%;
+
+    width: 76px;
+    aspect-ratio: 1 / 1;
+
+    border-radius: 50%;
+
+    background: rgba(255, 245, 188, 0.92);
+    box-shadow: 0 0 48px rgba(255, 236, 149, 0.55);
+}
+
+.ocean-clear-scene__water {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: -12%;
+
+    height: 60%;
+
+    background:
+        repeating-radial-gradient(
+            ellipse at 50% 0,
+            rgba(255, 255, 255, 0.22) 0 2px,
+            transparent 3px 18px
+        ),
+        linear-gradient(
+            180deg,
+            rgba(52, 155, 195, 0.82),
+            rgba(7, 65, 99, 0.96)
+        );
+
+    animation: ocean-drift 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes ocean-drift {
+    from {
+        transform: translateX(-2%) translateY(0);
+    }
+
+    to {
+        transform: translateX(2%) translateY(8px);
+    }
+}
+
+.ocean-clear-scene__inner {
+    position: relative;
+    z-index: 2;
+
+    padding: 32px 22px;
+
+    border-radius: 14px;
+
+    background: rgba(1, 39, 61, 0.34);
+    box-shadow: 0 18px 48px rgba(0, 35, 57, 0.24);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.ocean-clear-scene__title {
+    margin: 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(3.2rem, 16vw, 6rem);
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+}
+
+.ocean-clear-scene__text {
+    margin: 22px 0 0;
+
+    color: rgba(255, 255, 255, 0.82);
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: 0.92rem;
+    line-height: 2;
+}
+
+.paper-plane-button {
+    appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-width: 170px;
+    min-height: 50px;
+
+    margin-top: 36px;
+
+    border: 1px solid rgba(255, 255, 255, 0.52);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+
+    font-size: 0.88rem;
+    letter-spacing: 0.09em;
+
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.paper-plane-button span {
+    display: inline-block;
+    transform: rotate(-18deg);
+}
+
+.paper-plane-button:active {
+    transform: scale(0.97);
+}
+
+
+@media (max-width: 380px) {
+    .wave-puzzle__marks {
+        gap: 9px 5px;
+    }
+
+    .answer-form {
+        grid-template-columns: 1fr;
+    }
+
+    .answer-form__submit {
+        width: 100%;
+    }
+}
