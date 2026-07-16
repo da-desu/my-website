@@ -1,183 +1,109 @@
 /*
 ============================================================
 puzzle.js
-Version 0.3
+Version 0.3.1 修正版
 
-役割
-・第一問の画像選択
-・選択状態の管理
-・正解判定
-・正解後のシーン遷移
-
-後から別の謎を追加する際も、このファイルへまとめます。
+修正内容
+・puzzle.js単独でDOMContentLoaded時に初期化
+・イベント委譲でタップを確実に取得
+・iPhone Safariのタッチ操作に対応
 ============================================================
 */
 
-
 "use strict";
 
-
-/* =========================================================
-   1. 第一問の状態
-   ========================================================= */
-
 let isStage1Clearing = false;
+let stage1PuzzleInitialized = false;
 
 
 /* =========================================================
-   2. 画像タイル選択
+   メッセージ
    ========================================================= */
 
-/**
- * 桜画像の選択状態を切り替えます。
- *
- * @param {HTMLButtonElement} tile
- */
-function toggleSakuraTile(tile) {
-
-    if (
-        !tile ||
-        isStage1Clearing
-    ) {
-        return;
-    }
-
-    const isSelected =
-        tile.classList.toggle("is-selected");
-
-    tile.setAttribute(
-        "aria-pressed",
-        String(isSelected)
-    );
-
-    /*
-        選択を変更したら、前回のエラーメッセージを消します。
-    */
-    setStage1Message("", "");
-}
-
-
-/* =========================================================
-   3. メッセージ表示
-   ========================================================= */
-
-/**
- * 第一問のメッセージを表示します。
- *
- * @param {string} text
- * @param {string} type "error" / "success" / ""
- */
-function setStage1Message(
-    text,
-    type
-) {
-    const message =
-        document.getElementById(
-            "stage1Message"
-        );
+function setStage1Message(text, type) {
+    const message = document.getElementById("stage1Message");
 
     if (!message) {
         return;
     }
 
     message.textContent = text;
-
-    message.classList.remove(
-        "is-error",
-        "is-success"
-    );
+    message.classList.remove("is-error", "is-success");
 
     if (type === "error") {
-        message.classList.add(
-            "is-error"
-        );
+        message.classList.add("is-error");
     }
 
     if (type === "success") {
-        message.classList.add(
-            "is-success"
-        );
+        message.classList.add("is-success");
     }
 }
 
 
 /* =========================================================
-   4. 正解判定
+   選択処理
+   ========================================================= */
+
+function toggleSakuraTile(tile) {
+    if (!tile || isStage1Clearing) {
+        return;
+    }
+
+    const selected = tile.classList.toggle("is-selected");
+
+    tile.setAttribute(
+        "aria-pressed",
+        selected ? "true" : "false"
+    );
+
+    setStage1Message("", "");
+}
+
+
+/* =========================================================
+   正解判定
    ========================================================= */
 
 async function verifyStage1Answer() {
-
     if (isStage1Clearing) {
         return;
     }
 
     const tiles = Array.from(
-        document.querySelectorAll(
-            "#sakuraGrid .sakura-tile"
-        )
+        document.querySelectorAll("#sakuraGrid .sakura-tile")
     );
 
     const verifyButton =
-        document.getElementById(
-            "stage1VerifyButton"
-        );
+        document.getElementById("stage1VerifyButton");
 
-    if (
-        tiles.length === 0 ||
-        !verifyButton
-    ) {
+    if (!tiles.length || !verifyButton) {
+        setStage1Message(
+            "読み込みに失敗しました。ページを再読み込みしてください。",
+            "error"
+        );
         return;
     }
 
-    const selectedTiles =
-        tiles.filter(function (tile) {
-            return tile.classList.contains(
-                "is-selected"
-            );
-        });
+    const selectedCount = tiles.filter(function (tile) {
+        return tile.classList.contains("is-selected");
+    }).length;
 
-
-    /*
-        1枚も選ばれていない場合
-    */
-    if (selectedTiles.length === 0) {
+    if (selectedCount === 0) {
         setStage1Message(
             "画像を選択してください。",
             "error"
         );
-
         return;
     }
 
-
-    /*
-        今回は16枚すべてがソメイヨシノです。
-        すべて選択されているか確認します。
-    */
-    const allCorrect =
-        tiles.every(function (tile) {
-            return (
-                tile.dataset.correct === "true" &&
-                tile.classList.contains(
-                    "is-selected"
-                )
-            );
-        });
-
-
-    if (!allCorrect) {
+    if (selectedCount !== tiles.length) {
         setStage1Message(
             "まだ選ばれていない桜があるようだ。",
             "error"
         );
-
         return;
     }
 
-
-    /*
-        正解処理
-    */
     isStage1Clearing = true;
     verifyButton.disabled = true;
 
@@ -186,20 +112,13 @@ async function verifyStage1Answer() {
         "success"
     );
 
-    /*
-        既存のセーブ機能が読み込まれている場合のみ記録します。
-        読み込まれていなくてもゲームは止まりません。
-    */
-    if (
-        typeof window.clearStage ===
-        "function"
-    ) {
+    if (typeof window.clearStage === "function") {
         window.clearStage(1);
     }
 
-    await wait(700);
+    await window.wait(700);
 
-    await SceneManager.changeScene(
+    await window.SceneManager.changeScene(
         "stage1-clear",
         {
             fadeOutTime: 720,
@@ -213,85 +132,100 @@ async function verifyStage1Answer() {
 
 
 /* =========================================================
-   5. 第一問の初期化
+   初期化
+   ========================================================= */
+
+function initializePuzzles() {
+    if (stage1PuzzleInitialized) {
+        return;
+    }
+
+    const grid = document.getElementById("sakuraGrid");
+    const verifyButton =
+        document.getElementById("stage1VerifyButton");
+
+    if (!grid || !verifyButton) {
+        console.error(
+            "Stage1 puzzle elements were not found."
+        );
+        return;
+    }
+
+    /*
+        個々のボタンではなく、グリッド全体でクリックを受けます。
+        Safariでも安定して反応します。
+    */
+    grid.addEventListener("click", function (event) {
+        const tile = event.target.closest(".sakura-tile");
+
+        if (!tile || !grid.contains(tile)) {
+            return;
+        }
+
+        event.preventDefault();
+        toggleSakuraTile(tile);
+    });
+
+    /*
+        touchendでも反応を補助します。
+        clickと二重発火しないよう、touch時はpreventDefaultします。
+    */
+    grid.addEventListener(
+        "touchend",
+        function (event) {
+            const tile = event.target.closest(".sakura-tile");
+
+            if (!tile || !grid.contains(tile)) {
+                return;
+            }
+
+            event.preventDefault();
+            toggleSakuraTile(tile);
+        },
+        { passive: false }
+    );
+
+    verifyButton.addEventListener(
+        "click",
+        verifyStage1Answer
+    );
+
+    stage1PuzzleInitialized = true;
+}
+
+
+/* =========================================================
+   リセット
    ========================================================= */
 
 function resetStage1Puzzle() {
-
-    const tiles =
-        document.querySelectorAll(
-            "#sakuraGrid .sakura-tile"
-        );
+    document
+        .querySelectorAll("#sakuraGrid .sakura-tile")
+        .forEach(function (tile) {
+            tile.classList.remove("is-selected");
+            tile.setAttribute("aria-pressed", "false");
+        });
 
     const verifyButton =
-        document.getElementById(
-            "stage1VerifyButton"
-        );
-
-    tiles.forEach(function (tile) {
-        tile.classList.remove(
-            "is-selected"
-        );
-
-        tile.setAttribute(
-            "aria-pressed",
-            "false"
-        );
-    });
+        document.getElementById("stage1VerifyButton");
 
     if (verifyButton) {
         verifyButton.disabled = false;
     }
 
     setStage1Message("", "");
-
     isStage1Clearing = false;
 }
 
 
 /* =========================================================
-   6. イベント登録
+   自動初期化
    ========================================================= */
 
-function initializePuzzles() {
+document.addEventListener(
+    "DOMContentLoaded",
+    initializePuzzles
+);
 
-    const tiles =
-        document.querySelectorAll(
-            "#sakuraGrid .sakura-tile"
-        );
-
-    const verifyButton =
-        document.getElementById(
-            "stage1VerifyButton"
-        );
-
-    tiles.forEach(function (tile) {
-
-        tile.addEventListener(
-            "click",
-            function () {
-                toggleSakuraTile(tile);
-            }
-        );
-
-    });
-
-    if (verifyButton) {
-        verifyButton.addEventListener(
-            "click",
-            verifyStage1Answer
-        );
-    }
-
-}
-
-
-/* =========================================================
-   7. 他ファイルから使用できるように公開
-   ========================================================= */
-
-window.initializePuzzles =
-    initializePuzzles;
-
-window.resetStage1Puzzle =
-    resetStage1Puzzle;
+window.initializePuzzles = initializePuzzles;
+window.resetStage1Puzzle = resetStage1Puzzle;
