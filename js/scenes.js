@@ -664,6 +664,11 @@ function initializeScenes() {
             "stage2ContinueButton"
         );
 
+    const stage3ContinueButton =
+        document.getElementById(
+            "stage3ContinueButton"
+        );
+
     if (stage1ContinueButton) {
         stage1ContinueButton.addEventListener(
             "click",
@@ -731,7 +736,9 @@ function getResumeSceneLabel(sceneName) {
         "stage1-clear": "満開の桜の前",
         stage2: "第二問",
         "stage2-clear": "海を見つけた場面",
-        stage3: "第三問"
+        stage3: "第三問",
+        "stage3-clear": "寿司屋への地図を入手した場面",
+        stage4: "第四問"
     };
 
     return labels[sceneName] || "前回の続き";
@@ -825,6 +832,10 @@ async function continueSavedGame() {
     ) {
         window.resetStage2Puzzle();
     }
+
+    if (sceneName === "stage3" && typeof window.resetStage3Puzzle === "function") {
+        window.resetStage3Puzzle();
+    }
 }
 
 
@@ -855,6 +866,10 @@ async function restartGameFromBeginning() {
         "function"
     ) {
         window.resetStage2Puzzle();
+    }
+
+    if (typeof window.resetStage3Puzzle === "function") {
+        window.resetStage3Puzzle();
     }
 
     await SceneManager.changeScene(
@@ -896,6 +911,10 @@ function initializeStage2ContinueButton() {
 
         button.disabled = true;
 
+        if (typeof window.resetStage3Puzzle === "function") {
+            window.resetStage3Puzzle();
+        }
+
         await SceneManager.changeScene(
             "stage3",
             {
@@ -919,3 +938,7 @@ if (document.readyState === "loading") {
 } else {
     initializeStage2ContinueButton();
 }
+
+/* Version 0.7 map modal */
+function initializeMapControls(){const modal=document.getElementById("mapModal");document.getElementById("openMapButton")?.addEventListener("click",()=>{modal.hidden=false});document.getElementById("closeMapButton")?.addEventListener("click",()=>{modal.hidden=true});document.getElementById("mapModalBackdrop")?.addEventListener("click",()=>{modal.hidden=true})}
+document.addEventListener("DOMContentLoaded",initializeMapControls);
