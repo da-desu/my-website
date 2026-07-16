@@ -436,7 +436,7 @@
 
 
         <!-- =======================================================
-             STAGE2仮画面
+             STAGE2：海の一枚謎
         ======================================================== -->
         <section
             id="scene-stage2"
@@ -445,17 +445,187 @@
             aria-labelledby="stage2-title"
             hidden
         >
-            <div class="scene__inner stage-placeholder__inner">
+            <div class="scene__inner stage2-scene__inner">
 
                 <p class="scene-label">
-                    STAGE 2
+                    第二問
                 </p>
 
                 <h1
                     id="stage2-title"
+                    class="stage2-scene__title"
+                >
+                    波の向こうにあるもの
+                </h1>
+
+                <p class="stage2-scene__lead">
+                    前と後ろ。<br>
+                    隠れている半分を見つけよう。
+                </p>
+
+
+                <!--
+                    12個の印と、前後2層の波を使った一枚謎です。
+                    4番目と6番目が波に半分隠れています。
+                -->
+                <div
+                    class="wave-puzzle"
+                    role="img"
+                    aria-label="12個の印のうち、4番目と6番目が波に半分隠れている図"
+                >
+                    <div class="wave-puzzle__sky" aria-hidden="true"></div>
+
+                    <div class="wave-puzzle__marks" aria-hidden="true">
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span class="is-hidden-mark">4</span>
+                        <span>5</span>
+                        <span class="is-hidden-mark">6</span>
+                        <span>7</span>
+                        <span>8</span>
+                        <span>9</span>
+                        <span>10</span>
+                        <span>11</span>
+                        <span>12</span>
+                    </div>
+
+                    <div class="wave-puzzle__back-wave" aria-hidden="true"></div>
+                    <div class="wave-puzzle__front-wave" aria-hidden="true"></div>
+
+                    <p class="wave-puzzle__caption">
+                        4 / 12　・　6 / 12
+                    </p>
+                </div>
+
+
+                <form
+                    id="stage2Form"
+                    class="answer-form"
+                    novalidate
+                >
+                    <label
+                        class="answer-form__label"
+                        for="stage2Answer"
+                    >
+                        答えを入力
+                    </label>
+
+                    <input
+                        id="stage2Answer"
+                        class="answer-form__input"
+                        type="text"
+                        inputmode="text"
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        maxlength="12"
+                        placeholder="ひらがな・漢字"
+                    >
+
+                    <button
+                        id="stage2SubmitButton"
+                        class="answer-form__submit"
+                        type="submit"
+                    >
+                        送信
+                    </button>
+                </form>
+
+
+                <p
+                    id="stage2Message"
+                    class="stage2-message"
+                    aria-live="polite"
+                ></p>
+
+
+                <button
+                    id="stage2HintButton"
+                    class="hint-button"
+                    type="button"
+                >
+                    ヒントを見る
+                </button>
+
+                <p
+                    id="stage2Hint"
+                    class="stage2-hint"
+                    hidden
+                >
+                    4番目と6番目。<br>
+                    それぞれの「半分」に注目しよう。
+                </p>
+
+            </div>
+        </section>
+
+
+        <!-- =======================================================
+             STAGE2正解後
+        ======================================================== -->
+        <section
+            id="scene-stage2-clear"
+            class="scene ocean-clear-scene"
+            data-scene="stage2-clear"
+            aria-labelledby="stage2-clear-title"
+            hidden
+        >
+            <div class="ocean-clear-scene__sun" aria-hidden="true"></div>
+            <div class="ocean-clear-scene__water" aria-hidden="true"></div>
+
+            <div class="scene__inner ocean-clear-scene__inner">
+
+                <p class="scene-label">
+                    正解
+                </p>
+
+                <h1
+                    id="stage2-clear-title"
+                    class="ocean-clear-scene__title"
+                >
+                    海
+                </h1>
+
+                <p class="ocean-clear-scene__text">
+                    見えていなかった半分が、<br>
+                    ひとつの景色になった。
+                </p>
+
+                <button
+                    id="stage2ContinueButton"
+                    class="paper-plane-button"
+                    type="button"
+                >
+                    <span aria-hidden="true">➤</span>
+                    次へ進む
+                </button>
+
+            </div>
+        </section>
+
+
+        <!-- =======================================================
+             STAGE3仮画面
+        ======================================================== -->
+        <section
+            id="scene-stage3"
+            class="scene"
+            data-scene="stage3"
+            aria-labelledby="stage3-title"
+            hidden
+        >
+            <div class="scene__inner stage-placeholder__inner">
+
+                <p class="scene-label">
+                    STAGE 3
+                </p>
+
+                <h1
+                    id="stage3-title"
                     class="stage-placeholder__title"
                 >
-                    第二問は、次のVersionで実装します。
+                    第三問は、次のVersionで実装します。
                 </h1>
 
                 <button
