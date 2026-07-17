@@ -84,9 +84,11 @@ async function verifyStage1Answer() {
         return;
     }
 
-    const selectedCount = tiles.filter(function (tile) {
+    const selectedTiles = tiles.filter(function (tile) {
         return tile.classList.contains("is-selected");
-    }).length;
+    });
+
+    const selectedCount = selectedTiles.length;
 
     if (selectedCount === 0) {
         setStage1Message(
@@ -96,7 +98,17 @@ async function verifyStage1Answer() {
         return;
     }
 
-    if (selectedCount !== tiles.length) {
+    const correctTiles = tiles.filter(function (tile) {
+        return tile.dataset.correct === "true";
+    });
+
+    const isCorrect =
+        selectedCount === correctTiles.length &&
+        correctTiles.every(function (tile) {
+            return tile.classList.contains("is-selected");
+        });
+
+    if (!isCorrect) {
         setStage1Message(
             "何かが違うようだ。",
             "error"
@@ -235,7 +247,6 @@ window.resetStage1Puzzle = resetStage1Puzzle;
    8. 第二問「海」
    ========================================================= */
 
-let stage2WrongCount = 0;
 let isStage2Clearing = false;
 
 
@@ -318,26 +329,12 @@ async function verifyStage2Answer(event) {
     ];
 
     if (!correctAnswers.includes(answer)) {
-        stage2WrongCount += 1;
-
         setStage2Message(
             "違うようだ。もう一度、波の前後を見てみよう。",
             "error"
         );
 
         input.select();
-
-        if (stage2WrongCount >= 2) {
-            const hintButton =
-                document.getElementById(
-                    "stage2HintButton"
-                );
-
-            if (hintButton) {
-                hintButton.textContent =
-                    "ヒントを見る";
-            }
-        }
 
         return;
     }
@@ -373,28 +370,6 @@ async function verifyStage2Answer(event) {
 }
 
 
-function toggleStage2Hint() {
-    const hint =
-        document.getElementById("stage2Hint");
-
-    const button =
-        document.getElementById(
-            "stage2HintButton"
-        );
-
-    if (!hint || !button) {
-        return;
-    }
-
-    hint.hidden = !hint.hidden;
-
-    button.textContent =
-        hint.hidden
-            ? "ヒントを見る"
-            : "ヒントを閉じる";
-}
-
-
 function resetStage2Puzzle() {
     const input =
         document.getElementById("stage2Answer");
@@ -402,14 +377,6 @@ function resetStage2Puzzle() {
     const submitButton =
         document.getElementById(
             "stage2SubmitButton"
-        );
-
-    const hint =
-        document.getElementById("stage2Hint");
-
-    const hintButton =
-        document.getElementById(
-            "stage2HintButton"
         );
 
     if (input) {
@@ -421,18 +388,8 @@ function resetStage2Puzzle() {
         submitButton.disabled = false;
     }
 
-    if (hint) {
-        hint.hidden = true;
-    }
-
-    if (hintButton) {
-        hintButton.textContent =
-            "ヒントを見る";
-    }
-
     setStage2Message("", "");
 
-    stage2WrongCount = 0;
     isStage2Clearing = false;
 }
 
@@ -452,11 +409,6 @@ function initializeAllPuzzles() {
     const stage2Form =
         document.getElementById("stage2Form");
 
-    const hintButton =
-        document.getElementById(
-            "stage2HintButton"
-        );
-
     if (
         stage2Form &&
         !stage2Form.dataset.initialized
@@ -467,19 +419,6 @@ function initializeAllPuzzles() {
         );
 
         stage2Form.dataset.initialized =
-            "true";
-    }
-
-    if (
-        hintButton &&
-        !hintButton.dataset.initialized
-    ) {
-        hintButton.addEventListener(
-            "click",
-            toggleStage2Hint
-        );
-
-        hintButton.dataset.initialized =
             "true";
     }
 }
@@ -508,15 +447,22 @@ const Stage4Controller={
     completed:false,
     timer:null,
     waitMs:10000,
+    pinchStartDistance:null,
+    pinchTriggered:false,
+    pinchStartedAcrossSides:false,
 
-    el(id){return document.getElementById(id)},
+    el(id){return document.getElementById(id);},
 
     setStatus(id,text,type=""){
-        const el=this.el(id);
-        if(!el)return;
-        el.textContent=text;
-        el.classList.remove("is-error","is-success");
-        if(type)el.classList.add("is-"+type);
+        const target=this.el(id);
+        if(!target)return;
+        target.textContent=text;
+        target.classList.remove("is-error","is-success");
+        if(type){target.classList.add(type==="error"?"is-error":"is-success");}
+    },
+
+    getTouchDistance(t1,t2){
+        return Math.hypot(t1.clientX-t2.clientX,t1.clientY-t2.clientY);
     },
 
     stopTimer(){
@@ -543,9 +489,7 @@ const Stage4Controller={
     async fold(){
         if(this.folded||this.completed)return;
         this.folded=true;
-        this.el("stage4FoldButton").disabled=true;
         this.el("stage4FoldMap")?.classList.add("is-folded");
-        this.el("stage4DoorWord")?.classList.add("is-read-as-one");
         this.setStatus("stage4MapMessage","NOW  HERE が、NOWHERE に見える。","success");
         window.saveStage4State?.({folded:true});
         await window.wait(1050);
@@ -553,6 +497,60 @@ const Stage4Controller={
         if(panel)panel.hidden=false;
         this.setStatus("stage4ChoiceMessage","よく考えて選ぼう。");
         this.startTimer();
+    },
+
+    handleTouchStart(event){
+        if(this.folded||this.completed)return;
+        if(event.touches.length!==2)return;
+
+        const map=this.el("stage4FoldMap");
+        if(!map)return;
+
+        const rect=map.getBoundingClientRect();
+        const centerX=rect.left+(rect.width/2);
+        const first=event.touches[0];
+        const second=event.touches[1];
+        const leftTouch=first.clientX<=second.clientX?first:second;
+        const rightTouch=leftTouch===first?second:first;
+
+        this.pinchStartedAcrossSides=
+            leftTouch.clientX<centerX &&
+            rightTouch.clientX>centerX;
+
+        if(!this.pinchStartedAcrossSides){
+            this.pinchStartDistance=null;
+            return;
+        }
+
+        this.pinchStartDistance=this.getTouchDistance(leftTouch,rightTouch);
+        this.pinchTriggered=false;
+    },
+
+    handleTouchMove(event){
+        if(this.folded||this.completed)return;
+        if(
+            event.touches.length!==2 ||
+            this.pinchStartDistance===null ||
+            !this.pinchStartedAcrossSides
+        )return;
+
+        event.preventDefault();
+
+        const current=this.getTouchDistance(event.touches[0],event.touches[1]);
+        const delta=this.pinchStartDistance-current;
+
+        if(delta>=42&&!this.pinchTriggered){
+            this.pinchTriggered=true;
+            this.fold();
+        }
+    },
+
+    handleTouchEnd(){
+        if(!this.folded){
+            this.pinchStartDistance=null;
+            this.pinchTriggered=false;
+            this.pinchStartedAcrossSides=false;
+        }
     },
 
     choose(){
@@ -579,15 +577,16 @@ const Stage4Controller={
         this.stopTimer();
         this.folded=false;
         this.completed=false;
+        this.pinchStartDistance=null;
+        this.pinchTriggered=false;
+        this.pinchStartedAcrossSides=false;
         this.el("stage4FoldMap")?.classList.remove("is-folded");
         this.el("stage4DoorWord")?.classList.remove("is-read-as-one");
         this.el("stage4Door")?.classList.remove("is-open");
-        const foldButton=this.el("stage4FoldButton");
-        if(foldButton)foldButton.disabled=false;
         const choice=this.el("stage4ChoicePanel");
         if(choice)choice.hidden=true;
         document.querySelectorAll(".stage4-choice-button").forEach(b=>b.disabled=false);
-        this.setStatus("stage4MapMessage","地図には、うっすらと折り目がついている。");
+        this.setStatus("stage4MapMessage","地図を左右から二本の指でつまんでみよう。");
         this.setStatus("stage4ChoiceMessage","よく考えて選ぼう。");
         if(!preserveSave)window.resetStage4State?.();
     },
@@ -597,9 +596,7 @@ const Stage4Controller={
         const state=window.getStage4State?.()||{};
         if(state.folded){
             this.folded=true;
-            this.el("stage4FoldButton").disabled=true;
             this.el("stage4FoldMap")?.classList.add("is-folded");
-            this.el("stage4DoorWord")?.classList.add("is-read-as-one");
             this.setStatus("stage4MapMessage","NOW  HERE が、NOWHERE に見える。","success");
             const panel=this.el("stage4ChoicePanel");
             if(panel)panel.hidden=false;
@@ -615,7 +612,11 @@ const Stage4Controller={
 
     init(){
         if(this.initialized)return;
-        this.el("stage4FoldButton")?.addEventListener("click",()=>this.fold());
+        const map=this.el("stage4FoldMap");
+        map?.addEventListener("touchstart",(e)=>this.handleTouchStart(e),{passive:true});
+        map?.addEventListener("touchmove",(e)=>this.handleTouchMove(e),{passive:false});
+        map?.addEventListener("touchend",()=>this.handleTouchEnd());
+        map?.addEventListener("touchcancel",()=>this.handleTouchEnd());
         document.querySelectorAll(".stage4-choice-button").forEach(b=>b.addEventListener("click",()=>this.choose()));
         this.initialized=true;
     }
