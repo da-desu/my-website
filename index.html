@@ -223,14 +223,6 @@
                                 ></span>
                             </div>
 
-                            <p
-                                id="letterCreaseObservation"
-                                class="letter-crease-observation"
-                                hidden
-                            >
-                                左端に、かすかな折り目が見える。
-                            </p>
-
                             <!--
                                 左下から操作を始めるための透明な領域。
                                 見た目は折り目だけが残ります。
@@ -256,9 +248,6 @@
                             class="letter-flip-card__face letter-flip-card__back"
                             aria-label="手紙の裏"
                         >
-                            <p class="letter-card__eyebrow">
-                                裏面
-                            </p>
 
                             <p class="letter-back-message">
                                 裏側を知りたくなった君なら、<br>
@@ -387,8 +376,7 @@
 
 
                     <!--
-                        全16マスが正解です。
-                        見た目が異なっても、すべて同じソメイヨシノです。
+                        16枚のうち、完全に同じ構図の2枚だけが正解です。
                     -->
                     <div
                         id="sakuraGrid"
@@ -397,12 +385,12 @@
                         aria-label="ソメイヨシノの画像選択"
                     >
 
-                        <button class="sakura-tile sakura-tile--01" type="button" data-correct="true" aria-pressed="false" aria-label="画像1">
+                        <button class="sakura-tile sakura-tile--01" type="button" data-correct="false" aria-pressed="false" aria-label="画像1">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--02" type="button" data-correct="true" aria-pressed="false" aria-label="画像2">
+                        <button class="sakura-tile sakura-tile--02" type="button" data-correct="false" aria-pressed="false" aria-label="画像2">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
@@ -412,52 +400,52 @@
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--04" type="button" data-correct="true" aria-pressed="false" aria-label="画像4">
+                        <button class="sakura-tile sakura-tile--04" type="button" data-correct="false" aria-pressed="false" aria-label="画像4">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--05" type="button" data-correct="true" aria-pressed="false" aria-label="画像5">
+                        <button class="sakura-tile sakura-tile--05" type="button" data-correct="false" aria-pressed="false" aria-label="画像5">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--06" type="button" data-correct="true" aria-pressed="false" aria-label="画像6">
+                        <button class="sakura-tile sakura-tile--06" type="button" data-correct="false" aria-pressed="false" aria-label="画像6">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--07" type="button" data-correct="true" aria-pressed="false" aria-label="画像7">
+                        <button class="sakura-tile sakura-tile--07" type="button" data-correct="false" aria-pressed="false" aria-label="画像7">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--08" type="button" data-correct="true" aria-pressed="false" aria-label="画像8">
+                        <button class="sakura-tile sakura-tile--08" type="button" data-correct="false" aria-pressed="false" aria-label="画像8">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--09" type="button" data-correct="true" aria-pressed="false" aria-label="画像9">
+                        <button class="sakura-tile sakura-tile--09" type="button" data-correct="false" aria-pressed="false" aria-label="画像9">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--10" type="button" data-correct="true" aria-pressed="false" aria-label="画像10">
+                        <button class="sakura-tile sakura-tile--10" type="button" data-correct="false" aria-pressed="false" aria-label="画像10">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--11" type="button" data-correct="true" aria-pressed="false" aria-label="画像11">
+                        <button class="sakura-tile sakura-tile--11" type="button" data-correct="false" aria-pressed="false" aria-label="画像11">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--12" type="button" data-correct="true" aria-pressed="false" aria-label="画像12">
+                        <button class="sakura-tile sakura-tile--12" type="button" data-correct="false" aria-pressed="false" aria-label="画像12">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--13" type="button" data-correct="true" aria-pressed="false" aria-label="画像13">
+                        <button class="sakura-tile sakura-tile--13" type="button" data-correct="false" aria-pressed="false" aria-label="画像13">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
@@ -467,12 +455,12 @@
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--15" type="button" data-correct="true" aria-pressed="false" aria-label="画像15">
+                        <button class="sakura-tile sakura-tile--15" type="button" data-correct="false" aria-pressed="false" aria-label="画像15">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
 
-                        <button class="sakura-tile sakura-tile--16" type="button" data-correct="true" aria-pressed="false" aria-label="画像16">
+                        <button class="sakura-tile sakura-tile--16" type="button" data-correct="false" aria-pressed="false" aria-label="画像16">
                             <span class="sakura-tile__image" aria-hidden="true">✿</span>
                             <span class="sakura-tile__check" aria-hidden="true">✓</span>
                         </button>
@@ -542,24 +530,20 @@
                     全てクローンであるとか…。
                 </p>
 
-                <button
-                    id="stage1ChildButton"
-                    class="stage1-child-spot"
-                    type="button"
-                    aria-label="桜の木の下でお絵かきをしている子どもに話しかける"
-                >
-                    <span class="stage1-child-spot__tree stage1-child-spot__tree--left" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__tree stage1-child-spot__tree--right" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__ground" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__mat" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__drawing drawing-line--red" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__drawing drawing-line--blue" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__child stage1-child-spot__child--left" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__child stage1-child-spot__child--right" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__pen stage1-child-spot__pen--red" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__pen stage1-child-spot__pen--blue" aria-hidden="true"></span>
-                    <span class="stage1-child-spot__speech">タップして話しかける</span>
-                </button>
+                <div class="stage1-clear-photo">
+                    <img
+                        class="stage1-clear-photo__image"
+                        src="img/stage1/child_scene.png"
+                        alt="満開の桜の木の下で、女の子が赤いペンと青いペンを使って絵を描いている"
+                    >
+
+                    <button
+                        id="stage1ChildButton"
+                        class="stage1-child-hotspot"
+                        type="button"
+                        aria-label="桜の木の下で絵を描いている女の子に話しかける"
+                    ></button>
+                </div>
 
                 <div id="stage1PensReward" class="stage1-pens-reward" hidden>
                     <div class="stage1-pens-reward__dialog">
@@ -615,8 +599,8 @@
                 </h1>
 
                 <p class="stage2-scene__lead">
-                    前と後ろ。<br>
-                    隠れている半分を見つけよう。
+                    桜の木の向こうには、<br>
+                    青い世界が広がっていた。
                 </p>
 
 
@@ -699,24 +683,6 @@
                     class="stage2-message"
                     aria-live="polite"
                 ></p>
-
-
-                <button
-                    id="stage2HintButton"
-                    class="hint-button"
-                    type="button"
-                >
-                    ヒントを見る
-                </button>
-
-                <p
-                    id="stage2Hint"
-                    class="stage2-hint"
-                    hidden
-                >
-                    波は二つある。<br>
-                    手前と奥を、別々に読もう。
-                </p>
 
             </div>
         </section>
@@ -870,9 +836,7 @@
                             <div id="stage4Door" class="stage4-door">
                                 <div class="stage4-door__inner-line"></div>
                                 <div class="stage4-door__handle"></div>
-                                <div id="stage4DoorWord" class="stage4-door__word">
-                                    <span>NOW</span><span>HERE</span>
-                                </div>
+                                <div id="stage4DoorWord" class="stage4-door__word stage4-door__word--hidden" aria-hidden="true"></div>
                             </div>
                             <div class="stage4-interior" aria-hidden="true">いらっしゃい。</div>
                         </div>
@@ -882,23 +846,25 @@
                 <section class="stage4-map-panel" aria-labelledby="stage4-map-title">
                     <h2 id="stage4-map-title" class="stage4-map-panel__title">寿司屋への地図</h2>
 
-                    <div id="stage4FoldMap" class="stage4-fold-map" role="application" aria-label="中央に折り目のある地図">
-                        <div class="stage4-fold-map__paper">
-                            <span class="stage4-fold-map__sea">海</span>
-                            <span class="stage4-fold-map__shop">寿司屋</span>
-                            <span class="stage4-fold-map__route"></span>
-
-                            <div id="stage4MapWord" class="stage4-fold-map__word">
-                                <span>NOW</span><span>HERE</span>
-                            </div>
-
-                            <div class="stage4-fold-map__crease"></div>
-                            <div class="stage4-fold-map__right-half"></div>
+                    <div
+                        id="stage4FoldMap"
+                        class="stage4-fold-map stage4-fold-map--pinch"
+                        role="application"
+                        aria-label="左右から二本の指で地図をつまむと変化する地図"
+                    >
+                        <div id="stage4MapPaper" class="map-item-card__paper stage4-map-paper" aria-hidden="true">
+                            <span class="map-item-card__route"></span>
+                            <span class="map-item-card__start">海</span>
+                            <span class="map-item-card__goal">寿司屋</span>
+                            <span class="map-item-card__now">NOW</span>
+                            <span class="map-item-card__here">HERE</span>
+                            <span class="map-item-card__fold-line"></span>
+                            <span class="stage4-map-paper__left-half"></span>
+                            <span class="stage4-map-paper__right-half"></span>
                         </div>
                     </div>
 
-                    <p id="stage4MapMessage" class="stage4-status" aria-live="polite">地図には、うっすらと折り目がついている。</p>
-                    <button id="stage4FoldButton" class="sub-button" type="button">地図を折る</button>
+                    <p id="stage4MapMessage" class="stage4-status" aria-live="polite">地図を左右から二本の指でつまんでみよう。</p>
                 </section>
 
                 <section id="stage4ChoicePanel" class="stage4-choice-panel" hidden>
