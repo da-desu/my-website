@@ -2552,3 +2552,62 @@ button {
 /* END */
 .end-scene{overflow:hidden;background:radial-gradient(circle at 50% 38%,rgba(110,134,164,.14),transparent 36%),#030507}.end-scene__plane{position:absolute;right:13%;top:13%;color:rgba(255,255,255,.17);font-size:4rem;transform:rotate(-25deg)}.end-scene__inner{display:flex;flex-direction:column;align-items:center}.end-scene__small{margin:0;color:rgba(255,255,255,.32);font-size:.58rem;letter-spacing:.22em}.end-scene__title{margin:12px 0 0;font-family:"Times New Roman",serif;font-size:clamp(2.5rem,13vw,5rem);font-weight:400;letter-spacing:.08em}.end-scene__theme{margin:28px 0 0;font-family:"Yu Mincho",serif;font-size:clamp(1.3rem,6vw,2rem);line-height:1.9;letter-spacing:.08em}.end-scene__closing{margin:24px 0 0;color:rgba(255,255,255,.62);font-family:"Yu Mincho",serif;font-size:.84rem;line-height:2}.end-secret-badge{margin-top:24px;padding:11px 14px;border:1px solid rgba(195,200,203,.26);border-radius:10px;background:rgba(160,168,172,.07);color:rgba(230,233,234,.68);font-size:.72rem}.end-secret-badge span{display:block;margin-bottom:4px;color:rgba(230,233,234,.38);font-size:.56rem;letter-spacing:.16em}.end-scene__end{margin:30px 0 23px;color:rgba(255,255,255,.45);font-size:.72rem;letter-spacing:.35em}
 @media(max-width:410px){.final-purple-items{grid-template-columns:1fr}.final-purple-item p{min-height:auto}.final-statue{transform:scale(.9);margin-block:-15px}.final-panel{padding:17px}.final-mixer__tools{gap:8px}.final-pen{min-width:86px}.final-shadow-target{height:210px}}
+
+
+/* =========================================================
+   Version 0.10.1：紙飛行機を折った後のボタン修正
+   ========================================================= */
+
+/*
+    スマートフォンでは内容が画面の高さを超えるため、
+    最終手紙シーンだけ縦スクロールを許可します。
+*/
+.final-silence-scene {
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    place-items: start center;
+
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+}
+
+.final-silence-scene__inner {
+    min-height: 100%;
+
+    padding-top:
+        max(28px, env(safe-area-inset-top));
+
+    padding-bottom:
+        max(72px, env(safe-area-inset-bottom));
+}
+
+/*
+    折った手紙の装飾が、下に現れるボタンのタップを
+    受け取らないようにします。
+*/
+.final-letter,
+.final-letter * {
+    pointer-events: none;
+}
+
+#foldFinalLetterButton {
+    margin-top: 24px;
+}
+
+/*
+    hidden解除後の「窓辺へ」を確実に前面表示します。
+*/
+#goToWindowButton:not([hidden]) {
+    position: relative;
+    z-index: 30;
+
+    display: inline-flex;
+
+    flex: 0 0 auto;
+
+    margin-top: 20px;
+
+    pointer-events: auto;
+    touch-action: manipulation;
+}
