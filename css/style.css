@@ -2401,3 +2401,121 @@ button {
 .stage4-wait-bar{width:100%;height:4px;margin-top:10px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}.stage4-wait-bar span{display:block;width:0;height:100%;background:rgba(255,255,255,.6)}.stage4-wait-bar.is-running span{animation:stage4-wait 10s linear forwards}@keyframes stage4-wait{to{width:100%}}
 .stage4-clear-scene{background:radial-gradient(circle at 50% 42%,rgba(255,204,124,.16),transparent 38%),linear-gradient(180deg,#241710,#090706)}.stage4-clear-scene__inner{display:flex;flex-direction:column;align-items:center}.stage4-clear-scene__title{margin:0;font-family:"Yu Mincho",serif;font-size:clamp(1.5rem,6vw,2.3rem);font-weight:500;letter-spacing:.1em}.stage4-clear-scene__text{margin:23px 0 0;color:rgba(255,255,255,.74);font-family:"Yu Mincho",serif;line-height:2}
 @media(max-width:410px){.stage4-street{grid-template-columns:92px 1fr;gap:10px}.stage4-ad{width:78px;font-size:.54rem}.stage4-map-panel,.stage4-choice-panel{padding:16px}}
+
+/* Version 0.9 Stage5 */
+.stage5-scene{overflow-y:auto;background:radial-gradient(circle at 50% 12%,rgba(255,210,140,.12),transparent 34%),linear-gradient(180deg,#2d1d16 0%,#17100d 64%,#090706 100%)}.stage5-counter{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg,#684433,#3d291f);border-top:6px solid #8b624b;pointer-events:none}.stage5-scene__inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding-block:20px 42px}.stage5-scene__title{margin:0;font-family:"Yu Mincho",serif;font-size:clamp(1.45rem,6vw,2.15rem);font-weight:500;letter-spacing:.1em}
+.chef-card{display:grid;grid-template-columns:92px 1fr;gap:15px;align-items:center;width:min(100%,430px);margin-top:24px}.chef-card__face{position:relative;width:86px;height:86px;border-radius:45% 45% 50% 50%;background:#d3a87e}.chef-card__headband{position:absolute;left:-5px;right:-5px;top:10px;height:17px;background:#eee7d8}.chef-card__eye{position:absolute;top:43%;width:8px;height:4px;border-radius:50%;background:#33231b}.chef-card__eye--left{left:27%}.chef-card__eye--right{right:27%}.chef-card__mouth{position:absolute;left:50%;bottom:22%;width:24px;height:10px;border-bottom:3px solid #4d2e23;border-radius:50%;transform:translateX(-50%)}.chef-card__speech{position:relative;padding:16px 18px;border-radius:14px;background:#f2ead9;color:#32261f;text-align:left}.chef-card__speech::before{content:"";position:absolute;left:-12px;top:34%;border-right:14px solid #f2ead9;border-top:9px solid transparent;border-bottom:9px solid transparent}.chef-card__speech p{margin:0;font-family:"Yu Mincho",serif;font-size:.92rem;line-height:1.8}
+.stage5-puzzle-card{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;width:min(100%,430px);margin-top:28px;padding:24px 18px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:rgba(255,255,255,.06)}.stage5-color{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;color:#fff;font-family:"Yu Mincho",serif;font-size:clamp(1rem,4.5vw,1.35rem);font-weight:700}.stage5-color--red{background:#bd3d3d}.stage5-color--blue{background:#315da9}.stage5-color--purple{background:linear-gradient(135deg,#bd3d3d 0 48%,#315da9 52% 100%)}.stage5-plus,.stage5-equals{color:rgba(255,255,255,.68);font-size:1.4rem}.stage5-voice-instruction{margin:22px 0 0;color:rgba(255,255,255,.74);font-family:"Yu Mincho",serif;font-size:.9rem;line-height:1.8}.stage5-voice-instruction strong{color:#fff;font-size:1.03rem}.stage5-answer-form{margin-top:22px}.stage5-message{min-height:1.8em;margin:14px 0 0;color:rgba(255,255,255,.68);font-size:.82rem}.stage5-message.is-error{color:#ffc6c6}.stage5-message.is-success{color:#cef0d3}
+.soy-sauce-scene{background:radial-gradient(circle at 50% 44%,rgba(215,155,84,.2),transparent 34%),linear-gradient(180deg,#201510,#080605)}.soy-sauce-scene__inner{display:flex;flex-direction:column;align-items:center}.soy-sauce-scene__title{margin:0;font-family:"Yu Mincho",serif;font-size:clamp(1.35rem,5.6vw,2rem);font-weight:500;line-height:1.9}.soy-sauce-item{width:min(100%,270px);margin-top:30px;padding:24px;border:1px solid rgba(255,255,255,.16);border-radius:15px;background:rgba(255,255,255,.06)}.soy-sauce-bottle{position:relative;width:95px;height:170px;margin:0 auto}.soy-sauce-bottle__cap{position:absolute;left:50%;top:0;width:38px;height:34px;border-radius:7px;background:#b73128;transform:translateX(-50%)}.soy-sauce-bottle__body{position:absolute;left:50%;top:27px;bottom:0;width:82px;border-radius:18px 18px 12px 12px;background:linear-gradient(90deg,#20120e,#4e261b 45%,#1c0f0c);transform:translateX(-50%)}.soy-sauce-bottle__label{position:absolute;left:50%;top:76px;z-index:2;width:66px;padding:10px 4px;background:#eee2c8;color:#3e241a;font-family:"Yu Mincho",serif;font-weight:700;transform:translateX(-50%)}.soy-sauce-item__name{margin:15px 0 0}.soy-sauce-scene__message{margin:20px 0 28px;color:rgba(255,255,255,.74)}
+
+
+/* =========================================================
+   Version 0.9.1：第五問 正式画像・隠し解
+   ========================================================= */
+
+.stage5-menu-puzzle {
+    width: min(100%, 560px);
+    margin: 28px 0 0;
+    border: 7px solid rgba(78, 48, 30, 0.92);
+    border-radius: 8px;
+    background: #d8c3a2;
+    box-shadow:
+        0 18px 46px rgba(0, 0, 0, 0.40),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.stage5-menu-puzzle__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #eee3ca;
+}
+
+.stage5-menu-puzzle__caption {
+    padding: 10px 14px;
+    background: rgba(64, 39, 27, 0.96);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.75rem;
+    line-height: 1.6;
+}
+
+.ibushigin-reward {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 15px;
+    align-items: center;
+    width: min(100%, 430px);
+    margin-top: 18px;
+    padding: 15px;
+    border: 1px solid rgba(220, 224, 226, 0.34);
+    border-radius: 13px;
+    background: linear-gradient(135deg, rgba(157, 163, 166, 0.17), rgba(43, 46, 48, 0.30));
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.28),
+        inset 0 0 18px rgba(255, 255, 255, 0.04);
+    text-align: left;
+    animation: ibushigin-reward-appear 600ms ease both;
+}
+
+.ibushigin-reward[hidden] { display: none; }
+
+@keyframes ibushigin-reward-appear {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ibushigin-reward__metal {
+    display: grid;
+    place-items: center;
+    width: 68px;
+    height: 68px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 12px;
+    background: linear-gradient(145deg, #4c5154 0%, #a8adaf 32%, #555a5c 58%, #c0c3c4 100%);
+    color: #24282a;
+    font-family: "Yu Mincho", serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
+    box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.24);
+}
+
+.ibushigin-reward__label,
+.ibushigin-reward__name,
+.ibushigin-reward__description { margin: 0; }
+
+.ibushigin-reward__label {
+    color: rgba(224, 228, 230, 0.56);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+}
+
+.ibushigin-reward__name {
+    margin-top: 4px;
+    color: #eef0f1;
+    font-family: "Yu Mincho", serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.10em;
+}
+
+.ibushigin-reward__description {
+    margin-top: 5px;
+    color: rgba(235, 237, 238, 0.67);
+    font-size: 0.75rem;
+}
+
+.stage5-puzzle-card { display: none; }
+
+.inventory-list__description {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.56);
+    font-size: 0.74rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 390px) {
+    .stage5-menu-puzzle { border-width: 5px; }
+    .ibushigin-reward { grid-template-columns: 60px 1fr; padding: 13px; }
+    .ibushigin-reward__metal { width: 56px; height: 56px; }
+}
