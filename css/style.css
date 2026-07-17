@@ -2611,3 +2611,453 @@ button {
     pointer-events: auto;
     touch-action: manipulation;
 }
+
+
+/* =========================================================
+   Version 0.11：導入ストーリー／手紙の裏面ギミック
+   ========================================================= */
+
+/* 長い導入文をスマートフォンでも最後まで読めるようにします。 */
+.intro-scene {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.intro-scene__inner {
+    display: grid;
+    place-items: center;
+
+    min-height: calc(100svh - 48px);
+    padding-block: 22px 44px;
+}
+
+
+/* ---------------------------------------------------------
+   ストーリーシート
+   --------------------------------------------------------- */
+.story-sheet {
+    position: relative;
+
+    width: min(100%, 590px);
+    padding:
+        clamp(28px, 6.5vw, 48px)
+        clamp(22px, 6vw, 44px);
+
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    border-radius: 3px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.055),
+            rgba(255, 255, 255, 0.012)
+        ),
+        #101010;
+
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.58),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+.story-sheet::before,
+.story-sheet::after {
+    content: "";
+
+    position: absolute;
+    left: 20px;
+    right: 20px;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.20),
+            transparent
+        );
+}
+
+.story-sheet::before {
+    top: 17px;
+}
+
+.story-sheet::after {
+    bottom: 17px;
+}
+
+.story-sheet.is-visible {
+    animation: story-sheet-appear 760ms ease forwards;
+}
+
+.story-sheet.is-leaving {
+    animation: story-sheet-leave 360ms ease forwards;
+}
+
+@keyframes story-sheet-appear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes story-sheet-leave {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-9px);
+    }
+}
+
+.story-sheet__label {
+    margin: 0 0 18px;
+
+    color: rgba(255, 255, 255, 0.42);
+
+    font-size: 0.65rem;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+}
+
+.story-sheet__title {
+    margin: 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(1.35rem, 5.5vw, 2rem);
+    font-weight: 500;
+    letter-spacing: 0.10em;
+    line-height: 1.75;
+}
+
+.story-sheet__body {
+    margin-top: 30px;
+
+    color: rgba(255, 255, 255, 0.78);
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(0.92rem, 3.7vw, 1.05rem);
+    line-height: 2.12;
+    letter-spacing: 0.035em;
+    text-align: left;
+}
+
+.story-sheet__body p {
+    margin: 0;
+}
+
+.story-sheet__body p + p {
+    margin-top: 1.35em;
+}
+
+.story-sheet__button {
+    margin-top: 40px;
+}
+
+.story-sheet__map-line {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+
+    margin-top: 30px;
+
+    color: rgba(255, 255, 255, 0.48);
+
+    font-size: 0.72rem;
+    letter-spacing: 0.10em;
+}
+
+.story-sheet__map-line i {
+    position: relative;
+
+    display: block;
+    height: 1px;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.34) 0 7px,
+            transparent 7px 13px
+        );
+}
+
+.story-sheet__map-line i::after {
+    content: "";
+
+    position: absolute;
+    right: -1px;
+    top: 50%;
+
+    border-left: 7px solid rgba(255, 255, 255, 0.34);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+
+    transform: translateY(-50%);
+}
+
+
+/* ---------------------------------------------------------
+   手紙の表裏
+   --------------------------------------------------------- */
+.letter-card.letter-flip-card {
+    width: min(100%, 590px);
+    padding: 0;
+
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+
+    perspective: 1500px;
+}
+
+.letter-card.letter-flip-card::before {
+    display: none;
+}
+
+.letter-flip-card__flipper {
+    position: relative;
+
+    display: grid;
+
+    width: 100%;
+
+    transform-style: preserve-3d;
+    transition:
+        transform 920ms cubic-bezier(0.22, 0.74, 0.22, 1),
+        filter 420ms ease;
+
+    transform:
+        rotateY(
+            calc(
+                var(--intro-peel-progress, 0)
+                * -18deg
+            )
+        );
+}
+
+.letter-flip-card.is-flipped .letter-flip-card__flipper {
+    transform: rotateY(180deg);
+}
+
+.letter-flip-card__face {
+    position: relative;
+    grid-area: 1 / 1;
+
+    width: 100%;
+    min-height: 100%;
+
+    padding:
+        clamp(28px, 7vw, 52px)
+        clamp(22px, 6vw, 46px);
+
+    border-radius: 4px;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(65, 45, 25, 0.025) 0,
+            rgba(65, 45, 25, 0.025) 1px,
+            transparent 1px,
+            transparent 4px
+        ),
+        linear-gradient(
+            rgba(255, 255, 255, 0.08),
+            rgba(0, 0, 0, 0.04)
+        ),
+        var(--color-paper);
+
+    color: var(--color-paper-text);
+
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.letter-flip-card__front {
+    z-index: 2;
+}
+
+.letter-flip-card__back {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 520px;
+
+    transform: rotateY(180deg);
+}
+
+.letter-flip-card:not(.is-flipped)
+.letter-flip-card__back {
+    pointer-events: none;
+}
+
+.letter-flip-card.is-flipped
+.letter-flip-card__front {
+    pointer-events: none;
+}
+
+.letter-card__body {
+    min-height: 19em;
+}
+
+.typewriter-text {
+    font-size: clamp(0.92rem, 3.75vw, 1.08rem);
+    line-height: 2.04;
+}
+
+.letter-card__subtle-crease {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 5;
+
+    width: 42%;
+    height: 58%;
+
+    pointer-events: none;
+
+    opacity: 0.18;
+
+    background:
+        linear-gradient(
+            to top right,
+            transparent 48.9%,
+            rgba(77, 57, 34, 0.62) 49.5%,
+            rgba(255, 255, 255, 0.56) 50%,
+            transparent 50.8%
+        );
+
+    transition:
+        opacity 420ms ease,
+        filter 420ms ease;
+}
+
+.letter-flip-card.is-gesture-ready
+.letter-card__subtle-crease {
+    opacity: 0.30;
+}
+
+.letter-flip-card.is-swiping
+.letter-card__subtle-crease {
+    opacity: 0.62;
+    filter: drop-shadow(0 0 4px rgba(85, 57, 28, 0.24));
+}
+
+.letter-gesture-zone {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 7;
+
+    width: 46%;
+    height: 58%;
+
+    pointer-events: none;
+    touch-action: none;
+
+    outline: none;
+}
+
+.letter-flip-card.is-gesture-ready
+.letter-gesture-zone {
+    pointer-events: auto;
+    cursor: grab;
+}
+
+.letter-flip-card.is-swiping
+.letter-gesture-zone {
+    cursor: grabbing;
+}
+
+.letter-gesture-zone:focus-visible {
+    outline: 2px dashed rgba(64, 49, 31, 0.52);
+    outline-offset: -8px;
+}
+
+.letter-crease-observation {
+    position: relative;
+    z-index: 8;
+
+    margin: 22px 0 0;
+
+    color: rgba(27, 24, 20, 0.46);
+
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+
+    opacity: 0;
+}
+
+.letter-crease-observation.is-visible {
+    animation: crease-observation-appear 900ms ease forwards;
+}
+
+@keyframes crease-observation-appear {
+    to {
+        opacity: 1;
+    }
+}
+
+.letter-back-message {
+    margin: 42px 0 0;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    font-size: clamp(1.08rem, 4.6vw, 1.45rem);
+    line-height: 2.2;
+    letter-spacing: 0.08em;
+}
+
+.letter-flip-card__back .tap-next-button {
+    margin-top: 54px;
+}
+
+
+@media (max-width: 430px) {
+
+    .intro-scene {
+        padding-inline:
+            max(15px, env(safe-area-inset-left))
+            max(15px, env(safe-area-inset-right));
+    }
+
+    .story-sheet,
+    .letter-flip-card__face {
+        padding:
+            25px
+            19px;
+    }
+
+    .letter-card__body {
+        min-height: 21em;
+    }
+
+    .letter-flip-card__back {
+        min-height: 500px;
+    }
+}
