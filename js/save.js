@@ -51,7 +51,10 @@ const SAVEABLE_SCENES = new Set([
     "stage4-clear",
     "stage5",
     "stage5-clear",
-    "stage6"
+    "stage6",
+    "stage6-clear",
+    "ending-plane",
+    "end"
 ]);
 
 
@@ -388,3 +391,40 @@ function resetStage4State(){
 window.getStage4State=getStage4State;
 window.saveStage4State=saveStage4State;
 window.resetStage4State=resetStage4State;
+
+
+/* =========================================================
+   Version 0.10：最終ステージ内部状態
+   ========================================================= */
+function getStage6State(){
+    const data=getSaveData();
+    const defaults={
+        patinaSolved:false,
+        redSelected:false,
+        blueSelected:false,
+        inkMixed:false,
+        inkApplied:false,
+        soyApplied:false,
+        transformed:false,
+        shadowShot:false,
+        letterFolded:false,
+        ended:false
+    };
+    const state=data.stage6State;
+    return state&&typeof state==="object"
+        ? Object.assign({},defaults,state)
+        : defaults;
+}
+function saveStage6State(partial){
+    const data=getSaveData();
+    data.stage6State=Object.assign({},getStage6State(),partial||{});
+    saveData(data);
+}
+function resetStage6State(){
+    const data=getSaveData();
+    delete data.stage6State;
+    saveData(data);
+}
+window.getStage6State=getStage6State;
+window.saveStage6State=saveStage6State;
+window.resetStage6State=resetStage6State;
