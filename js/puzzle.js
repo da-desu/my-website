@@ -98,7 +98,7 @@ async function verifyStage1Answer() {
 
     if (selectedCount !== tiles.length) {
         setStage1Message(
-            "まだ選ばれていない桜があるようだ。",
+            "何かが違うようだ。",
             "error"
         );
         return;
