@@ -1030,3 +1030,301 @@ function updateEndSecretBadge(){const badge=document.getElementById("ibushiginEn
 const initializeBeforeV010=window.initializePuzzles;
 window.initializePuzzles=function initializePuzzlesV010(){initializeBeforeV010?.();Stage6Controller.init();FinalLetterController.init();EndingPlaneController.init()};
 window.Stage6Controller=Stage6Controller;window.FinalLetterController=FinalLetterController;window.EndingPlaneController=EndingPlaneController;window.updateEndSecretBadge=updateEndSecretBadge;
+
+
+/* =========================================================
+   Version 0.10.1：最終手紙ナビゲーション修正
+   ========================================================= */
+
+(function installFinalLetterButtonFix() {
+
+    "use strict";
+
+    if (window.__finalLetterButtonFixV0101) {
+        return;
+    }
+
+    window.__finalLetterButtonFixV0101 = true;
+
+
+    /**
+     * 「窓辺へ」ボタンを確実に表示して操作可能にします。
+     */
+    function revealWindowButton() {
+
+        const button =
+            document.getElementById(
+                "goToWindowButton"
+            );
+
+        if (!button) {
+            return;
+        }
+
+        button.hidden = false;
+        button.removeAttribute("hidden");
+        button.disabled = false;
+        button.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        button.style.display =
+            "inline-flex";
+
+        button.style.pointerEvents =
+            "auto";
+
+        /*
+            スマートフォンで画面外に現れた場合、
+            ボタンが見える位置まで自動で移動します。
+        */
+        window.setTimeout(
+            function scrollToWindowButton() {
+
+                button.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                    inline: "nearest"
+                });
+            },
+            180
+        );
+    }
+
+
+    /**
+     * 手紙を紙飛行機へ折った状態にします。
+     */
+    function foldFinalLetter() {
+
+        const letter =
+            document.getElementById(
+                "finalLetter"
+            );
+
+        const foldButton =
+            document.getElementById(
+                "foldFinalLetterButton"
+            );
+
+        if (letter) {
+            letter.classList.add(
+                "is-folded"
+            );
+        }
+
+        if (foldButton) {
+            foldButton.disabled = true;
+        }
+
+        revealWindowButton();
+
+        if (
+            typeof window.saveStage6State ===
+            "function"
+        ) {
+            window.saveStage6State({
+                letterFolded: true
+            });
+        }
+    }
+
+
+    /**
+     * 紙飛行機を飛ばす画面へ移動します。
+     */
+    async function goToEndingPlane(
+        button
+    ) {
+
+        if (
+            button.dataset.transitioning ===
+            "true"
+        ) {
+            return;
+        }
+
+        button.dataset.transitioning =
+            "true";
+
+        button.disabled = true;
+
+        try {
+
+            if (
+                window.EndingPlaneController &&
+                typeof window.EndingPlaneController.reset ===
+                    "function"
+            ) {
+                window.EndingPlaneController.reset();
+            }
+
+            if (
+                window.SceneManager &&
+                typeof window.SceneManager.changeScene ===
+                    "function"
+            ) {
+
+                await window.SceneManager.changeScene(
+                    "ending-plane",
+                    {
+                        fadeOutTime: 800,
+                        blackTime: 450,
+                        fadeInTime: 900
+                    }
+                );
+
+                return;
+            }
+
+            throw new Error(
+                "SceneManager.changeScene is unavailable."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "窓辺への遷移に失敗しました。",
+                error
+            );
+
+            /*
+                アニメーション遷移が失敗した場合も、
+                最終手段として画面を直接表示します。
+            */
+            if (
+                window.SceneManager &&
+                typeof window.SceneManager.showImmediately ===
+                    "function"
+            ) {
+                window.SceneManager.showImmediately(
+                    "ending-plane"
+                );
+            }
+
+        } finally {
+
+            button.disabled = false;
+
+            button.dataset.transitioning =
+                "false";
+        }
+    }
+
+
+    /*
+        個別イベントの初期化順に依存しないよう、
+        document全体でクリックを捕捉します。
+    */
+    document.addEventListener(
+        "click",
+        async function finalLetterNavigationFix(
+            event
+        ) {
+
+            const target = event.target;
+
+            if (
+                !target ||
+                typeof target.closest !==
+                    "function"
+            ) {
+                return;
+            }
+
+
+            const foldButton =
+                target.closest(
+                    "#foldFinalLetterButton"
+                );
+
+            if (foldButton) {
+
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                foldFinalLetter();
+
+                return;
+            }
+
+
+            const windowButton =
+                target.closest(
+                    "#goToWindowButton"
+                );
+
+            if (!windowButton) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            await goToEndingPlane(
+                windowButton
+            );
+        },
+        true
+    );
+
+
+    /**
+     * リロード復帰時にもボタン状態を同期します。
+     */
+    function restoreFinalLetterButton() {
+
+        if (
+            typeof window.getStage6State !==
+            "function"
+        ) {
+            return;
+        }
+
+        const state =
+            window.getStage6State() || {};
+
+        if (state.letterFolded) {
+
+            document
+                .getElementById(
+                    "finalLetter"
+                )
+                ?.classList.add(
+                    "is-folded"
+                );
+
+            const foldButton =
+                document.getElementById(
+                    "foldFinalLetterButton"
+                );
+
+            if (foldButton) {
+                foldButton.disabled = true;
+            }
+
+            revealWindowButton();
+        }
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            restoreFinalLetterButton
+        );
+
+    } else {
+        restoreFinalLetterButton();
+    }
+
+    window.addEventListener(
+        "pageshow",
+        restoreFinalLetterButton
+    );
+
+})();
