@@ -1329,7 +1329,6 @@ async function showIntroLetterV011() {
         !letterCard ||
         !text ||
         !cursor ||
-        !observation ||
         !gestureZone
     ) {
         return;
@@ -1369,8 +1368,10 @@ async function showIntroLetterV011() {
     text.textContent = "";
     cursor.classList.remove("is-hidden");
 
-    observation.hidden = true;
-    observation.classList.remove("is-visible");
+    if (observation) {
+        observation.hidden = true;
+        observation.classList.remove("is-visible");
+    }
 
     gestureZone.setAttribute(
         "aria-disabled",
@@ -1410,13 +1411,15 @@ async function showIntroLetterV011() {
         "false"
     );
 
-    observation.hidden = false;
+    if (observation) {
+        observation.hidden = false;
 
-    window.requestAnimationFrame(function () {
-        observation.classList.add(
-            "is-visible"
-        );
-    });
+        window.requestAnimationFrame(function () {
+            observation.classList.add(
+                "is-visible"
+            );
+        });
+    }
 
     button.dataset.transitioning = "false";
     button.disabled = false;
@@ -1902,7 +1905,7 @@ window.runIntroScene = runIntroScene;
 
 
 /* =========================================================
-   Version 0.11.1：第一問正解後の子どもイベント
+   Version 0.11.2：第一問正解後の子どもイベント
    ========================================================= */
 function stage1HasPensAlready(){
     const saveData=typeof window.getSaveData==="function"?window.getSaveData():null;
@@ -1912,14 +1915,13 @@ function stage1HasPensAlready(){
 
 function updateStage1ChildSpotState(){
     const childButton=document.getElementById("stage1ChildButton");
-    const speech=childButton?.querySelector(".stage1-child-spot__speech");
-    if(!childButton||!speech)return;
+    if(!childButton)return;
     if(stage1HasPensAlready()){
         childButton.dataset.collected="true";
-        speech.textContent="赤ペンと青ペンはもう渡したよ";
+        childButton.setAttribute("aria-label","桜の木の下で絵を描いている女の子。赤ペンと青ペンはもう受け取った");
     }else{
         childButton.dataset.collected="false";
-        speech.textContent="タップして話しかける";
+        childButton.setAttribute("aria-label","桜の木の下で絵を描いている女の子に話しかける");
     }
 }
 
