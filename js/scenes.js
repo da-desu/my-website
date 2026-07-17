@@ -740,7 +740,9 @@ function getResumeSceneLabel(sceneName) {
         "stage3-clear": "寿司屋への地図を入手した場面",
         stage4: "寿司屋の扉",
         "stage4-clear": "寿司屋へ入る場面",
-        stage5: "第五問"
+        stage5: "第五問",
+        "stage5-clear": "醤油を手に入れた場面",
+        stage6: "第六問"
     };
 
     return labels[sceneName] || "前回の続き";
@@ -1107,3 +1109,6 @@ document.addEventListener(
     },
     true
 );
+
+/* Version 0.9 navigation */
+document.addEventListener("click",async function(e){const b4=e.target.closest("#stage4ContinueButton");if(b4){e.preventDefault();e.stopImmediatePropagation();if(b4.dataset.transitioning==="true")return;b4.dataset.transitioning="true";b4.disabled=true;try{window.resetStage5Puzzle?.();await window.SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b4.disabled=false;b4.dataset.transitioning="false"}return}const b5=e.target.closest("#stage5ContinueButton");if(!b5)return;e.preventDefault();e.stopImmediatePropagation();if(b5.dataset.transitioning==="true")return;b5.dataset.transitioning="true";b5.disabled=true;try{await window.SceneManager.changeScene("stage6",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b5.disabled=false;b5.dataset.transitioning="false"}},true);
