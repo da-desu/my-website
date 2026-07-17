@@ -794,12 +794,114 @@
             </div>
         </section>
 
-        <section id="scene-stage5" class="scene" data-scene="stage5" aria-labelledby="stage5-title" hidden>
-            <div class="scene__inner stage-placeholder__inner">
-                <p class="scene-label">STAGE 5</p>
-                <h1 id="stage5-title" class="stage-placeholder__title">第五問は、次のVersionで実装します。</h1>
-                <button id="backToTopButton" class="sub-button" type="button">TOPへ戻る</button>
+        <!-- =======================================================
+             STAGE5：寿司屋のメニュー謎
+        ======================================================== -->
+        <section
+            id="scene-stage5"
+            class="scene stage5-scene"
+            data-scene="stage5"
+            aria-labelledby="stage5-title"
+            hidden
+        >
+            <div class="stage5-counter" aria-hidden="true"></div>
+
+            <div class="scene__inner stage5-scene__inner">
+                <p class="scene-label">第五問</p>
+
+                <h1 id="stage5-title" class="stage5-scene__title">
+                    大将に注文しよう
+                </h1>
+
+                <div class="chef-card">
+                    <div class="chef-card__face" aria-hidden="true">
+                        <span class="chef-card__headband"></span>
+                        <span class="chef-card__eye chef-card__eye--left"></span>
+                        <span class="chef-card__eye chef-card__eye--right"></span>
+                        <span class="chef-card__mouth"></span>
+                    </div>
+
+                    <div class="chef-card__speech">
+                        <p id="chefSpeech">
+                            へい、いらっしゃい。<br>
+                            何がほしい？
+                        </p>
+                    </div>
+                </div>
+
+                <figure class="stage5-menu-puzzle">
+                    <img
+                        class="stage5-menu-puzzle__image"
+                        src="img/stage5/puzzle.png"
+                        alt="寿司屋のメニュー表に見える一枚謎"
+                    >
+
+                    <figcaption class="stage5-menu-puzzle__caption">
+                        メニュー表をよく見て、答えを大将へ伝えよう。
+                    </figcaption>
+                </figure>
+
+                <p class="stage5-voice-instruction">
+                    答えが分かったら、<br>
+                    <strong>声に出して読もう。</strong>
+                </p>
+
+                <form id="stage5Form" class="answer-form stage5-answer-form" novalidate>
+                    <label class="answer-form__label" for="stage5Answer">
+                        何がほしい？
+                    </label>
+
+                    <input
+                        id="stage5Answer"
+                        class="answer-form__input"
+                        type="text"
+                        inputmode="text"
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        maxlength="24"
+                        placeholder="答えを入力"
+                    >
+
+                    <button id="stage5SubmitButton" class="answer-form__submit" type="submit">
+                        伝える
+                    </button>
+                </form>
+
+                <p id="stage5Message" class="stage5-message" aria-live="polite"></p>
+
+                <div id="ibushiginReward" class="ibushigin-reward" hidden>
+                    <div class="ibushigin-reward__metal" aria-hidden="true">銀</div>
+
+                    <div class="ibushigin-reward__text">
+                        <p class="ibushigin-reward__label">SECRET ITEM</p>
+                        <p class="ibushigin-reward__name">いぶしぎん</p>
+                        <p class="ibushigin-reward__description">渋い輝きを放つ銀。</p>
+                    </div>
+                </div>
+
+                <button id="stage5HintButton" class="hint-button" type="button">
+                    ヒントを見る
+                </button>
+
+                <p id="stage5Hint" class="stage2-hint" hidden>
+                    上の縁に隠れた形と、<br>
+                    その真下の文字を見比べよう。
+                </p>
             </div>
+        </section>
+
+        <section id="scene-stage5-clear" class="scene soy-sauce-scene" data-scene="stage5-clear" aria-labelledby="stage5-clear-title" hidden>
+            <div class="scene__inner soy-sauce-scene__inner">
+                <p class="scene-label">ITEM GET</p>
+                <h1 id="stage5-clear-title" class="soy-sauce-scene__title">お醤油ですね。<br>少々お待ちください。</h1>
+                <div class="soy-sauce-item"><div class="soy-sauce-bottle" aria-hidden="true"><span class="soy-sauce-bottle__cap"></span><span class="soy-sauce-bottle__body"></span><span class="soy-sauce-bottle__label">醤油</span></div><p class="soy-sauce-item__name">醤油</p></div>
+                <p class="soy-sauce-scene__message">「醤油」を手に入れた。</p>
+                <button id="stage5ContinueButton" class="start-button" type="button">次へ進む</button>
+            </div>
+        </section>
+        <section id="scene-stage6" class="scene" data-scene="stage6" aria-labelledby="stage6-title" hidden>
+            <div class="scene__inner stage-placeholder__inner"><p class="scene-label">STAGE 6</p><h1 id="stage6-title" class="stage-placeholder__title">次のステージは、次のVersionで実装します。</h1><button id="backToTopButton" class="sub-button" type="button">TOPへ戻る</button></div>
         </section>
 
         <!-- =======================================================
