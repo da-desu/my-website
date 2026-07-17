@@ -742,7 +742,10 @@ function getResumeSceneLabel(sceneName) {
         "stage4-clear": "寿司屋へ入る場面",
         stage5: "第五問",
         "stage5-clear": "醤油を手に入れた場面",
-        stage6: "第六問"
+        stage6: "最終ステージ",
+        "stage6-clear": "最後の手紙",
+        "ending-plane": "紙飛行機を飛ばす場面",
+        end: "エンディング"
     };
 
     return labels[sceneName] || "前回の続き";
@@ -1111,4 +1114,30 @@ document.addEventListener(
 );
 
 /* Version 0.9 navigation */
-document.addEventListener("click",async function(e){const b4=e.target.closest("#stage4ContinueButton");if(b4){e.preventDefault();e.stopImmediatePropagation();if(b4.dataset.transitioning==="true")return;b4.dataset.transitioning="true";b4.disabled=true;try{window.resetStage5Puzzle?.();await window.SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b4.disabled=false;b4.dataset.transitioning="false"}return}const b5=e.target.closest("#stage5ContinueButton");if(!b5)return;e.preventDefault();e.stopImmediatePropagation();if(b5.dataset.transitioning==="true")return;b5.dataset.transitioning="true";b5.disabled=true;try{await window.SceneManager.changeScene("stage6",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b5.disabled=false;b5.dataset.transitioning="false"}},true);
+document.addEventListener("click",async function(e){const b4=e.target.closest("#stage4ContinueButton");if(b4){e.preventDefault();e.stopImmediatePropagation();if(b4.dataset.transitioning==="true")return;b4.dataset.transitioning="true";b4.disabled=true;try{window.resetStage5Puzzle?.();await window.SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b4.disabled=false;b4.dataset.transitioning="false"}return}const b5=e.target.closest("#stage5ContinueButton");if(!b5)return;e.preventDefault();e.stopImmediatePropagation();if(b5.dataset.transitioning==="true")return;b5.dataset.transitioning="true";b5.disabled=true;try{window.Stage6Controller?.reset();await window.SceneManager.changeScene("stage6",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b5.disabled=false;b5.dataset.transitioning="false"}},true);
+
+
+/* =========================================================
+   Version 0.10：最終ステージ再開・終了操作
+   ========================================================= */
+const continueSavedGameBeforeV010=continueSavedGame;
+continueSavedGame=async function(){
+    const sceneName=typeof window.getResumeScene==="function"?window.getResumeScene():"top";
+    await continueSavedGameBeforeV010();
+    if(sceneName==="stage6")window.Stage6Controller?.restore();
+    if(sceneName==="stage6-clear")window.FinalLetterController?.restore();
+    if(sceneName==="ending-plane")window.EndingPlaneController?.reset();
+    if(sceneName==="end")window.updateEndSecretBadge?.();
+};
+
+document.addEventListener("click",async function finalNavigation(event){
+    const restart=event.target.closest("#restartFromEndButton");
+    if(!restart)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(restart.dataset.transitioning==="true")return;
+    restart.dataset.transitioning="true";restart.disabled=true;
+    try{
+        window.resetSave?.();window.Stage6Controller?.reset({preserveSave:true});window.FinalLetterController?.reset();window.EndingPlaneController?.reset();
+        await window.SceneManager.changeScene("top",{fadeOutTime:700,blackTime:350,fadeInTime:900});
+    }finally{restart.disabled=false;restart.dataset.transitioning="false"}
+},true);
