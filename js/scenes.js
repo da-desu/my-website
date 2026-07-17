@@ -1141,3 +1141,740 @@ document.addEventListener("click",async function finalNavigation(event){
         await window.SceneManager.changeScene("top",{fadeOutTime:700,blackTime:350,fadeInTime:900});
     }finally{restart.disabled=false;restart.dataset.transitioning="false"}
 },true);
+
+
+/* =========================================================
+   Version 0.11：導入ストーリー／手紙の裏面ギミック
+   ========================================================= */
+
+let introBrushupRunIdV011 = 0;
+let introLetterGestureReadyV011 = false;
+let introLetterFlippedV011 = false;
+let introLetterPointerV011 = null;
+
+
+function waitForPaintV011() {
+    return new Promise(function (resolve) {
+        window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(resolve);
+        });
+    });
+}
+
+
+function showIntroElementV011(element) {
+    if (!element) {
+        return;
+    }
+
+    element.hidden = false;
+    element.classList.remove("is-leaving");
+
+    window.requestAnimationFrame(function () {
+        element.classList.add("is-visible");
+    });
+}
+
+
+async function hideIntroElementV011(
+    element,
+    duration
+) {
+    if (!element || element.hidden) {
+        return;
+    }
+
+    element.classList.remove("is-visible");
+    element.classList.add("is-leaving");
+
+    await window.wait(duration || 360);
+
+    element.hidden = true;
+    element.classList.remove("is-leaving");
+}
+
+
+const introLetterTextV011 =
+    "拝啓、この手紙を受け取ってくれた人へ。\n\n" +
+    "明日僕は空の世界に旅立つようです。病室から見ていた空は青く、白く、大きな海のようでした。\n\n" +
+    "このベッドから出て、外へ出てみたかったなぁ。あぁ1度でいいから***をこの目で見たい。\n\n" +
+    "世界を照らす自由の象って呼ばれてるんだって。物語の背景って面白いよね。";
+
+
+/**
+ * INTROを最初のストーリーシートから再生します。
+ */
+runIntroScene = async function runIntroSceneV011() {
+
+    if (isIntroRunning) {
+        return;
+    }
+
+    /*
+        先に前回状態を初期化してから、
+        今回の演出IDを発行します。
+    */
+    resetIntroScene();
+
+    isIntroRunning = true;
+
+    const runId = ++introBrushupRunIdV011;
+
+    const introSilence =
+        document.getElementById("introSilence");
+
+    const storySheet =
+        document.getElementById(
+            "storySheetBeforeLetter"
+        );
+
+    if (!introSilence || !storySheet) {
+        console.error(
+            "Version 0.11のINTRO要素が見つかりません。"
+        );
+
+        isIntroRunning = false;
+        return;
+    }
+
+    introSilence.hidden = false;
+
+    await waitForPaintV011();
+
+    if (runId !== introBrushupRunIdV011) {
+        return;
+    }
+
+    introSilence.classList.add("is-visible");
+
+    await window.wait(900);
+
+    if (runId !== introBrushupRunIdV011) {
+        return;
+    }
+
+    introSilence.classList.remove("is-visible");
+    introSilence.hidden = true;
+
+    await window.wait(320);
+
+    if (runId !== introBrushupRunIdV011) {
+        return;
+    }
+
+    showIntroElementV011(storySheet);
+
+    isIntroRunning = false;
+};
+
+
+/**
+ * 一つ目のストーリーシートから手紙へ進みます。
+ */
+async function showIntroLetterV011() {
+
+    const storySheet =
+        document.getElementById(
+            "storySheetBeforeLetter"
+        );
+
+    const button =
+        document.getElementById(
+            "storyToLetterButton"
+        );
+
+    const letterCard =
+        document.getElementById("letterCard");
+
+    const text =
+        document.getElementById("typewriterText");
+
+    const cursor =
+        document.getElementById("typewriterCursor");
+
+    const observation =
+        document.getElementById(
+            "letterCreaseObservation"
+        );
+
+    const gestureZone =
+        document.getElementById(
+            "letterGestureZone"
+        );
+
+    if (
+        !storySheet ||
+        !button ||
+        !letterCard ||
+        !text ||
+        !cursor ||
+        !observation ||
+        !gestureZone
+    ) {
+        return;
+    }
+
+    if (button.dataset.transitioning === "true") {
+        return;
+    }
+
+    button.dataset.transitioning = "true";
+    button.disabled = true;
+
+    const runId = ++introBrushupRunIdV011;
+
+    await hideIntroElementV011(storySheet, 360);
+
+    if (runId !== introBrushupRunIdV011) {
+        return;
+    }
+
+    letterCard.hidden = false;
+    letterCard.classList.remove(
+        "is-flipped",
+        "is-gesture-ready",
+        "is-swiping",
+        "is-leaving"
+    );
+
+    letterCard.style.setProperty(
+        "--intro-peel-progress",
+        "0"
+    );
+
+    introLetterGestureReadyV011 = false;
+    introLetterFlippedV011 = false;
+
+    text.textContent = "";
+    cursor.classList.remove("is-hidden");
+
+    observation.hidden = true;
+    observation.classList.remove("is-visible");
+
+    gestureZone.setAttribute(
+        "aria-disabled",
+        "true"
+    );
+
+    await waitForPaintV011();
+
+    letterCard.classList.add("is-visible");
+
+    await window.wait(620);
+
+    if (runId !== introBrushupRunIdV011) {
+        return;
+    }
+
+    await window.typeText(
+        text,
+        introLetterTextV011,
+        19
+    );
+
+    if (runId !== introBrushupRunIdV011) {
+        return;
+    }
+
+    cursor.classList.add("is-hidden");
+
+    introLetterGestureReadyV011 = true;
+
+    letterCard.classList.add(
+        "is-gesture-ready"
+    );
+
+    gestureZone.setAttribute(
+        "aria-disabled",
+        "false"
+    );
+
+    observation.hidden = false;
+
+    window.requestAnimationFrame(function () {
+        observation.classList.add(
+            "is-visible"
+        );
+    });
+
+    button.dataset.transitioning = "false";
+    button.disabled = false;
+}
+
+
+/**
+ * 手紙を裏返します。
+ */
+function revealIntroLetterBackV011() {
+
+    if (
+        !introLetterGestureReadyV011 ||
+        introLetterFlippedV011
+    ) {
+        return;
+    }
+
+    const letterCard =
+        document.getElementById("letterCard");
+
+    const gestureZone =
+        document.getElementById(
+            "letterGestureZone"
+        );
+
+    if (!letterCard || !gestureZone) {
+        return;
+    }
+
+    introLetterFlippedV011 = true;
+    introLetterGestureReadyV011 = false;
+
+    letterCard.classList.remove(
+        "is-gesture-ready",
+        "is-swiping"
+    );
+
+    letterCard.style.setProperty(
+        "--intro-peel-progress",
+        "0"
+    );
+
+    letterCard.classList.add("is-flipped");
+
+    gestureZone.setAttribute(
+        "aria-disabled",
+        "true"
+    );
+
+    window.setTimeout(function () {
+        document
+            .getElementById("letterBackNextButton")
+            ?.focus({ preventScroll: true });
+    }, 940);
+}
+
+
+function beginLetterGestureV011(event) {
+
+    if (
+        !introLetterGestureReadyV011 ||
+        introLetterFlippedV011
+    ) {
+        return;
+    }
+
+    const zone = event.currentTarget;
+
+    event.preventDefault();
+
+    introLetterPointerV011 = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        currentX: event.clientX,
+        currentY: event.clientY
+    };
+
+    zone.setPointerCapture?.(event.pointerId);
+
+    document
+        .getElementById("letterCard")
+        ?.classList.add("is-swiping");
+}
+
+
+function moveLetterGestureV011(event) {
+
+    const state = introLetterPointerV011;
+
+    if (
+        !state ||
+        state.pointerId !== event.pointerId
+    ) {
+        return;
+    }
+
+    event.preventDefault();
+
+    state.currentX = event.clientX;
+    state.currentY = event.clientY;
+
+    const dx = state.currentX - state.startX;
+    const dy = state.currentY - state.startY;
+
+    const progress = Math.max(
+        0,
+        Math.min(
+            1,
+            (dx + (-dy)) / 220
+        )
+    );
+
+    document
+        .getElementById("letterCard")
+        ?.style.setProperty(
+            "--intro-peel-progress",
+            String(progress)
+        );
+}
+
+
+function finishLetterGestureV011(event) {
+
+    const state = introLetterPointerV011;
+
+    if (!state) {
+        return;
+    }
+
+    if (
+        event &&
+        event.pointerId !== undefined &&
+        state.pointerId !== event.pointerId
+    ) {
+        return;
+    }
+
+    const dx = state.currentX - state.startX;
+    const dy = state.currentY - state.startY;
+
+    introLetterPointerV011 = null;
+
+    const letterCard =
+        document.getElementById("letterCard");
+
+    letterCard?.classList.remove("is-swiping");
+
+    const movedRightEnough = dx >= 82;
+    const movedUpEnough = dy <= -68;
+    const diagonalEnough = dx + (-dy) >= 176;
+
+    if (
+        movedRightEnough &&
+        movedUpEnough &&
+        diagonalEnough
+    ) {
+        revealIntroLetterBackV011();
+        return;
+    }
+
+    letterCard?.style.setProperty(
+        "--intro-peel-progress",
+        "0"
+    );
+}
+
+
+/**
+ * 手紙の裏から、第一問直前のストーリーシートへ進みます。
+ */
+async function showStoryBeforeStage1V011() {
+
+    const button =
+        document.getElementById(
+            "letterBackNextButton"
+        );
+
+    const letterCard =
+        document.getElementById("letterCard");
+
+    const storySheet =
+        document.getElementById(
+            "storySheetBeforeStage1"
+        );
+
+    if (!button || !letterCard || !storySheet) {
+        return;
+    }
+
+    if (button.dataset.transitioning === "true") {
+        return;
+    }
+
+    button.dataset.transitioning = "true";
+    button.disabled = true;
+
+    letterCard.classList.remove("is-visible");
+    letterCard.classList.add("is-leaving");
+
+    await window.wait(440);
+
+    letterCard.hidden = true;
+    letterCard.classList.remove("is-leaving");
+
+    showIntroElementV011(storySheet);
+
+    button.dataset.transitioning = "false";
+    button.disabled = false;
+}
+
+
+/**
+ * 第一問へ進みます。
+ */
+async function startStage1FromStoryV011() {
+
+    const button =
+        document.getElementById(
+            "storyToStage1Button"
+        );
+
+    if (!button) {
+        return;
+    }
+
+    if (button.dataset.transitioning === "true") {
+        return;
+    }
+
+    button.dataset.transitioning = "true";
+    button.disabled = true;
+
+    try {
+        if (
+            typeof window.resetStage1Puzzle ===
+            "function"
+        ) {
+            window.resetStage1Puzzle();
+        }
+
+        await window.SceneManager.changeScene(
+            "stage1",
+            {
+                fadeOutTime: 760,
+                blackTime: 360,
+                fadeInTime: 860
+            }
+        );
+
+    } finally {
+        button.dataset.transitioning = "false";
+        button.disabled = false;
+    }
+}
+
+
+/**
+ * INTRO内の全要素を初期状態へ戻します。
+ */
+resetIntroScene = function resetIntroSceneV011() {
+
+    introBrushupRunIdV011 += 1;
+    introLetterGestureReadyV011 = false;
+    introLetterFlippedV011 = false;
+    introLetterPointerV011 = null;
+    isIntroRunning = false;
+
+    const ids = [
+        "introSilence",
+        "storySheetBeforeLetter",
+        "letterCard",
+        "storySheetBeforeStage1"
+    ];
+
+    ids.forEach(function (id) {
+        const element = document.getElementById(id);
+
+        if (!element) {
+            return;
+        }
+
+        element.hidden = true;
+        element.classList.remove(
+            "is-visible",
+            "is-leaving",
+            "is-flipped",
+            "is-gesture-ready",
+            "is-swiping"
+        );
+
+        element.style.removeProperty(
+            "--intro-peel-progress"
+        );
+    });
+
+    const text =
+        document.getElementById("typewriterText");
+
+    const cursor =
+        document.getElementById("typewriterCursor");
+
+    const observation =
+        document.getElementById(
+            "letterCreaseObservation"
+        );
+
+    const gestureZone =
+        document.getElementById(
+            "letterGestureZone"
+        );
+
+    if (text) {
+        text.textContent = "";
+    }
+
+    if (cursor) {
+        cursor.classList.remove("is-hidden");
+    }
+
+    if (observation) {
+        observation.hidden = true;
+        observation.classList.remove("is-visible");
+    }
+
+    if (gestureZone) {
+        gestureZone.setAttribute(
+            "aria-disabled",
+            "true"
+        );
+    }
+
+    [
+        "storyToLetterButton",
+        "letterBackNextButton",
+        "storyToStage1Button"
+    ].forEach(function (id) {
+        const button = document.getElementById(id);
+
+        if (!button) {
+            return;
+        }
+
+        button.disabled = false;
+        button.dataset.transitioning = "false";
+    });
+};
+
+
+function initializeIntroBrushupV011() {
+
+    const storyToLetterButton =
+        document.getElementById(
+            "storyToLetterButton"
+        );
+
+    const letterBackNextButton =
+        document.getElementById(
+            "letterBackNextButton"
+        );
+
+    const storyToStage1Button =
+        document.getElementById(
+            "storyToStage1Button"
+        );
+
+    const gestureZone =
+        document.getElementById(
+            "letterGestureZone"
+        );
+
+    if (
+        storyToLetterButton &&
+        storyToLetterButton.dataset.v011Ready !==
+            "true"
+    ) {
+        storyToLetterButton.addEventListener(
+            "click",
+            showIntroLetterV011
+        );
+
+        storyToLetterButton.dataset.v011Ready =
+            "true";
+    }
+
+    if (
+        letterBackNextButton &&
+        letterBackNextButton.dataset.v011Ready !==
+            "true"
+    ) {
+        letterBackNextButton.addEventListener(
+            "click",
+            showStoryBeforeStage1V011
+        );
+
+        letterBackNextButton.dataset.v011Ready =
+            "true";
+    }
+
+    if (
+        storyToStage1Button &&
+        storyToStage1Button.dataset.v011Ready !==
+            "true"
+    ) {
+        storyToStage1Button.addEventListener(
+            "click",
+            startStage1FromStoryV011
+        );
+
+        storyToStage1Button.dataset.v011Ready =
+            "true";
+    }
+
+    if (
+        gestureZone &&
+        gestureZone.dataset.v011Ready !== "true"
+    ) {
+        gestureZone.addEventListener(
+            "pointerdown",
+            beginLetterGestureV011
+        );
+
+        gestureZone.addEventListener(
+            "pointermove",
+            moveLetterGestureV011
+        );
+
+        gestureZone.addEventListener(
+            "pointerup",
+            finishLetterGestureV011
+        );
+
+        gestureZone.addEventListener(
+            "pointercancel",
+            finishLetterGestureV011
+        );
+
+        gestureZone.addEventListener(
+            "keydown",
+            function (event) {
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+                    event.preventDefault();
+                    revealIntroLetterBackV011();
+                }
+            }
+        );
+
+        gestureZone.dataset.v011Ready = "true";
+    }
+}
+
+
+/* 再開画面の表記も新しい導入に合わせます。 */
+const getResumeSceneLabelBeforeV011 =
+    getResumeSceneLabel;
+
+getResumeSceneLabel = function getResumeSceneLabelV011(
+    sceneName
+) {
+    if (sceneName === "intro") {
+        return "紙飛行機を拾った場面";
+    }
+
+    return getResumeSceneLabelBeforeV011(
+        sceneName
+    );
+};
+
+
+/* game.jsより後に読み込まれるため、DOMContentLoadedでも登録します。 */
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeIntroBrushupV011
+);
+
+
+/* 既存処理から参照される公開関数を最新化します。 */
+window.runIntroScene = runIntroScene;
