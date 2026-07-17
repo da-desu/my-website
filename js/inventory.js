@@ -19,7 +19,11 @@ const ITEM_PRESENTATIONS = {
     },
     "醤油": {
         icon: "瓶",
-        description: "大将から受け取った醤油。"
+        description: "大将から受け取った醤油。寿司屋では「むらさき」とも呼ばれる。"
+    },
+    "紫のインク": {
+        icon: "紫",
+        description: "赤ペンと青ペンを混ぜて作った紫。"
     },
     "いぶしぎん": {
         icon: "銀",
