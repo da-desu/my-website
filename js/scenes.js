@@ -947,7 +947,28 @@ if (document.readyState === "loading") {
 }
 
 /* Version 0.7 map modal */
-function initializeMapControls(){const modal=document.getElementById("mapModal");document.getElementById("openMapButton")?.addEventListener("click",()=>{modal.hidden=false});document.getElementById("closeMapButton")?.addEventListener("click",()=>{modal.hidden=true});document.getElementById("mapModalBackdrop")?.addEventListener("click",()=>{modal.hidden=true})}
+function initializeMapControls(){
+    const modal=document.getElementById("mapModal");
+    const openButton=document.getElementById("openMapButton");
+    const closeButton=document.getElementById("closeMapButton");
+    const backdrop=document.getElementById("mapModalBackdrop");
+    const sourcePaper=document.getElementById("mapItemPaper");
+    const modalPaper=document.getElementById("mapModalPaper");
+
+    function syncMapPaper(){
+        if(!sourcePaper||!modalPaper)return;
+        modalPaper.innerHTML=sourcePaper.innerHTML;
+    }
+
+    openButton?.addEventListener("click",()=>{
+        syncMapPaper();
+        if(modal){modal.hidden=false;}
+    });
+
+    closeButton?.addEventListener("click",()=>{if(modal){modal.hidden=true;}});
+    backdrop?.addEventListener("click",()=>{if(modal){modal.hidden=true;}});
+    syncMapPaper();
+}
 document.addEventListener("DOMContentLoaded",initializeMapControls);
 
 /* =========================================================
@@ -1198,7 +1219,7 @@ const introLetterTextV011 =
     "拝啓、この手紙を受け取ってくれた人へ。\n\n" +
     "明日僕は空の世界に旅立つようです。病室から見ていた空は青く、白く、大きな海のようでした。\n\n" +
     "このベッドから出て、外へ出てみたかったなぁ。あぁ1度でいいから***をこの目で見たい。\n\n" +
-    "世界を照らす自由の象って呼ばれてるんだって。物語の背景って面白いよね。";
+    "世界を照らす自由の像って呼ばれてるんだって。物語の背景って面白いよね。";
 
 
 /**
@@ -1878,3 +1899,60 @@ document.addEventListener(
 
 /* 既存処理から参照される公開関数を最新化します。 */
 window.runIntroScene = runIntroScene;
+
+
+/* =========================================================
+   Version 0.11.1：第一問正解後の子どもイベント
+   ========================================================= */
+function stage1HasPensAlready(){
+    const saveData=typeof window.getSaveData==="function"?window.getSaveData():null;
+    const items=Array.isArray(saveData?.items)?saveData.items:[];
+    return items.includes("赤ペン")&&items.includes("青ペン");
+}
+
+function updateStage1ChildSpotState(){
+    const childButton=document.getElementById("stage1ChildButton");
+    const speech=childButton?.querySelector(".stage1-child-spot__speech");
+    if(!childButton||!speech)return;
+    if(stage1HasPensAlready()){
+        childButton.dataset.collected="true";
+        speech.textContent="赤ペンと青ペンはもう渡したよ";
+    }else{
+        childButton.dataset.collected="false";
+        speech.textContent="タップして話しかける";
+    }
+}
+
+function hideStage1PensReward(){
+    const panel=document.getElementById("stage1PensReward");
+    if(panel){panel.hidden=true;panel.classList.remove("is-visible");}
+    updateStage1ChildSpotState();
+}
+
+function showStage1PensReward(){
+    const panel=document.getElementById("stage1PensReward");
+    if(!panel)return;
+    if(!stage1HasPensAlready()){
+        window.obtainItem?.("赤ペン");
+        window.obtainItem?.("青ペン");
+    }
+    panel.hidden=false;
+    window.requestAnimationFrame(()=>panel.classList.add("is-visible"));
+    updateStage1ChildSpotState();
+}
+
+function initializeStage1ClearReward(){
+    const childButton=document.getElementById("stage1ChildButton");
+    const closeButton=document.getElementById("stage1PensRewardClose");
+    if(childButton&&childButton.dataset.rewardBound!=="true"){
+        childButton.addEventListener("click",showStage1PensReward);
+        childButton.dataset.rewardBound="true";
+    }
+    if(closeButton&&closeButton.dataset.rewardBound!=="true"){
+        closeButton.addEventListener("click",hideStage1PensReward);
+        closeButton.dataset.rewardBound="true";
+    }
+    updateStage1ChildSpotState();
+}
+
+document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
