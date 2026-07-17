@@ -162,15 +162,15 @@
 
                     <div class="story-sheet__body">
                         <p>
-                            技術の進歩により、時の流れ方、世界、は大きく変わった。電車の中は、スマホに流れた映像に時間を浪費される、俯く人ばかりだ。かくゆう私もその一員であるが。
+                            技術の進歩により、時の流れ方も、世界も、大きく変わった。電車の中は、スマホに流れる映像に時間を奪われ、俯く人ばかりだ。かくいう私も、その一員であるが。
                         </p>
 
                         <p>
-                            そんな中、何か転機を待っているのに、降ってくるのは、雨や仕事ばかり。「今日は早めに帰ろう」と積もらぬ思いを空に馳せていた時、紙飛行機が春の風に流され落ちてきた。
+                            そんな中、何か転機を待っているのに、降ってくるのは、雨や仕事ばかり。「今日は早めに帰ろう」と積もらぬ思いを空に馳せていた時、紙飛行機が春の風に流され、落ちてきた。
                         </p>
 
                         <p>
-                            紙飛行機か子どもっぽいなぁ。そう思いながら、紙飛行機を広げると、そこには誰かの思いが綴られていた。
+                            紙飛行機か。子どもっぽいなぁ。そう思いながら紙飛行機を広げると、そこには誰かの思いが綴られていた。
                         </p>
                     </div>
 
@@ -228,7 +228,7 @@
                                 class="letter-crease-observation"
                                 hidden
                             >
-                                
+                                左端に、かすかな折り目が見える。
                             </p>
 
                             <!--
@@ -257,7 +257,7 @@
                             aria-label="手紙の裏"
                         >
                             <p class="letter-card__eyebrow">
-                                
+                                裏面
                             </p>
 
                             <p class="letter-back-message">
@@ -293,11 +293,11 @@
 
                     <div class="story-sheet__body">
                         <p>
-                            世界を照らす自由の象とはなんだろうか私は知らなかった。ただそこには手書きの地図が書かれていた。
+                            世界を照らす自由の像とはなんだろうか。私は知らなかった。ただ、そこには手書きの地図が書かれていた。
                         </p>
 
                         <p>
-                            現実の世界に飽きていた私は、この出会いを、物語として享受することにした。この先に何が待っているのか。まずはここへ向かってみよう。
+                            私はこの出会いを、物語として表示することにした。この先に何が待っているのか。まずはここへ向かってみよう
                         </p>
                     </div>
 
@@ -538,9 +538,46 @@
                 </h1>
 
                 <p class="sakura-clear-scene__text">
-                    同じ名前で呼ばれていても、<br>
-                    見え方はひとつではない。
+                    ソメイヨシノは<br>
+                    全てクローンであるとか…。
                 </p>
+
+                <button
+                    id="stage1ChildButton"
+                    class="stage1-child-spot"
+                    type="button"
+                    aria-label="桜の木の下でお絵かきをしている子どもに話しかける"
+                >
+                    <span class="stage1-child-spot__tree stage1-child-spot__tree--left" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__tree stage1-child-spot__tree--right" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__ground" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__mat" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__drawing drawing-line--red" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__drawing drawing-line--blue" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__child stage1-child-spot__child--left" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__child stage1-child-spot__child--right" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__pen stage1-child-spot__pen--red" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__pen stage1-child-spot__pen--blue" aria-hidden="true"></span>
+                    <span class="stage1-child-spot__speech">タップして話しかける</span>
+                </button>
+
+                <div id="stage1PensReward" class="stage1-pens-reward" hidden>
+                    <div class="stage1-pens-reward__dialog">
+                        <p class="stage1-pens-reward__message">
+                            もしかして、赤いペンと青いペンが欲しいの？
+                        </p>
+                        <div class="stage1-pens-reward__items" aria-hidden="true">
+                            <span class="stage1-pens-reward__item stage1-pens-reward__item--red">赤ペン</span>
+                            <span class="stage1-pens-reward__item stage1-pens-reward__item--blue">青ペン</span>
+                        </div>
+                        <p class="stage1-pens-reward__caption">
+                            「赤ペン」と「青ペン」を手に入れた。
+                        </p>
+                        <button id="stage1PensRewardClose" class="dark-button stage1-pens-reward__button" type="button">
+                            受け取る
+                        </button>
+                    </div>
+                </div>
 
                 <button
                     id="stage1ContinueButton"
@@ -712,8 +749,8 @@
                 </h1>
 
                 <p class="ocean-clear-scene__text">
-                    見えていなかった半分が、<br>
-                    ひとつの景色になった。
+                    海って驚きの秘密がいっぱいで、<br>
+                    神秘的だよね。
                 </p>
 
                 <button
@@ -765,7 +802,7 @@
                 <p class="scene-label">ITEM GET</p>
                 <h1 id="map-acquisition-title" class="map-acquisition-scene__title">北へ向かうと、<br>一枚の地図が落ちていた。</h1>
                 <div id="mapItemCard" class="map-item-card" aria-label="寿司屋への地図">
-                    <div class="map-item-card__paper" aria-hidden="true">
+                    <div id="mapItemPaper" class="map-item-card__paper" aria-hidden="true">
                         <span class="map-item-card__route"></span>
                         <span class="map-item-card__start">海</span>
                         <span class="map-item-card__goal">寿司屋</span>
@@ -793,22 +830,15 @@
             <div class="map-modal__panel">
                 <p class="scene-label">MAP</p>
                 <h2 id="map-modal-title" class="map-modal__title">寿司屋への地図</h2>
-                <div class="map-modal__map" aria-hidden="true">
-                    <div class="map-modal__sea">海</div>
-                    <div class="map-modal__road"></div>
-                    <div class="map-modal__arrow" aria-hidden="true"></div>
-                    <div class="map-modal__shop">寿司屋</div>
-
-                    <!--
-                        折る前は NOW  HERE。
-                        Version 0.8で中央を折り、NOWHEREへ変化させます。
-                    -->
-                    <div class="map-modal__now-here">
-                        <span class="map-modal__now">NOW</span>
-                        <span class="map-modal__here">HERE</span>
+                <div class="map-modal__map">
+                    <div id="mapModalPaper" class="map-item-card__paper map-item-card__paper--modal" aria-hidden="true">
+                        <span class="map-item-card__route"></span>
+                        <span class="map-item-card__start">海</span>
+                        <span class="map-item-card__goal">寿司屋</span>
+                        <span class="map-item-card__now">NOW</span>
+                        <span class="map-item-card__here">HERE</span>
+                        <span class="map-item-card__fold-line"></span>
                     </div>
-
-                    <div class="map-modal__fold-line"></div>
                 </div>
                 <p class="map-modal__note">地図には、うっすらと折り目がついている。</p>
                 <button id="closeMapButton" class="sub-button" type="button">閉じる</button>
