@@ -23,11 +23,11 @@ const ITEM_PRESENTATIONS = {
     },
     "赤ペン": {
         icon: "赤",
-        description: "桜の木の下の子どもから受け取った赤いペン。"
+        description: "桜の木の下の女の子から受け取った赤いペン。"
     },
     "青ペン": {
         icon: "青",
-        description: "桜の木の下の子どもから受け取った青いペン。"
+        description: "桜の木の下の女の子から受け取った青いペン。"
     },
     "紫のインク": {
         icon: "紫",
