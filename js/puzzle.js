@@ -850,3 +850,183 @@ window.initializePuzzles = function initializePuzzlesV091() {
 };
 
 window.resetStage5Puzzle = resetStage5Puzzle;
+
+
+/* =========================================================
+   Version 0.10：最終ステージコントローラー
+   ========================================================= */
+const Stage6Controller={
+    initialized:false,
+    state:null,
+    el(id){return document.getElementById(id)},
+    normalize(value){return String(value||"").trim().replace(/\s+/g,"").replace(/[!！?？。、,.・]+/g,"").toLowerCase()},
+    setMessage(id,text,type=""){
+        const el=this.el(id); if(!el)return;
+        el.textContent=text; el.classList.remove("is-error","is-success");
+        if(type)el.classList.add("is-"+type);
+    },
+    save(partial){this.state=Object.assign({},this.state||window.getStage6State?.()||{},partial||{});window.saveStage6State?.(partial||{})},
+    flashPurple(){
+        const flash=this.el("finalStatuePurpleFlash");
+        const statue=this.el("finalStatue");
+        if(flash){flash.classList.remove("is-active");void flash.offsetWidth;flash.classList.add("is-active")}
+        if(statue){statue.classList.add("is-purple-flash");setTimeout(()=>statue.classList.remove("is-purple-flash"),900)}
+    },
+    async solvePatina(event){
+        event?.preventDefault();
+        const input=this.el("stage6PatinaAnswer");
+        const button=this.el("stage6PatinaSubmit");
+        if(!input||!button)return;
+        const answer=this.normalize(input.value);
+        if(!answer){this.setMessage("stage6PatinaMessage","緑色の正体を入力してください。","error");input.focus();return}
+        if(!["緑青","ろくしょう"].includes(answer)){
+            this.setMessage("stage6PatinaMessage","素材と、長い年月で生まれた色を調べよう。","error");input.select();return
+        }
+        input.disabled=true;button.disabled=true;
+        this.el("finalStatue")?.classList.add("is-copper");
+        this.setMessage("stage6PatinaMessage","正解。像は銅で作られ、緑青によって今の色になった。","success");
+        this.save({patinaSolved:true});
+        await window.wait(1000);
+        const panel=this.el("stage6PurplePanel");if(panel)panel.hidden=false;
+        panel?.scrollIntoView({behavior:"smooth",block:"center"});
+    },
+    selectPen(color){
+        if(this.state?.transformed)return;
+        const key=color==="red"?"redSelected":"blueSelected";
+        this.state[key]=true;
+        this.el(color==="red"?"stage6RedPen":"stage6BluePen")?.classList.add("is-selected");
+        this.save({[key]:true});
+        if(this.state.redSelected&&this.state.blueSelected&&!this.state.inkMixed){
+            this.state.inkMixed=true;
+            const result=this.el("stage6MixerResult");
+            if(result){result.textContent="紫のインクができた。";result.classList.add("is-purple")}
+            const apply=this.el("stage6ApplyInk");if(apply)apply.disabled=false;
+            if(typeof window.obtainItem==="function")window.obtainItem("紫のインク");else window.addItem?.("紫のインク");
+            this.save({inkMixed:true});
+            this.setMessage("stage6PurpleMessage","第一の紫を手に入れた。","success");
+        }
+    },
+    applyInk(){
+        if(!this.state?.inkMixed||this.state.inkApplied)return;
+        this.state.inkApplied=true;this.el("stage6ApplyInk")?.closest(".final-purple-item")?.classList.add("is-used");
+        const b=this.el("stage6ApplyInk");if(b)b.disabled=true;
+        this.el("stage6PurpleDot1")?.classList.add("is-filled");this.flashPurple();this.save({inkApplied:true});
+        this.setMessage("stage6PurpleMessage","一つ目の紫をかけた。","success");this.checkTransformation();
+    },
+    applySoy(){
+        if(this.state?.soyApplied)return;
+        if(!(typeof window.hasItem==="function"&&window.hasItem("醤油"))){
+            this.setMessage("stage6PurpleMessage","寿司屋で受け取ったものが必要だ。","error");return
+        }
+        this.state.soyApplied=true;this.el("stage6ApplySoy")?.closest(".final-purple-item")?.classList.add("is-used");
+        const b=this.el("stage6ApplySoy");if(b)b.disabled=true;
+        this.el("stage6PurpleDot2")?.classList.add("is-filled");this.flashPurple();this.save({soyApplied:true});
+        this.setMessage("stage6PurpleMessage","寿司屋で『むらさき』と呼ばれる醤油をかけた。","success");this.checkTransformation();
+    },
+    async checkTransformation(){
+        if(!this.state.inkApplied||!this.state.soyApplied||this.state.transformed)return;
+        this.state.transformed=true;this.save({transformed:true});
+        await window.wait(900);
+        this.el("finalStatue")?.classList.add("is-gun");
+        const kanji=this.el("stage6NameKanji");if(kanji){kanji.style.opacity="0";kanji.style.transform="scale(.75)";setTimeout(()=>{kanji.textContent="銃";kanji.style.opacity="1";kanji.style.transform="scale(1)"},360)}
+        this.el("stage6NameReading")?.classList.add("is-gun");
+        this.setMessage("stage6PurpleMessage","『ゆ』が小さくなった。じゆうは、じゅうになった。","success");
+        await window.wait(1150);
+        const panel=this.el("stage6ShadowPanel");if(panel)panel.hidden=false;
+        panel?.scrollIntoView({behavior:"smooth",block:"center"});
+    },
+    async shootShadow(){
+        if(this.state?.shadowShot)return;
+        this.state.shadowShot=true;this.save({shadowShot:true});
+        const target=this.el("stage6ShadowTarget");target?.classList.add("is-shot");if(target)target.disabled=true;
+        this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success");
+        document.querySelectorAll("audio").forEach(audio=>{try{audio.pause()}catch(_){}});
+        window.clearStage?.(6);
+        await window.wait(1300);
+        await window.SceneManager.changeScene("stage6-clear",{fadeOutTime:900,blackTime:700,fadeInTime:1100});
+        FinalLetterController.restore();
+    },
+    restore(){
+        this.reset({preserveSave:true});
+        this.state=window.getStage6State?.()||{};
+        const s=this.state;
+        if(s.patinaSolved){this.el("finalStatue")?.classList.add("is-copper");const i=this.el("stage6PatinaAnswer"),b=this.el("stage6PatinaSubmit");if(i)i.disabled=true;if(b)b.disabled=true;this.setMessage("stage6PatinaMessage","正解。像は銅で作られ、緑青によって今の色になった。","success");const p=this.el("stage6PurplePanel");if(p)p.hidden=false}
+        if(s.redSelected)this.el("stage6RedPen")?.classList.add("is-selected");
+        if(s.blueSelected)this.el("stage6BluePen")?.classList.add("is-selected");
+        if(s.inkMixed){const r=this.el("stage6MixerResult");if(r){r.textContent="紫のインクができた。";r.classList.add("is-purple")}const b=this.el("stage6ApplyInk");if(b)b.disabled=false}
+        if(s.inkApplied){this.el("stage6PurpleDot1")?.classList.add("is-filled");this.el("stage6ApplyInk")?.closest(".final-purple-item")?.classList.add("is-used");const b=this.el("stage6ApplyInk");if(b)b.disabled=true}
+        if(s.soyApplied){this.el("stage6PurpleDot2")?.classList.add("is-filled");this.el("stage6ApplySoy")?.closest(".final-purple-item")?.classList.add("is-used");const b=this.el("stage6ApplySoy");if(b)b.disabled=true}
+        if(s.transformed){this.el("finalStatue")?.classList.add("is-gun");const k=this.el("stage6NameKanji");if(k)k.textContent="銃";this.el("stage6NameReading")?.classList.add("is-gun");const p=this.el("stage6ShadowPanel");if(p)p.hidden=false;this.setMessage("stage6PurpleMessage","『ゆ』が小さくなった。じゆうは、じゅうになった。","success")}
+        if(s.shadowShot){const target=this.el("stage6ShadowTarget");target?.classList.add("is-shot");if(target)target.disabled=true;this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success")}
+    },
+    reset({preserveSave=false}={}){
+        this.state={patinaSolved:false,redSelected:false,blueSelected:false,inkMixed:false,inkApplied:false,soyApplied:false,transformed:false,shadowShot:false,letterFolded:false,ended:false};
+        this.el("finalStatue")?.classList.remove("is-copper","is-gun","is-purple-flash");
+        const k=this.el("stage6NameKanji");if(k){k.textContent="自由";k.style.opacity="";k.style.transform=""}this.el("stage6NameReading")?.classList.remove("is-gun");
+        const i=this.el("stage6PatinaAnswer"),s=this.el("stage6PatinaSubmit");if(i){i.value="";i.disabled=false}if(s)s.disabled=false;
+        const pp=this.el("stage6PurplePanel");if(pp)pp.hidden=true;const sp=this.el("stage6ShadowPanel");if(sp)sp.hidden=true;
+        ["stage6RedPen","stage6BluePen"].forEach(id=>this.el(id)?.classList.remove("is-selected"));
+        const result=this.el("stage6MixerResult");if(result){result.textContent="まだ混ざっていない";result.classList.remove("is-purple")}
+        const ink=this.el("stage6ApplyInk"),soy=this.el("stage6ApplySoy");if(ink)ink.disabled=true;if(soy)soy.disabled=false;
+        document.querySelectorAll(".final-purple-item").forEach(el=>el.classList.remove("is-used"));["stage6PurpleDot1","stage6PurpleDot2"].forEach(id=>this.el(id)?.classList.remove("is-filled"));
+        const target=this.el("stage6ShadowTarget");target?.classList.remove("is-shot");if(target)target.disabled=false;
+        ["stage6PatinaMessage","stage6PurpleMessage"].forEach(id=>this.setMessage(id,""));this.setMessage("stage6ShadowMessage","影に狙いを定めよう。");
+        if(!preserveSave)window.resetStage6State?.();
+    },
+    init(){
+        if(this.initialized)return;
+        this.el("stage6PatinaForm")?.addEventListener("submit",event=>this.solvePatina(event));
+        this.el("stage6RedPen")?.addEventListener("click",()=>this.selectPen("red"));this.el("stage6BluePen")?.addEventListener("click",()=>this.selectPen("blue"));
+        this.el("stage6ApplyInk")?.addEventListener("click",()=>this.applyInk());this.el("stage6ApplySoy")?.addEventListener("click",()=>this.applySoy());
+        this.el("stage6ShadowTarget")?.addEventListener("click",()=>this.shootShadow());this.initialized=true;
+    }
+};
+
+/* 最後の手紙 */
+const FinalLetterController={
+    initialized:false,
+    folded:false,
+    fold(){
+        if(this.folded)return;this.folded=true;
+        document.getElementById("finalLetter")?.classList.add("is-folded");
+        const fold=document.getElementById("foldFinalLetterButton");if(fold)fold.disabled=true;
+        const go=document.getElementById("goToWindowButton");if(go)go.hidden=false;
+        window.saveStage6State?.({letterFolded:true});
+    },
+    restore(){
+        const state=window.getStage6State?.()||{};this.folded=Boolean(state.letterFolded);
+        document.getElementById("finalLetter")?.classList.toggle("is-folded",this.folded);
+        const fold=document.getElementById("foldFinalLetterButton");if(fold)fold.disabled=this.folded;
+        const go=document.getElementById("goToWindowButton");if(go)go.hidden=!this.folded;
+    },
+    reset(){this.folded=false;document.getElementById("finalLetter")?.classList.remove("is-folded");const f=document.getElementById("foldFinalLetterButton");if(f)f.disabled=false;const g=document.getElementById("goToWindowButton");if(g)g.hidden=true},
+    init(){if(this.initialized)return;document.getElementById("foldFinalLetterButton")?.addEventListener("click",()=>this.fold());document.getElementById("goToWindowButton")?.addEventListener("click",async()=>{EndingPlaneController.reset();await window.SceneManager.changeScene("ending-plane",{fadeOutTime:800,blackTime:450,fadeInTime:900})});this.initialized=true}
+};
+
+/* 最後の紙飛行機 */
+const EndingPlaneController={
+    initialized:false,pointerId:null,startX:0,startY:0,currentX:0,currentY:0,completed:false,
+    reset(){this.pointerId=null;this.completed=false;const p=document.getElementById("endingPlane"),t=document.getElementById("endingPlaneTrail");if(p){p.classList.remove("is-dragging","is-flying");p.style.transform="rotate(-18deg)";p.style.opacity="";p.disabled=false}t?.classList.remove("is-visible");const m=document.getElementById("endingPlaneMessage");if(m){m.textContent="紙飛行機に触れて、そのまま右上へ。";m.classList.remove("is-error","is-success")}},
+    finish(){
+        if(this.pointerId===null||this.completed)return;const dx=this.currentX-this.startX,dy=this.currentY-this.startY;this.pointerId=null;const p=document.getElementById("endingPlane");p?.classList.remove("is-dragging");
+        if(dx>=120&&dy<=-100){this.complete();return}
+        if(p)p.style.transform="rotate(-18deg)";const m=document.getElementById("endingPlaneMessage");if(m){m.textContent="もう少し大きく、右上へ飛ばそう。";m.classList.add("is-error")}
+    },
+    async complete(){
+        if(this.completed)return;this.completed=true;const p=document.getElementById("endingPlane"),a=document.getElementById("endingPlaneArea"),t=document.getElementById("endingPlaneTrail");if(!p||!a)return;
+        p.disabled=true;p.classList.add("is-flying");t?.classList.add("is-visible");const r=a.getBoundingClientRect();p.style.transform=`translate3d(${r.width*.82}px,-${r.height*.82}px,0) rotate(-29deg)`;
+        const m=document.getElementById("endingPlaneMessage");if(m){m.textContent="紙飛行機は、背景の向こうへ飛んでいった。";m.classList.add("is-success")}
+        window.saveStage6State?.({ended:true});await window.wait(1100);await window.SceneManager.changeScene("end",{fadeOutTime:1000,blackTime:900,fadeInTime:1500});updateEndSecretBadge();
+    },
+    init(){
+        if(this.initialized)return;const p=document.getElementById("endingPlane");if(!p)return;
+        p.addEventListener("pointerdown",e=>{if(this.completed)return;e.preventDefault();this.pointerId=e.pointerId;this.startX=this.currentX=e.clientX;this.startY=this.currentY=e.clientY;p.setPointerCapture(e.pointerId);p.classList.add("is-dragging")});
+        p.addEventListener("pointermove",e=>{if(this.pointerId!==e.pointerId||this.completed)return;e.preventDefault();this.currentX=e.clientX;this.currentY=e.clientY;p.style.transform=`translate3d(${this.currentX-this.startX}px,${this.currentY-this.startY}px,0) rotate(-24deg)`});
+        p.addEventListener("pointerup",e=>{if(this.pointerId!==e.pointerId)return;e.preventDefault();this.finish()});p.addEventListener("pointercancel",()=>this.finish());this.initialized=true;
+    }
+};
+function updateEndSecretBadge(){const badge=document.getElementById("ibushiginEndBadge");if(badge)badge.hidden=!(typeof window.hasItem==="function"&&window.hasItem("いぶしぎん"))}
+
+const initializeBeforeV010=window.initializePuzzles;
+window.initializePuzzles=function initializePuzzlesV010(){initializeBeforeV010?.();Stage6Controller.init();FinalLetterController.init();EndingPlaneController.init()};
+window.Stage6Controller=Stage6Controller;window.FinalLetterController=FinalLetterController;window.EndingPlaneController=EndingPlaneController;window.updateEndSecretBadge=updateEndSecretBadge;
