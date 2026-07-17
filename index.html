@@ -900,8 +900,278 @@
                 <button id="stage5ContinueButton" class="start-button" type="button">次へ進む</button>
             </div>
         </section>
-        <section id="scene-stage6" class="scene" data-scene="stage6" aria-labelledby="stage6-title" hidden>
-            <div class="scene__inner stage-placeholder__inner"><p class="scene-label">STAGE 6</p><h1 id="stage6-title" class="stage-placeholder__title">次のステージは、次のVersionで実装します。</h1><button id="backToTopButton" class="sub-button" type="button">TOPへ戻る</button></div>
+        <!-- =======================================================
+             STAGE6：最終ステージ
+        ======================================================== -->
+        <section
+            id="scene-stage6"
+            class="scene final-stage-scene"
+            data-scene="stage6"
+            aria-labelledby="stage6-title"
+            hidden
+        >
+            <div class="final-stage-scene__sky" aria-hidden="true"></div>
+            <div class="final-stage-scene__water" aria-hidden="true"></div>
+
+            <div class="scene__inner final-stage-scene__inner">
+                <p class="scene-label">FINAL STAGE</p>
+
+                <h1 id="stage6-title" class="final-stage-scene__title">
+                    世界を照らす自由の像
+                </h1>
+
+                <p class="final-stage-scene__lead">
+                    知っているはずの姿を、もう一度よく見よう。
+                </p>
+
+                <!-- 自由の女神：CSSだけで描く仮ビジュアル -->
+                <div id="finalStatueCard" class="final-statue-card">
+                    <div id="finalStatue" class="final-statue" aria-label="緑色の自由の女神像">
+                        <div class="final-statue__halo" aria-hidden="true"></div>
+                        <div class="final-statue__torch-arm" aria-hidden="true">
+                            <span class="final-statue__torch"></span>
+                            <span class="final-statue__flame"></span>
+                        </div>
+                        <div class="final-statue__head" aria-hidden="true">
+                            <span class="final-statue__crown"></span>
+                        </div>
+                        <div class="final-statue__body" aria-hidden="true"></div>
+                        <div class="final-statue__book" aria-hidden="true"></div>
+                        <div class="final-statue__pedestal" aria-hidden="true"></div>
+                        <div id="finalStatuePurpleFlash" class="final-statue__purple-flash" aria-hidden="true"></div>
+                    </div>
+
+                    <div class="final-statue-card__name">
+                        <span id="stage6NameKanji" class="final-name-kanji">自由</span>の女神
+                    </div>
+                    <div id="stage6NameReading" class="final-name-reading">
+                        じ<span id="stage6Yu" class="final-name-reading__yu">ゆ</span>う の めがみ
+                    </div>
+                </div>
+
+                <!-- 緑青を答える導入 -->
+                <section id="stage6PatinaPanel" class="final-panel" aria-labelledby="stage6-patina-title">
+                    <h2 id="stage6-patina-title" class="final-panel__title">
+                        この緑色の正体は？
+                    </h2>
+
+                    <p class="final-panel__text">
+                        検索してもよい。<br>
+                        像が作られた素材と、今の色の関係を調べよう。
+                    </p>
+
+                    <form id="stage6PatinaForm" class="answer-form final-answer-form" novalidate>
+                        <label class="answer-form__label" for="stage6PatinaAnswer">
+                            緑色の正体
+                        </label>
+                        <input
+                            id="stage6PatinaAnswer"
+                            class="answer-form__input"
+                            type="text"
+                            inputmode="text"
+                            autocomplete="off"
+                            spellcheck="false"
+                            maxlength="12"
+                            placeholder="漢字またはひらがな"
+                        >
+                        <button id="stage6PatinaSubmit" class="answer-form__submit" type="submit">
+                            答える
+                        </button>
+                    </form>
+
+                    <p id="stage6PatinaMessage" class="final-status" aria-live="polite"></p>
+                </section>
+
+                <!-- 紫を二つ用意する最終指示 -->
+                <section id="stage6PurplePanel" class="final-panel final-purple-panel" hidden>
+                    <p class="final-purple-panel__eyebrow">LAST INSTRUCTION</p>
+                    <h2 class="final-purple-panel__command">紫を二つかけろ</h2>
+
+                    <p class="final-panel__text">
+                        一つは、桜の前で見た二色から。<br>
+                        もう一つは、寿司屋で受け取ったものから。
+                    </p>
+
+                    <div class="final-mixer">
+                        <p class="final-mixer__title">赤と青を混ぜる</p>
+
+                        <div class="final-mixer__tools">
+                            <button id="stage6RedPen" class="final-pen final-pen--red" type="button">
+                                赤ペン
+                            </button>
+                            <span class="final-mixer__plus">＋</span>
+                            <button id="stage6BluePen" class="final-pen final-pen--blue" type="button">
+                                青ペン
+                            </button>
+                        </div>
+
+                        <div id="stage6MixerResult" class="final-mixer__result" aria-live="polite">
+                            まだ混ざっていない
+                        </div>
+                    </div>
+
+                    <div class="final-purple-items">
+                        <article class="final-purple-item">
+                            <div class="final-purple-item__icon final-purple-item__icon--ink" aria-hidden="true">紫</div>
+                            <h3>第一の紫</h3>
+                            <p>赤と青を混ぜた紫のインク。</p>
+                            <button id="stage6ApplyInk" class="sub-button" type="button" disabled>
+                                像にかける
+                            </button>
+                        </article>
+
+                        <article class="final-purple-item">
+                            <div class="final-purple-item__icon final-purple-item__icon--soy" aria-hidden="true">瓶</div>
+                            <h3>第二の紫</h3>
+                            <p>大将が「紫」として渡したもの。</p>
+                            <button id="stage6ApplySoy" class="sub-button" type="button">
+                                像にかける
+                            </button>
+                        </article>
+                    </div>
+
+                    <div class="final-purple-progress" aria-label="紫をかけた回数">
+                        <span id="stage6PurpleDot1"></span>
+                        <span id="stage6PurpleDot2"></span>
+                    </div>
+
+                    <p id="stage6PurpleMessage" class="final-status" aria-live="polite"></p>
+                </section>
+
+                <!-- 「自由」から「銃」へ変わった後の象徴的な標的 -->
+                <section id="stage6ShadowPanel" class="final-panel final-shadow-panel" hidden>
+                    <h2 class="final-panel__title">最後に撃ち抜くもの</h2>
+                    <p class="final-panel__text">
+                        目の前の誰かではない。<br>
+                        ずっと俯き、世界を同じ姿だと思い込んでいた自分の影だ。
+                    </p>
+
+                    <button id="stage6ShadowTarget" class="final-shadow-target" type="button" aria-label="内なる自分の影を撃ち抜く">
+                        <span class="final-shadow-target__person" aria-hidden="true"></span>
+                        <span class="final-shadow-target__label">内なる自分の影</span>
+                    </button>
+
+                    <p id="stage6ShadowMessage" class="final-status" aria-live="polite">
+                        影に狙いを定めよう。
+                    </p>
+                </section>
+            </div>
+        </section>
+
+        <!-- =======================================================
+             STAGE6 CLEAR：静寂と手紙
+        ======================================================== -->
+        <section
+            id="scene-stage6-clear"
+            class="scene final-silence-scene"
+            data-scene="stage6-clear"
+            aria-labelledby="stage6-clear-title"
+            hidden
+        >
+            <div class="scene__inner final-silence-scene__inner">
+                <p class="final-silence-scene__dots">……</p>
+
+                <h1 id="stage6-clear-title" class="final-silence-scene__title">
+                    撃ち抜いたのは、<br>
+                    自分を縛っていた見方だった。
+                </h1>
+
+                <p class="final-silence-scene__text">
+                    裏側を知りたくなった君なら、<br>
+                    最後の選択も、間違わなかったね。
+                </p>
+
+                <div id="finalLetter" class="final-letter">
+                    <div class="final-letter__front">
+                        <p>知るたびに<br>世界は姿を変える。</p>
+                    </div>
+                    <div class="final-letter__fold final-letter__fold--left"></div>
+                    <div class="final-letter__fold final-letter__fold--right"></div>
+                </div>
+
+                <button id="foldFinalLetterButton" class="start-button" type="button">
+                    紙飛行機を折る
+                </button>
+
+                <button id="goToWindowButton" class="sub-button" type="button" hidden>
+                    窓辺へ
+                </button>
+            </div>
+        </section>
+
+        <!-- =======================================================
+             紙飛行機を窓から飛ばす
+        ======================================================== -->
+        <section
+            id="scene-ending-plane"
+            class="scene ending-plane-scene"
+            data-scene="ending-plane"
+            aria-labelledby="ending-plane-title"
+            hidden
+        >
+            <div class="ending-plane-scene__window" aria-hidden="true"></div>
+
+            <div class="scene__inner ending-plane-scene__inner">
+                <p class="scene-label">LAST ACTION</p>
+                <h1 id="ending-plane-title" class="ending-plane-scene__title">
+                    紙飛行機を、窓の外へ。
+                </h1>
+                <p class="ending-plane-scene__lead">
+                    左下の紙飛行機を、右上へ大きく飛ばそう。
+                </p>
+
+                <div id="endingPlaneArea" class="ending-plane-area" role="application" aria-label="紙飛行機を左下から右上へ飛ばす">
+                    <div class="ending-plane-area__night" aria-hidden="true"></div>
+                    <div class="ending-plane-area__stars" aria-hidden="true"></div>
+                    <div id="endingPlaneTrail" class="ending-plane-trail" aria-hidden="true"></div>
+                    <button id="endingPlane" class="ending-plane" type="button" aria-label="紙飛行機">
+                        <span aria-hidden="true">➤</span>
+                    </button>
+                    <span class="ending-plane-area__start" aria-hidden="true">START</span>
+                    <span class="ending-plane-area__goal" aria-hidden="true">SKY</span>
+                </div>
+
+                <p id="endingPlaneMessage" class="final-status" aria-live="polite">
+                    紙飛行機に触れて、そのまま右上へ。
+                </p>
+            </div>
+        </section>
+
+        <!-- =======================================================
+             END
+        ======================================================== -->
+        <section
+            id="scene-end"
+            class="scene end-scene"
+            data-scene="end"
+            aria-labelledby="end-title"
+            hidden
+        >
+            <div class="end-scene__plane" aria-hidden="true">➤</div>
+
+            <div class="scene__inner end-scene__inner">
+                <p class="end-scene__small">THE WORLD CHANGES WITH CONTEXT</p>
+                <h1 id="end-title" class="end-scene__title">BACKGROUND</h1>
+                <p class="end-scene__theme">
+                    知るたびに<br>
+                    世界は姿を変える。
+                </p>
+                <p class="end-scene__closing">
+                    変わったのは世界ではない。<br>
+                    背景を知った、あなたの見え方だ。
+                </p>
+
+                <div id="ibushiginEndBadge" class="end-secret-badge" hidden>
+                    <span>SECRET</span>
+                    渋い輝きは、背景の中に残っていた。
+                </div>
+
+                <p class="end-scene__end">END</p>
+
+                <button id="restartFromEndButton" class="sub-button" type="button">
+                    最初から遊ぶ
+                </button>
+            </div>
         </section>
 
         <!-- =======================================================
