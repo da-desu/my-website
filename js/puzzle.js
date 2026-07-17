@@ -628,3 +628,225 @@ window.initializePuzzles=function(){
 window.Stage4Controller=Stage4Controller;
 window.resetStage4Puzzle=()=>Stage4Controller.reset();
 window.restoreStage4Puzzle=()=>Stage4Controller.restore();
+
+/* =========================================================
+   Version 0.9.1：第五問 メニュー謎
+   ========================================================= */
+
+let stage5Initialized = false;
+let stage5Clearing = false;
+
+function normalizeStage5Answer(value) {
+    const cleaned = String(value || "")
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/[!！?？。、,.・]+/g, "")
+        .toLowerCase();
+
+    return cleaned.replace(/[\u30a1-\u30f6]/g, function (character) {
+        return String.fromCharCode(character.charCodeAt(0) - 0x60);
+    });
+}
+
+function setStage5Message(text, type) {
+    const message = document.getElementById("stage5Message");
+
+    if (!message) {
+        return;
+    }
+
+    message.textContent = text;
+    message.classList.remove("is-error", "is-success");
+
+    if (type) {
+        message.classList.add("is-" + type);
+    }
+}
+
+function setChefSpeech(html) {
+    const speech = document.getElementById("chefSpeech");
+
+    if (speech) {
+        speech.innerHTML = html;
+    }
+}
+
+function showIbushiginReward() {
+    const reward = document.getElementById("ibushiginReward");
+
+    if (reward) {
+        reward.hidden = false;
+    }
+}
+
+function handleIbushiginAnswer(input) {
+    const alreadyOwned =
+        typeof window.hasItem === "function" &&
+        window.hasItem("いぶしぎん");
+
+    if (!alreadyOwned) {
+        if (typeof window.obtainItem === "function") {
+            window.obtainItem("いぶしぎん");
+        } else if (typeof window.addItem === "function") {
+            window.addItem("いぶしぎん");
+        }
+
+        setChefSpeech("渋いねえ。<br>こいつを持っていきな。");
+        setStage5Message("隠しアイテム「いぶしぎん」を手に入れた。", "success");
+    } else {
+        setChefSpeech("そいつは、もう渡したよ。<br>ほかには何がほしい？");
+        setStage5Message("「いぶしぎん」は入手済みだ。", "success");
+    }
+
+    showIbushiginReward();
+    input.value = "";
+    input.focus();
+}
+
+async function verifyStage5Answer(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    if (stage5Clearing) {
+        return;
+    }
+
+    const input = document.getElementById("stage5Answer");
+    const submitButton = document.getElementById("stage5SubmitButton");
+
+    if (!input || !submitButton) {
+        return;
+    }
+
+    const answer = normalizeStage5Answer(input.value);
+
+    if (!answer) {
+        setStage5Message("何がほしいか、大将へ伝えてください。", "error");
+        input.focus();
+        return;
+    }
+
+    const ibushiginAnswers = [
+        "いぶしぎん",
+        "いぶし銀",
+        "燻し銀"
+    ];
+
+    if (ibushiginAnswers.includes(answer)) {
+        handleIbushiginAnswer(input);
+        return;
+    }
+
+    const purpleAnswers = [
+        "むらさき",
+        "紫",
+        "むらさきください",
+        "むらさきをください",
+        "紫ください",
+        "紫をください"
+    ];
+
+    if (!purpleAnswers.includes(answer)) {
+        setChefSpeech("うーん、何のことだい？");
+        setStage5Message("メニュー表を、もう一度よく見てみよう。", "error");
+        input.select();
+        return;
+    }
+
+    stage5Clearing = true;
+    input.disabled = true;
+    submitButton.disabled = true;
+
+    setStage5Message("大将に伝わった。", "success");
+    setChefSpeech("お醤油ですね。<br>少々お待ちください。");
+
+    window.clearStage?.(5);
+
+    if (typeof window.obtainItem === "function") {
+        window.obtainItem("醤油");
+    } else if (typeof window.addItem === "function") {
+        window.addItem("醤油");
+    }
+
+    await window.wait(1200);
+
+    await window.SceneManager.changeScene(
+        "stage5-clear",
+        {
+            fadeOutTime: 720,
+            blackTime: 300,
+            fadeInTime: 900
+        }
+    );
+
+    stage5Clearing = false;
+}
+
+function toggleStage5Hint() {
+    const hint = document.getElementById("stage5Hint");
+    const button = document.getElementById("stage5HintButton");
+
+    if (!hint || !button) {
+        return;
+    }
+
+    hint.hidden = !hint.hidden;
+    button.textContent = hint.hidden ? "ヒントを見る" : "ヒントを閉じる";
+}
+
+function resetStage5Puzzle() {
+    const input = document.getElementById("stage5Answer");
+    const submitButton = document.getElementById("stage5SubmitButton");
+    const hint = document.getElementById("stage5Hint");
+    const hintButton = document.getElementById("stage5HintButton");
+    const reward = document.getElementById("ibushiginReward");
+
+    if (input) {
+        input.value = "";
+        input.disabled = false;
+    }
+
+    if (submitButton) {
+        submitButton.disabled = false;
+    }
+
+    if (hint) {
+        hint.hidden = true;
+    }
+
+    if (hintButton) {
+        hintButton.textContent = "ヒントを見る";
+    }
+
+    const ownsIbushigin =
+        typeof window.hasItem === "function" &&
+        window.hasItem("いぶしぎん");
+
+    if (reward) {
+        reward.hidden = !ownsIbushigin;
+    }
+
+    setChefSpeech("へい、いらっしゃい。<br>何がほしい？");
+    setStage5Message("", "");
+    stage5Clearing = false;
+}
+
+function initializeStage5Puzzle() {
+    if (stage5Initialized) {
+        return;
+    }
+
+    document.getElementById("stage5Form")?.addEventListener("submit", verifyStage5Answer);
+    document.getElementById("stage5HintButton")?.addEventListener("click", toggleStage5Hint);
+    stage5Initialized = true;
+}
+
+const initializeBeforeV091 = window.initializePuzzles;
+
+window.initializePuzzles = function initializePuzzlesV091() {
+    initializeBeforeV091?.();
+    initializeStage5Puzzle();
+};
+
+window.resetStage5Puzzle = resetStage5Puzzle;
