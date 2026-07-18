@@ -4313,3 +4313,187 @@ button {
         border-radius: 14px;
     }
 }
+
+
+/* =========================================================
+   Version 0.11.8：表示位置・桜・地図・待機時間の調整
+   ========================================================= */
+
+/* 女の子の一枚謎を画面中央へ固定 */
+.stage1-pens-reward {
+    place-content: center;
+    justify-items: center;
+    padding-inline: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
+}
+
+.stage1-pens-reward__dialog {
+    box-sizing: border-box;
+    width: min(calc(100vw - 32px), 520px);
+    max-width: 100%;
+    margin-inline: auto;
+    justify-self: center;
+    position: relative;
+    left: 0;
+    transform: none;
+}
+
+/* 会話文・正解後の言葉を「答えを入力」と同系統の白へ */
+.stage1-pens-reward__message,
+.stage1-girl-puzzle-form label {
+    color: rgba(255,255,255,.84);
+}
+
+/* 受け取るボタンを暗いモーダル上でも明瞭に */
+.stage1-pens-reward__button {
+    display: block;
+    width: min(100%, 240px);
+    min-height: 50px;
+    margin: 20px auto 0;
+    border: 1px solid rgba(255,255,255,.68);
+    border-radius: 12px;
+    background: #f1e5d2;
+    color: #2f241d;
+    font-weight: 800;
+    letter-spacing: .08em;
+    box-shadow: 0 8px 22px rgba(0,0,0,.28);
+}
+
+.stage1-pens-reward__button:active {
+    transform: scale(.98);
+}
+
+/* 第二問はシーン全体を縦スクロールさせ、手紙を最後まで表示する */
+#scene-stage2 {
+    overflow-y: auto;
+    place-items: start center;
+}
+
+.stage2-scene__inner {
+    width: min(100%, 660px);
+    max-height: none;
+    overflow: visible;
+    padding-block: 12px 40px;
+}
+
+.stage2-petal-puzzle {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: min(100%, 520px);
+    max-width: 100%;
+    margin-inline: auto;
+    overflow: hidden;
+}
+
+.stage2-petal-puzzle__image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* 桜の花びら単体ではなく、🌸のような五枚花の形 */
+.stage2-drag-petal {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 50%, #d98daa 0 7%, #efb4c8 8% 12%, transparent 13%),
+        radial-gradient(ellipse at 50% 18%, #fffafb 0 15%, #f7d4df 16% 27%, #eaa8bf 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 80% 41%, #fffafb 0 15%, #f7d4df 16% 27%, #eaa8bf 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 68% 78%, #fffafb 0 15%, #f7d4df 16% 27%, #eaa8bf 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 32% 78%, #fffafb 0 15%, #f7d4df 16% 27%, #eaa8bf 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 20% 41%, #fffafb 0 15%, #f7d4df 16% 27%, #eaa8bf 28% 36%, transparent 37%);
+    box-shadow:
+        0 5px 12px rgba(71,36,48,.22),
+        inset 0 0 8px rgba(255,255,255,.38);
+}
+
+.stage2-drag-petal::after {
+    content: "";
+    left: 47%;
+    top: 47%;
+    width: 6%;
+    height: 6%;
+    border-radius: 50%;
+    background: #d484a2;
+    transform: none;
+}
+
+.stage2-drag-petal.is-fixed {
+    background:
+        radial-gradient(circle at 50% 50%, #c97295 0 7%, #eaa0ba 8% 12%, transparent 13%),
+        radial-gradient(ellipse at 50% 18%, #fff7fa 0 15%, #f3c5d5 16% 27%, #df91ae 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 80% 41%, #fff7fa 0 15%, #f3c5d5 16% 27%, #df91ae 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 68% 78%, #fff7fa 0 15%, #f3c5d5 16% 27%, #df91ae 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 32% 78%, #fff7fa 0 15%, #f3c5d5 16% 27%, #df91ae 28% 36%, transparent 37%),
+        radial-gradient(ellipse at 20% 41%, #fff7fa 0 15%, #f3c5d5 16% 27%, #df91ae 28% 36%, transparent 37%);
+}
+
+/* 可動花をすべて払った後は、固定された2輪だけが残る */
+.stage2-petal-layer.is-cleared .stage2-drag-petal:not(.is-fixed) {
+    display: none;
+}
+
+/* 地図：NOW HEREの下に現在地の☆、折る前は間隔を広げる */
+.map-item-card__now {
+    right: calc(50% + 14px);
+}
+
+.map-item-card__here {
+    left: calc(50% + 14px);
+}
+
+.map-item-card__current-star {
+    position: absolute;
+    left: 50%;
+    top: 61%;
+    z-index: 4;
+    color: rgba(179,76,58,.92);
+    font-size: clamp(.8rem, 3.8vw, 1.1rem);
+    line-height: 1;
+    transform: translate(-50%,-50%);
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+
+.stage4-fold-map.is-folded .map-item-card__now {
+    right: calc(50% + 1px);
+}
+
+.stage4-fold-map.is-folded .map-item-card__here {
+    left: calc(50% + 1px);
+}
+
+/* 第四問：30秒の待機バー */
+.stage4-wait-bar.is-running span {
+    animation: stage4-wait-v0118 30s linear forwards;
+}
+
+@keyframes stage4-wait-v0118 {
+    to { width: 100%; }
+}
+
+@media (max-width: 430px) {
+    .stage1-pens-reward__dialog {
+        width: calc(100vw - 24px);
+    }
+
+    .stage2-petal-puzzle {
+        width: min(calc(100vw - 28px), 480px);
+    }
+
+    .map-item-card__now {
+        right: calc(50% + 10px);
+    }
+
+    .map-item-card__here {
+        left: calc(50% + 10px);
+    }
+
+    .stage4-fold-map.is-folded .map-item-card__now {
+        right: calc(50% + 1px);
+    }
+
+    .stage4-fold-map.is-folded .map-item-card__here {
+        left: calc(50% + 1px);
+    }
+}
