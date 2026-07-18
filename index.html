@@ -250,8 +250,7 @@
                         >
 
                             <p class="letter-back-message">
-                                裏側を知りたくなった君なら、<br>
-                                最後の選択、間違わないでね
+                                さては謎解き好きだね？
                             </p>
 
                             <button
@@ -282,29 +281,29 @@
 
                     <div class="story-sheet__body">
                         <p>
-                            世界を照らす自由の像とはなんだろうか。私は知らなかった。ただ、そこには手書きの地図が書かれていた。
+                            世界を照らす自由の像とはなんだろうか。私は知らなかった。ただ、そこにはQRコードが貼られていた。
                         </p>
 
                         <p>
-                            私はこの出会いを、物語として表示することにした。この先に何が待っているのか。まずはここへ向かってみよう
+                            私はこの出会いを物語として享受するため、QRコードを読み込んだ。この先に何が待っているのだろう。
                         </p>
-                    </div>
-
-                    <div
-                        class="story-sheet__map-line"
-                        aria-hidden="true"
-                    >
-                        <span>現在地</span>
-                        <i></i>
-                        <span>？</span>
                     </div>
 
                     <button
                         id="storyToStage1Button"
-                        class="start-button story-sheet__button"
+                        class="qr-scan-button"
                         type="button"
+                        aria-label="QRコードを読み込む"
                     >
-                        地図をたどる
+                        <span class="qr-scan-button__visual" aria-hidden="true">
+                            <span class="qr-scan-button__ring"></span>
+                            <span class="qr-scan-button__code">
+                                <i></i><i></i><i></i>
+                                <i></i><i></i><i></i>
+                                <i></i><i></i><i></i>
+                            </span>
+                        </span>
+                        <span class="qr-scan-button__caption">QRコードを読み込む</span>
                     </button>
                 </article>
 
@@ -547,19 +546,58 @@
 
                 <div id="stage1PensReward" class="stage1-pens-reward" hidden>
                     <div class="stage1-pens-reward__dialog">
-                        <p class="stage1-pens-reward__message">
-                            もしかして、赤いペンと青いペンが欲しいの？
-                        </p>
-                        <div class="stage1-pens-reward__items" aria-hidden="true">
-                            <span class="stage1-pens-reward__item stage1-pens-reward__item--red">赤ペン</span>
-                            <span class="stage1-pens-reward__item stage1-pens-reward__item--blue">青ペン</span>
-                        </div>
-                        <p class="stage1-pens-reward__caption">
-                            「赤ペン」と「青ペン」を手に入れた。
-                        </p>
-                        <button id="stage1PensRewardClose" class="dark-button stage1-pens-reward__button" type="button">
-                            受け取る
-                        </button>
+
+                        <section id="stage1GirlPuzzlePanel" class="stage1-girl-puzzle-panel">
+                            <p class="stage1-pens-reward__message">
+                                私のこと気にかけてくれたの？<br>
+                                この謎を解けたら、赤いペンと青いペンをあげるよ。
+                            </p>
+
+                            <figure class="stage1-girl-puzzle-card">
+                                <img
+                                    src="img/stage1/girl_puzzle.png"
+                                    alt="歌が上手い事実と疑うまい事実、人生の選択と洗濯を見比べる一枚謎"
+                                >
+                            </figure>
+
+                            <form id="stage1GirlPuzzleForm" class="stage1-girl-puzzle-form" novalidate>
+                                <label for="stage1GirlPuzzleAnswer">答えを入力</label>
+                                <div class="stage1-girl-puzzle-form__row">
+                                    <input
+                                        id="stage1GirlPuzzleAnswer"
+                                        type="text"
+                                        autocomplete="off"
+                                        autocapitalize="off"
+                                        spellcheck="false"
+                                        maxlength="12"
+                                        placeholder="ひらがな"
+                                    >
+                                    <button type="submit">答える</button>
+                                </div>
+                            </form>
+
+                            <p id="stage1GirlPuzzleMessage" class="stage1-girl-puzzle-message" aria-live="polite"></p>
+
+                            <button id="stage1GirlPuzzleDismiss" class="sub-button stage1-girl-puzzle-dismiss" type="button">
+                                またあとで
+                            </button>
+                        </section>
+
+                        <section id="stage1GirlPuzzleReward" class="stage1-girl-puzzle-reward" hidden>
+                            <p class="stage1-pens-reward__message">
+                                さっすが！お礼にこのペンあげる！
+                            </p>
+                            <div class="stage1-pens-reward__items" aria-hidden="true">
+                                <span class="stage1-pens-reward__item stage1-pens-reward__item--red">赤ペン</span>
+                                <span class="stage1-pens-reward__item stage1-pens-reward__item--blue">青ペン</span>
+                            </div>
+                            <p id="stage1PensRewardCaption" class="stage1-pens-reward__caption">
+                                「赤ペン」と「青ペン」を手に入れた。
+                            </p>
+                            <button id="stage1PensRewardClose" class="dark-button stage1-pens-reward__button" type="button">
+                                受け取る
+                            </button>
+                        </section>
                     </div>
                 </div>
 
@@ -611,50 +649,30 @@
                     青い世界が広がっていた。
                 </p>
 
-
                 <!--
-                    上級者向けの一枚謎です。
-
-                    手前の桜の木には「4/12」、
-                    奥の桜の木には「6/12」が隠れています。
-
-                    幹と花の向こうに、数字の一部だけが見えます。
+                    確定した手紙画像の上に、JavaScriptで桜の花びらを重ねます。
+                    「桜」と「消えたようだ。の最後の『だ』」に重なる2枚だけは固定です。
+                    それ以外は指やマウスで画面外へ払えます。
                 -->
-                <div
-                    class="wave-puzzle wave-puzzle--advanced stage2-sakura-puzzle"
-                    role="img"
-                    aria-label="手前の桜の木に4分の12、奥の桜の木に6分の12という文字が隠れている図"
+                <figure
+                    id="stage2PetalPuzzle"
+                    class="stage2-petal-puzzle"
+                    aria-label="桜の花びらに覆われた手紙の一枚謎"
                 >
-                    <div class="wave-puzzle__sky" aria-hidden="true"></div>
+                    <img
+                        id="stage2PuzzleImage"
+                        class="stage2-petal-puzzle__image"
+                        src="img/stage2/sakura_puzzle.png"
+                        alt="文字が整列して書かれた古い手紙"
+                        draggable="false"
+                    >
 
                     <div
-                        class="hidden-fraction hidden-fraction--back"
-                        aria-hidden="true"
-                    >
-                        <span class="hidden-fraction__numerator">6</span>
-                        <span class="hidden-fraction__line"></span>
-                        <span class="hidden-fraction__denominator">12</span>
-                    </div>
-
-                    <div class="stage2-cherry-tree stage2-cherry-tree--back" aria-hidden="true">
-                        <span class="stage2-cherry-tree__trunk"></span>
-                        <span class="stage2-cherry-tree__canopy"></span>
-                    </div>
-
-                    <div
-                        class="hidden-fraction hidden-fraction--front"
-                        aria-hidden="true"
-                    >
-                        <span class="hidden-fraction__numerator">4</span>
-                        <span class="hidden-fraction__line"></span>
-                        <span class="hidden-fraction__denominator">12</span>
-                    </div>
-
-                    <div class="stage2-cherry-tree stage2-cherry-tree--front" aria-hidden="true">
-                        <span class="stage2-cherry-tree__trunk"></span>
-                        <span class="stage2-cherry-tree__canopy"></span>
-                    </div>
-                </div>
+                        id="stage2PetalLayer"
+                        class="stage2-petal-layer"
+                        aria-label="手紙を覆っている桜の花びら"
+                    ></div>
+                </figure>
 
 
                 <form
@@ -941,8 +959,8 @@
 
                     <div class="chef-card__speech">
                         <p id="chefSpeech">
-                            へい、いらっしゃい。<br>
-                            何がほしい？
+                            今売り切れが多くてね。<br>
+                            さんかくの間のものなら渡せるよ。
                         </p>
                     </div>
                 </div>
@@ -959,14 +977,9 @@
                     </figcaption>
                 </figure>
 
-                <p class="stage5-voice-instruction">
-                    答えが分かったら、<br>
-                    <strong>声に出して読もう。</strong>
-                </p>
-
                 <form id="stage5Form" class="answer-form stage5-answer-form" novalidate>
                     <label class="answer-form__label" for="stage5Answer">
-                        何がほしい？
+                        答えを入力
                     </label>
 
                     <input
