@@ -353,6 +353,13 @@ const Stage2PetalController = {
         return document.getElementById("stage2PetalLayer");
     },
 
+    updateClearedState(){
+        const layer=this.layer();
+        if(!layer)return;
+        const movable=layer.querySelectorAll('.stage2-drag-petal:not(.is-fixed)');
+        layer.classList.toggle('is-cleared', movable.length===0);
+    },
+
     createPetal(data){
         const petal=document.createElement("button");
         petal.type="button";
@@ -360,7 +367,7 @@ const Stage2PetalController = {
         petal.dataset.petalId=data.id;
         petal.dataset.fixed=data.fixed?"true":"false";
         petal.dataset.rotation=String(data.rotation);
-        petal.setAttribute("aria-label",data.fixed?"動かない桜の花びら":"動かせる桜の花びら");
+        petal.setAttribute("aria-label",data.fixed?"動かない桜の花":"動かせる桜の花");
         petal.style.left=data.x+"%";
         petal.style.top=data.y+"%";
         petal.style.setProperty("--petal-size",data.size+"%");
@@ -374,6 +381,7 @@ const Stage2PetalController = {
         if(!layer)return;
         layer.replaceChildren();
         this.petals.forEach(data=>layer.appendChild(this.createPetal(data)));
+        this.updateClearedState();
     },
 
     startDrag(event,petal){
@@ -451,7 +459,10 @@ const Stage2PetalController = {
         petal.style.transform=
             `translate(-50%,-50%) translate3d(${flyX}px,${flyY}px,0) rotate(${state.rotation+240}deg) scale(.65)`;
 
-        window.setTimeout(()=>petal.remove(),620);
+        window.setTimeout(()=>{
+            petal.remove();
+            this.updateClearedState();
+        },620);
     },
 
     scatterAll(){
@@ -655,7 +666,7 @@ const Stage4Controller={
     folded:false,
     completed:false,
     timer:null,
-    waitMs:60000,
+    waitMs:30000,
     pinchStartDistance:null,
     pinchTriggered:false,
     pinchStartedAcrossSides:false,
@@ -692,7 +703,7 @@ const Stage4Controller={
         if(!this.folded||this.completed)return;
         this.stopTimer();
         this.el("stage4WaitBar")?.classList.add("is-running");
-        setTimeout(()=>this.el("stage4Silence")?.classList.add("is-visible"),30000);
+        setTimeout(()=>this.el("stage4Silence")?.classList.add("is-visible"),15000);
         this.timer=setTimeout(()=>this.complete(),this.waitMs);
     },
 
@@ -769,7 +780,7 @@ const Stage4Controller={
     choose(){
         if(!this.folded||this.completed)return;
         this.stopTimer();
-        this.setStatus("stage4ChoiceMessage","扉は動かない。選ばないことも、選択かもしれない。","error");
+        this.setStatus("stage4ChoiceMessage","選択にも色々あるよね","error");
         this.startTimer();
     },
 
