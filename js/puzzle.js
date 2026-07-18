@@ -98,17 +98,25 @@ async function verifyStage1Answer() {
         return;
     }
 
-    const correctTiles = tiles.filter(function (tile) {
-        return tile.dataset.correct === "true";
+    const duplicateTiles = tiles.filter(function (tile) {
+        return tile.dataset.duplicate === "true";
     });
 
-    const isCorrect =
-        selectedCount === correctTiles.length &&
-        correctTiles.every(function (tile) {
+    const selectedOnlyDuplicatePair =
+        selectedCount === duplicateTiles.length &&
+        duplicateTiles.every(function (tile) {
             return tile.classList.contains("is-selected");
         });
 
-    if (!isCorrect) {
+    if (selectedOnlyDuplicatePair) {
+        setStage1Message(
+            "他にも“同じソメイヨシノがあるようだ”",
+            ""
+        );
+        return;
+    }
+
+    if (selectedCount !== tiles.length) {
         setStage1Message(
             "何かが違うようだ。",
             "error"
@@ -120,7 +128,7 @@ async function verifyStage1Answer() {
     verifyButton.disabled = true;
 
     setStage1Message(
-        "確認できました。",
+        "あなたは”見た目”で判断しませんでした。",
         "success"
     );
 
@@ -128,7 +136,7 @@ async function verifyStage1Answer() {
         window.clearStage(1);
     }
 
-    await window.wait(700);
+    await window.wait(1500);
 
     await window.SceneManager.changeScene(
         "stage1-clear",
@@ -330,7 +338,7 @@ async function verifyStage2Answer(event) {
 
     if (!correctAnswers.includes(answer)) {
         setStage2Message(
-            "違うようだ。もう一度、波の前後を見てみよう。",
+            "違うようだ。もう一度、桜の木の前後を見てみよう。",
             "error"
         );
 
@@ -355,17 +363,27 @@ async function verifyStage2Answer(event) {
         window.clearStage(2);
     }
 
-    await window.wait(650);
+    const petalTransition =
+        document.getElementById("stage2PetalTransition");
+
+    if (petalTransition) {
+        petalTransition.classList.remove("is-active");
+        void petalTransition.offsetWidth;
+        petalTransition.classList.add("is-active");
+    }
+
+    await window.wait(1850);
 
     await window.SceneManager.changeScene(
         "stage2-clear",
         {
-            fadeOutTime: 700,
-            blackTime: 260,
+            fadeOutTime: 180,
+            blackTime: 80,
             fadeInTime: 900
         }
     );
 
+    petalTransition?.classList.remove("is-active");
     isStage2Clearing = false;
 }
 
@@ -389,6 +407,10 @@ function resetStage2Puzzle() {
     }
 
     setStage2Message("", "");
+
+    document
+        .getElementById("stage2PetalTransition")
+        ?.classList.remove("is-active");
 
     isStage2Clearing = false;
 }
@@ -446,7 +468,7 @@ const Stage4Controller={
     folded:false,
     completed:false,
     timer:null,
-    waitMs:10000,
+    waitMs:60000,
     pinchStartDistance:null,
     pinchTriggered:false,
     pinchStartedAcrossSides:false,
@@ -457,6 +479,7 @@ const Stage4Controller={
         const target=this.el(id);
         if(!target)return;
         target.textContent=text;
+        target.hidden=!text;
         target.classList.remove("is-error","is-success");
         if(type){target.classList.add(type==="error"?"is-error":"is-success");}
     },
@@ -482,7 +505,7 @@ const Stage4Controller={
         if(!this.folded||this.completed)return;
         this.stopTimer();
         this.el("stage4WaitBar")?.classList.add("is-running");
-        setTimeout(()=>this.el("stage4Silence")?.classList.add("is-visible"),4200);
+        setTimeout(()=>this.el("stage4Silence")?.classList.add("is-visible"),30000);
         this.timer=setTimeout(()=>this.complete(),this.waitMs);
     },
 
@@ -494,7 +517,10 @@ const Stage4Controller={
         window.saveStage4State?.({folded:true});
         await window.wait(1050);
         const panel=this.el("stage4ChoicePanel");
-        if(panel)panel.hidden=false;
+        if(panel){
+            panel.hidden=false;
+            panel.scrollIntoView({behavior:"smooth",block:"center"});
+        }
         this.setStatus("stage4ChoiceMessage","よく考えて選ぼう。");
         this.startTimer();
     },
@@ -566,7 +592,10 @@ const Stage4Controller={
         this.stopTimer();
         document.querySelectorAll(".stage4-choice-button").forEach(b=>b.disabled=true);
         this.setStatus("stage4ChoiceMessage","何もしなかった。すると――","success");
-        this.el("stage4Door")?.classList.add("is-open");
+        const door=this.el("stage4Door");
+        door?.scrollIntoView({behavior:"smooth",block:"center"});
+        await window.wait(420);
+        door?.classList.add("is-open");
         window.clearStage?.(4);
         window.saveStage4State?.({folded:true,doorOpened:true});
         await window.wait(1550);
@@ -586,7 +615,7 @@ const Stage4Controller={
         const choice=this.el("stage4ChoicePanel");
         if(choice)choice.hidden=true;
         document.querySelectorAll(".stage4-choice-button").forEach(b=>b.disabled=false);
-        this.setStatus("stage4MapMessage","地図を左右から二本の指でつまんでみよう。");
+        this.setStatus("stage4MapMessage","");
         this.setStatus("stage4ChoiceMessage","よく考えて選ぼう。");
         if(!preserveSave)window.resetStage4State?.();
     },
