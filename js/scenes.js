@@ -1905,12 +1905,30 @@ window.runIntroScene = runIntroScene;
 
 
 /* =========================================================
-   Version 0.11.2：第一問正解後の子どもイベント
+   Version 0.11.7：第一問正解後の女の子・一枚謎イベント
    ========================================================= */
 function stage1HasPensAlready(){
     const saveData=typeof window.getSaveData==="function"?window.getSaveData():null;
     const items=Array.isArray(saveData?.items)?saveData.items:[];
     return items.includes("赤ペン")&&items.includes("青ペン");
+}
+
+function normalizeStage1GirlPuzzleAnswer(value){
+    return String(value||"")
+        .trim()
+        .replace(/\s+/g,"")
+        .replace(/[!！?？。、,.・]/g,"")
+        .replace(/[\u30a1-\u30f6]/g,function(character){
+            return String.fromCharCode(character.charCodeAt(0)-0x60);
+        });
+}
+
+function setStage1GirlPuzzleMessage(text,type=""){
+    const message=document.getElementById("stage1GirlPuzzleMessage");
+    if(!message)return;
+    message.textContent=text;
+    message.classList.remove("is-error","is-success");
+    if(type)message.classList.add(type==="error"?"is-error":"is-success");
 }
 
 function updateStage1ChildSpotState(){
@@ -1925,6 +1943,19 @@ function updateStage1ChildSpotState(){
     }
 }
 
+function setStage1GirlPuzzleView(solved){
+    const puzzlePanel=document.getElementById("stage1GirlPuzzlePanel");
+    const rewardPanel=document.getElementById("stage1GirlPuzzleReward");
+    const caption=document.getElementById("stage1PensRewardCaption");
+    if(puzzlePanel)puzzlePanel.hidden=Boolean(solved);
+    if(rewardPanel)rewardPanel.hidden=!solved;
+    if(caption){
+        caption.textContent=stage1HasPensAlready()
+            ? "「赤ペン」と「青ペン」は入手済み。"
+            : "「赤ペン」と「青ペン」を手に入れた。";
+    }
+}
+
 function hideStage1PensReward(){
     const panel=document.getElementById("stage1PensReward");
     if(panel){panel.hidden=true;panel.classList.remove("is-visible");}
@@ -1933,19 +1964,50 @@ function hideStage1PensReward(){
 
 function showStage1PensReward(){
     const panel=document.getElementById("stage1PensReward");
+    const input=document.getElementById("stage1GirlPuzzleAnswer");
     if(!panel)return;
-    if(!stage1HasPensAlready()){
-        window.obtainItem?.("赤ペン");
-        window.obtainItem?.("青ペン");
-    }
+    setStage1GirlPuzzleMessage("");
+    setStage1GirlPuzzleView(stage1HasPensAlready());
     panel.hidden=false;
     window.requestAnimationFrame(()=>panel.classList.add("is-visible"));
+    if(!stage1HasPensAlready())setTimeout(()=>input?.focus(),260);
+    updateStage1ChildSpotState();
+}
+
+function solveStage1GirlPuzzle(event){
+    event?.preventDefault();
+    if(stage1HasPensAlready()){
+        setStage1GirlPuzzleView(true);
+        return;
+    }
+    const input=document.getElementById("stage1GirlPuzzleAnswer");
+    if(!input)return;
+    const answer=normalizeStage1GirlPuzzleAnswer(input.value);
+    const correctAnswers=["ひまよろしく"];
+    if(!answer){
+        setStage1GirlPuzzleMessage("答えを入力してね。","error");
+        input.focus();
+        return;
+    }
+    if(!correctAnswers.includes(answer)){
+        setStage1GirlPuzzleMessage("違うみたい。隠れていない文字を、順番に読んでみて。","error");
+        input.select();
+        return;
+    }
+    window.obtainItem?.("赤ペン");
+    window.obtainItem?.("青ペン");
+    setStage1GirlPuzzleMessage("さっすが！お礼にこのペンあげる！","success");
+    setStage1GirlPuzzleView(true);
+    const caption=document.getElementById("stage1PensRewardCaption");
+    if(caption)caption.textContent="「赤ペン」と「青ペン」を手に入れた。";
     updateStage1ChildSpotState();
 }
 
 function initializeStage1ClearReward(){
     const childButton=document.getElementById("stage1ChildButton");
     const closeButton=document.getElementById("stage1PensRewardClose");
+    const dismissButton=document.getElementById("stage1GirlPuzzleDismiss");
+    const form=document.getElementById("stage1GirlPuzzleForm");
     if(childButton&&childButton.dataset.rewardBound!=="true"){
         childButton.addEventListener("click",showStage1PensReward);
         childButton.dataset.rewardBound="true";
@@ -1953,6 +2015,14 @@ function initializeStage1ClearReward(){
     if(closeButton&&closeButton.dataset.rewardBound!=="true"){
         closeButton.addEventListener("click",hideStage1PensReward);
         closeButton.dataset.rewardBound="true";
+    }
+    if(dismissButton&&dismissButton.dataset.rewardBound!=="true"){
+        dismissButton.addEventListener("click",hideStage1PensReward);
+        dismissButton.dataset.rewardBound="true";
+    }
+    if(form&&form.dataset.rewardBound!=="true"){
+        form.addEventListener("submit",solveStage1GirlPuzzle);
+        form.dataset.rewardBound="true";
     }
     updateStage1ChildSpotState();
 }
