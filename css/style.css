@@ -3976,3 +3976,340 @@ button {
         width: 67%;
     }
 }
+
+
+/* =========================================================
+   Version 0.11.5：追加ブラッシュアップ
+   ========================================================= */
+
+/* 物語シート：QRコード読み込み演出 */
+.qr-scan-button {
+    appearance: none;
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    width: min(100%, 230px);
+    margin: 30px auto 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.qr-scan-button__visual {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 116px;
+    height: 116px;
+}
+
+.qr-scan-button__ring {
+    position: absolute;
+    inset: 0;
+    border: 3px dashed rgba(65,48,39,.62);
+    border-radius: 50%;
+    animation: qr-scan-rotate 2.4s linear infinite;
+}
+
+.qr-scan-button__ring::before,
+.qr-scan-button__ring::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+
+.qr-scan-button__ring::before {
+    right: -7px;
+    top: 19px;
+    border-left: 13px solid rgba(65,48,39,.78);
+    transform: rotate(30deg);
+}
+
+.qr-scan-button__ring::after {
+    left: -7px;
+    bottom: 19px;
+    border-right: 13px solid rgba(65,48,39,.78);
+    transform: rotate(30deg);
+}
+
+.qr-scan-button__code {
+    display: grid;
+    grid-template-columns: repeat(3, 15px);
+    grid-template-rows: repeat(3, 15px);
+    gap: 5px;
+    padding: 12px;
+    border: 2px solid rgba(62,45,37,.72);
+    border-radius: 8px;
+    background: rgba(255,250,241,.8);
+    box-shadow: 0 8px 20px rgba(64,43,34,.12);
+}
+
+.qr-scan-button__code i {
+    display: block;
+    background: rgba(56,42,36,.84);
+}
+
+.qr-scan-button__code i:nth-child(2),
+.qr-scan-button__code i:nth-child(4),
+.qr-scan-button__code i:nth-child(8) {
+    background: transparent;
+    border: 2px solid rgba(56,42,36,.84);
+}
+
+.qr-scan-button__caption {
+    font-family: "Yu Mincho", "Noto Serif JP", serif;
+    font-size: .82rem;
+    letter-spacing: .1em;
+}
+
+.qr-scan-button:active .qr-scan-button__visual {
+    transform: scale(.96);
+}
+
+@keyframes qr-scan-rotate {
+    to { transform: rotate(360deg); }
+}
+
+/* 女の子の一枚謎 */
+.stage1-pens-reward__dialog {
+    width: min(94vw, 520px);
+    max-height: 92svh;
+    overflow-y: auto;
+}
+
+.stage1-girl-puzzle-card {
+    width: 100%;
+    margin: 18px 0 0;
+    border: 4px solid rgba(124,91,74,.64);
+    border-radius: 13px;
+    overflow: hidden;
+    background: #f5ead8;
+}
+
+.stage1-girl-puzzle-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.stage1-girl-puzzle-form {
+    margin-top: 18px;
+    text-align: left;
+}
+
+.stage1-girl-puzzle-form label {
+    display: block;
+    margin-bottom: 7px;
+    color: rgba(255,255,255,.66);
+    font-size: .74rem;
+}
+
+.stage1-girl-puzzle-form__row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 9px;
+}
+
+.stage1-girl-puzzle-form input {
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 10px;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    font-size: 1rem;
+}
+
+.stage1-girl-puzzle-form button {
+    min-height: 46px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 10px;
+    background: #e8ddca;
+    color: #342922;
+    font-weight: 700;
+}
+
+.stage1-girl-puzzle-message {
+    min-height: 1.6em;
+    margin: 12px 0 0;
+    font-size: .8rem;
+}
+
+.stage1-girl-puzzle-message.is-error { color: #ffc6c6; }
+.stage1-girl-puzzle-message.is-success { color: #cdeecf; }
+.stage1-girl-puzzle-dismiss { margin-top: 12px; }
+.stage1-girl-puzzle-reward[hidden],
+.stage1-girl-puzzle-panel[hidden] { display: none; }
+
+/* 第二問：女の子画像と同じトーンの桜の一枚謎 */
+.stage2-sakura-image-puzzle {
+    width: min(100%, 620px);
+    margin: 25px 0 0;
+    border: 6px solid rgba(255,255,255,.54);
+    border-radius: 18px;
+    overflow: hidden;
+    background: #9ed0e8;
+    box-shadow: 0 18px 42px rgba(35,74,92,.22);
+}
+
+.stage2-sakura-image-puzzle img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* 第五問：音読指示を削除した後の余白 */
+.stage5-menu-puzzle + .stage5-answer-form {
+    margin-top: 24px;
+}
+
+/* END：BACKGROUNDがスマホで見切れない大きさ */
+.end-scene__title {
+    max-width: 100%;
+    font-size: clamp(1.75rem, 9vw, 3.8rem);
+    letter-spacing: .035em;
+    white-space: nowrap;
+}
+
+@media (max-width: 390px) {
+    .qr-scan-button__visual {
+        width: 102px;
+        height: 102px;
+    }
+    .stage1-pens-reward__dialog {
+        padding-inline: 14px;
+    }
+    .stage1-girl-puzzle-form__row {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   Version 0.11.7：第二問・花びらを手でどかすギミック
+   ========================================================= */
+.stage2-petal-puzzle {
+    position: relative;
+    width: min(100%, 620px);
+    margin: 25px 0 0;
+    border: 6px solid rgba(255,255,255,.54);
+    border-radius: 18px;
+    overflow: hidden;
+    background: #d8c19d;
+    box-shadow: 0 18px 42px rgba(35,50,55,.26);
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.stage2-petal-puzzle__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
+.stage2-petal-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.stage2-drag-petal {
+    appearance: none;
+    position: absolute;
+    width: var(--petal-size, 11%);
+    aspect-ratio: 1 / .72;
+    padding: 0;
+    border: 0;
+    border-radius: 68% 32% 64% 36% / 62% 42% 58% 38%;
+    background:
+        radial-gradient(circle at 51% 49%, rgba(219,127,154,.74) 0 5%, transparent 6%),
+        radial-gradient(ellipse at 44% 37%, #fffefe 0 19%, #fde8ef 42%, #f5c8d6 72%, #dc91aa 100%);
+    box-shadow:
+        inset -5px -4px 9px rgba(183,89,119,.15),
+        0 5px 12px rgba(71,36,48,.22);
+    transform: translate(-50%,-50%) rotate(var(--petal-rotation,0deg));
+    transform-origin: 50% 50%;
+    cursor: grab;
+    pointer-events: auto;
+    touch-action: none;
+    transition:
+        transform 230ms ease,
+        opacity 500ms ease,
+        filter 180ms ease;
+    will-change: transform,opacity;
+}
+
+.stage2-drag-petal::after {
+    content: "";
+    position: absolute;
+    left: 48%;
+    top: 10%;
+    width: 1px;
+    height: 72%;
+    background: linear-gradient(180deg,rgba(209,126,150,.12),rgba(190,92,123,.4),transparent);
+    transform: rotate(7deg);
+}
+
+.stage2-drag-petal.is-dragging {
+    z-index: 100;
+    cursor: grabbing;
+    filter: drop-shadow(0 13px 10px rgba(55,28,37,.28));
+    transition: filter 120ms ease;
+}
+
+.stage2-drag-petal.is-leaving {
+    pointer-events: none;
+    opacity: 0;
+    transition:
+        transform 620ms cubic-bezier(.16,.7,.25,1),
+        opacity 430ms ease 120ms;
+}
+
+.stage2-drag-petal.is-fixed {
+    cursor: default;
+    background:
+        radial-gradient(circle at 51% 49%, rgba(204,104,136,.8) 0 5%, transparent 6%),
+        radial-gradient(ellipse at 44% 37%, #fffafa 0 19%, #f8d8e3 43%, #ebaec1 73%, #ce7796 100%);
+    box-shadow:
+        0 0 0 2px rgba(255,255,255,.2),
+        0 6px 14px rgba(71,36,48,.25);
+}
+
+.stage2-drag-petal.is-fixed.is-tested {
+    animation: stage2-fixed-petal-shake 310ms ease;
+}
+
+@keyframes stage2-fixed-petal-shake {
+    0%,100% {
+        transform: translate(-50%,-50%) rotate(var(--petal-rotation,0deg));
+    }
+    35% {
+        transform: translate(calc(-50% - 5px),-50%) rotate(calc(var(--petal-rotation,0deg) - 3deg));
+    }
+    70% {
+        transform: translate(calc(-50% + 5px),-50%) rotate(calc(var(--petal-rotation,0deg) + 3deg));
+    }
+}
+
+/* 旧仮画像用の枠は今回の花びらパズルでは使いません。 */
+.stage2-sakura-image-puzzle { display: none; }
+
+@media (max-width: 430px) {
+    .stage2-petal-puzzle {
+        width: calc(100vw - 28px);
+        border-width: 4px;
+        border-radius: 14px;
+    }
+}
