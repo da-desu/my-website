@@ -3762,3 +3762,217 @@ button {
         height: 52%;
     }
 }
+
+
+/* =========================================================
+   Version 0.11.4：追加ブラッシュアップ
+   ========================================================= */
+
+/* 第二問：波ではなく、桜の木で分数を隠す */
+.stage2-sakura-puzzle {
+    overflow: hidden;
+    background: linear-gradient(180deg, #97cbe7 0%, #d8edf5 58%, #9ac9da 100%);
+}
+
+.stage2-sakura-puzzle .wave-puzzle__sky {
+    background:
+        radial-gradient(circle at 78% 18%, rgba(255, 250, 206, 0.90) 0 6%, transparent 7%),
+        linear-gradient(180deg, #83c6e8 0%, #d6edf6 56%, #a9d5e3 100%);
+}
+
+.stage2-cherry-tree {
+    position: absolute;
+    bottom: -8%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.stage2-cherry-tree--back {
+    left: 43%;
+    z-index: 2;
+    width: 58%;
+    transform: scale(.88) rotate(2deg);
+    transform-origin: bottom center;
+    opacity: .92;
+}
+
+.stage2-cherry-tree--front {
+    left: -6%;
+    z-index: 4;
+    width: 62%;
+    transform: rotate(-3deg);
+    transform-origin: bottom center;
+}
+
+.stage2-cherry-tree__trunk {
+    position: absolute;
+    left: 48%;
+    bottom: 0;
+    width: 20%;
+    height: 68%;
+    border-radius: 48% 52% 16% 20% / 18% 20% 6% 8%;
+    background:
+        linear-gradient(88deg, rgba(48,29,22,.28), transparent 22% 72%, rgba(255,255,255,.10)),
+        repeating-linear-gradient(165deg, #4f3329 0 7px, #6f4939 8px 13px, #3e2922 14px 18px);
+    box-shadow:
+        inset 8px 0 12px rgba(0,0,0,.20),
+        0 10px 18px rgba(42,27,21,.20);
+}
+
+.stage2-cherry-tree__trunk::before,
+.stage2-cherry-tree__trunk::after {
+    content: "";
+    position: absolute;
+    bottom: 54%;
+    width: 85%;
+    height: 15%;
+    border-radius: 999px;
+    background: #5c3a2e;
+    transform-origin: 10% 50%;
+}
+
+.stage2-cherry-tree__trunk::before {
+    left: 54%;
+    transform: rotate(-32deg);
+}
+
+.stage2-cherry-tree__trunk::after {
+    right: 54%;
+    transform: rotate(212deg);
+}
+
+.stage2-cherry-tree__canopy {
+    position: absolute;
+    left: 4%;
+    top: 1%;
+    width: 94%;
+    height: 62%;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 18% 34%, #fff9fb 0 5%, #f7cbd8 6% 13%, transparent 14%),
+        radial-gradient(circle at 36% 17%, #fffafd 0 6%, #f3bfcf 7% 15%, transparent 16%),
+        radial-gradient(circle at 54% 31%, #fff8fb 0 6%, #f4c3d1 7% 16%, transparent 17%),
+        radial-gradient(circle at 76% 18%, #fff9fc 0 5%, #efb7c8 6% 14%, transparent 15%),
+        radial-gradient(circle at 83% 44%, #fff9fb 0 6%, #f4c4d2 7% 16%, transparent 17%),
+        radial-gradient(circle at 64% 60%, #fffafd 0 7%, #edb4c6 8% 18%, transparent 19%),
+        radial-gradient(circle at 33% 62%, #fff9fc 0 7%, #f3bfd0 8% 18%, transparent 19%),
+        radial-gradient(circle at 12% 62%, #fff9fc 0 6%, #efb7c8 7% 17%, transparent 18%),
+        radial-gradient(ellipse at center, rgba(241,177,198,.96) 0 58%, transparent 59%);
+    filter: drop-shadow(0 8px 10px rgba(111,64,77,.18));
+}
+
+.stage2-sakura-puzzle .hidden-fraction {
+    color: rgba(18, 61, 82, .62);
+    text-shadow:
+        0 1px 0 rgba(255,255,255,.42),
+        0 0 4px rgba(15,46,63,.12);
+}
+
+/* 第二問正解：桜の花びらが画面を覆う遷移 */
+.stage2-petal-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 1650;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    background: rgba(255, 245, 249, 0);
+    transition:
+        opacity 180ms ease,
+        visibility 0s linear 1900ms,
+        background-color 900ms ease 650ms;
+}
+
+.stage2-petal-transition.is-active {
+    opacity: 1;
+    visibility: visible;
+    background: rgba(255, 242, 247, .98);
+    transition:
+        opacity 160ms ease,
+        visibility 0s,
+        background-color 900ms ease 650ms;
+}
+
+.stage2-petal-transition span {
+    position: absolute;
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    width: clamp(34px, 10vw, 86px);
+    aspect-ratio: 1.35 / 1;
+    border-radius: 70% 12% 70% 22%;
+    background:
+        radial-gradient(circle at 70% 24%, rgba(255,255,255,.96) 0 12%, transparent 13%),
+        linear-gradient(145deg, #fffafc 0%, #f5b9cc 58%, #e995b3 100%);
+    box-shadow: 0 10px 22px rgba(163,82,111,.15);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.15) rotate(var(--r, 0deg));
+}
+
+.stage2-petal-transition.is-active span {
+    animation: stage2-petal-cover 1.55s cubic-bezier(.15,.72,.22,1) forwards;
+    animation-delay: var(--d, 0s);
+}
+
+.stage2-petal-transition span:nth-child(1){--x:5%;--y:12%;--r:18deg;--d:.02s}
+.stage2-petal-transition span:nth-child(2){--x:20%;--y:5%;--r:-24deg;--d:.13s}
+.stage2-petal-transition span:nth-child(3){--x:38%;--y:15%;--r:42deg;--d:.07s}
+.stage2-petal-transition span:nth-child(4){--x:57%;--y:7%;--r:-8deg;--d:.18s}
+.stage2-petal-transition span:nth-child(5){--x:77%;--y:13%;--r:64deg;--d:.05s}
+.stage2-petal-transition span:nth-child(6){--x:94%;--y:6%;--r:-45deg;--d:.21s}
+.stage2-petal-transition span:nth-child(7){--x:11%;--y:33%;--r:88deg;--d:.17s}
+.stage2-petal-transition span:nth-child(8){--x:29%;--y:38%;--r:-62deg;--d:.03s}
+.stage2-petal-transition span:nth-child(9){--x:49%;--y:31%;--r:28deg;--d:.24s}
+.stage2-petal-transition span:nth-child(10){--x:69%;--y:40%;--r:-18deg;--d:.10s}
+.stage2-petal-transition span:nth-child(11){--x:90%;--y:31%;--r:47deg;--d:.15s}
+.stage2-petal-transition span:nth-child(12){--x:3%;--y:59%;--r:-38deg;--d:.25s}
+.stage2-petal-transition span:nth-child(13){--x:22%;--y:63%;--r:70deg;--d:.08s}
+.stage2-petal-transition span:nth-child(14){--x:41%;--y:55%;--r:-12deg;--d:.19s}
+.stage2-petal-transition span:nth-child(15){--x:61%;--y:65%;--r:98deg;--d:.04s}
+.stage2-petal-transition span:nth-child(16){--x:80%;--y:58%;--r:-54deg;--d:.22s}
+.stage2-petal-transition span:nth-child(17){--x:96%;--y:67%;--r:20deg;--d:.11s}
+.stage2-petal-transition span:nth-child(18){--x:14%;--y:88%;--r:-84deg;--d:.20s}
+.stage2-petal-transition span:nth-child(19){--x:49%;--y:87%;--r:38deg;--d:.09s}
+.stage2-petal-transition span:nth-child(20){--x:84%;--y:90%;--r:-30deg;--d:.16s}
+
+@keyframes stage2-petal-cover {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.12) rotate(var(--r, 0deg));
+    }
+    42% { opacity: .96; }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(4.3) rotate(calc(var(--r, 0deg) + 135deg));
+    }
+}
+
+/* 第四問：1分の回答時間 */
+.stage4-wait-bar.is-running span {
+    animation: stage4-wait-v0114 60s linear forwards;
+}
+
+@keyframes stage4-wait-v0114 {
+    to { width: 100%; }
+}
+
+/* 問いを地図より上に置いた際の間隔調整 */
+.stage4-choice-panel + .stage4-map-panel {
+    margin-top: 18px;
+}
+
+.stage4-choice-panel__title {
+    line-height: 1.65;
+}
+
+@media (max-width: 430px) {
+    .stage2-cherry-tree--back {
+        left: 42%;
+        width: 62%;
+    }
+
+    .stage2-cherry-tree--front {
+        left: -9%;
+        width: 67%;
+    }
+}
