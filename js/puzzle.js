@@ -296,6 +296,188 @@ function setStage2Message(text, type) {
 }
 
 
+
+/* =========================================================
+   Version 0.11.7：第二問「動かせる桜の花びら」
+   ========================================================= */
+const Stage2PetalController = {
+    initialized: false,
+    activePointer: null,
+
+    /*
+        x / y は、手紙画像に対する割合です。
+        fixed:true の2枚だけは動きません。
+        1枚目は「桜」、2枚目は「消えたようだ。」の「だ」を覆います。
+    */
+    petals: [
+        {id:"fixed-sakura",x:18.7,y:13.9,size:12.0,rotation:-18,fixed:true},
+        {id:"fixed-da",x:68.5,y:56.4,size:10.5,rotation:24,fixed:true},
+
+        {id:"p01",x:31,y:14,size:10,rotation:35},
+        {id:"p02",x:45,y:13,size:12,rotation:-42},
+        {id:"p03",x:59,y:15,size:9,rotation:12},
+        {id:"p04",x:76,y:14,size:11,rotation:58},
+        {id:"p05",x:84,y:19,size:9,rotation:-25},
+        {id:"p06",x:20,y:24,size:11,rotation:72},
+        {id:"p07",x:36,y:24,size:13,rotation:-8},
+        {id:"p08",x:50,y:25,size:10,rotation:41},
+        {id:"p09",x:65,y:24,size:12,rotation:-56},
+        {id:"p10",x:80,y:27,size:11,rotation:18},
+        {id:"p11",x:25,y:35,size:12,rotation:-33},
+        {id:"p12",x:40,y:36,size:10,rotation:67},
+        {id:"p13",x:55,y:35,size:13,rotation:5},
+        {id:"p14",x:70,y:36,size:11,rotation:-72},
+        {id:"p15",x:83,y:38,size:9,rotation:31},
+        {id:"p16",x:17,y:46,size:10,rotation:48},
+        {id:"p17",x:33,y:46,size:13,rotation:-16},
+        {id:"p18",x:48,y:47,size:11,rotation:78},
+        {id:"p19",x:62,y:46,size:12,rotation:-44},
+        {id:"p20",x:79,y:48,size:10,rotation:14},
+        {id:"p21",x:22,y:57,size:13,rotation:-60},
+        {id:"p22",x:38,y:58,size:10,rotation:26},
+        {id:"p23",x:53,y:57,size:12,rotation:-5},
+        {id:"p24",x:82,y:58,size:11,rotation:63},
+        {id:"p25",x:18,y:68,size:11,rotation:8},
+        {id:"p26",x:34,y:69,size:12,rotation:-47},
+        {id:"p27",x:49,y:68,size:10,rotation:74},
+        {id:"p28",x:64,y:70,size:13,rotation:-22},
+        {id:"p29",x:80,y:69,size:10,rotation:39},
+        {id:"p30",x:25,y:81,size:12,rotation:-70},
+        {id:"p31",x:43,y:80,size:10,rotation:16},
+        {id:"p32",x:61,y:81,size:12,rotation:52},
+        {id:"p33",x:78,y:82,size:11,rotation:-34},
+        {id:"p34",x:53,y:90,size:9,rotation:7}
+    ],
+
+    layer(){
+        return document.getElementById("stage2PetalLayer");
+    },
+
+    createPetal(data){
+        const petal=document.createElement("button");
+        petal.type="button";
+        petal.className="stage2-drag-petal"+(data.fixed?" is-fixed":"");
+        petal.dataset.petalId=data.id;
+        petal.dataset.fixed=data.fixed?"true":"false";
+        petal.dataset.rotation=String(data.rotation);
+        petal.setAttribute("aria-label",data.fixed?"動かない桜の花びら":"動かせる桜の花びら");
+        petal.style.left=data.x+"%";
+        petal.style.top=data.y+"%";
+        petal.style.setProperty("--petal-size",data.size+"%");
+        petal.style.setProperty("--petal-rotation",data.rotation+"deg");
+        petal.addEventListener("pointerdown",event=>this.startDrag(event,petal));
+        return petal;
+    },
+
+    render(){
+        const layer=this.layer();
+        if(!layer)return;
+        layer.replaceChildren();
+        this.petals.forEach(data=>layer.appendChild(this.createPetal(data)));
+    },
+
+    startDrag(event,petal){
+        if(isStage2Clearing)return;
+        event.preventDefault();
+
+        if(petal.dataset.fixed==="true"){
+            petal.classList.remove("is-tested");
+            void petal.offsetWidth;
+            petal.classList.add("is-tested");
+            return;
+        }
+
+        if(this.activePointer)return;
+
+        const rect=petal.getBoundingClientRect();
+        this.activePointer={
+            id:event.pointerId,
+            petal,
+            startX:event.clientX,
+            startY:event.clientY,
+            dx:0,
+            dy:0,
+            rotation:Number(petal.dataset.rotation||0),
+            width:rect.width
+        };
+
+        petal.classList.add("is-dragging");
+        petal.setPointerCapture?.(event.pointerId);
+
+        const move=e=>this.moveDrag(e);
+        const end=e=>this.endDrag(e,move,end);
+        petal.addEventListener("pointermove",move);
+        petal.addEventListener("pointerup",end);
+        petal.addEventListener("pointercancel",end);
+    },
+
+    moveDrag(event){
+        const state=this.activePointer;
+        if(!state||event.pointerId!==state.id)return;
+        event.preventDefault();
+        state.dx=event.clientX-state.startX;
+        state.dy=event.clientY-state.startY;
+        state.petal.style.transform=
+            `translate(-50%,-50%) translate3d(${state.dx}px,${state.dy}px,0) rotate(${state.rotation+state.dx*.08}deg)`;
+    },
+
+    endDrag(event,move,end){
+        const state=this.activePointer;
+        if(!state||event.pointerId!==state.id)return;
+
+        const petal=state.petal;
+        petal.removeEventListener("pointermove",move);
+        petal.removeEventListener("pointerup",end);
+        petal.removeEventListener("pointercancel",end);
+        petal.releasePointerCapture?.(event.pointerId);
+        petal.classList.remove("is-dragging");
+
+        const distance=Math.hypot(state.dx,state.dy);
+        this.activePointer=null;
+
+        if(distance<72){
+            petal.style.transform="";
+            return;
+        }
+
+        const length=Math.max(distance,1);
+        const directionX=state.dx/length;
+        const directionY=state.dy/length;
+        const flyDistance=Math.max(window.innerWidth,window.innerHeight)*1.35;
+        const flyX=state.dx+(directionX*flyDistance);
+        const flyY=state.dy+(directionY*flyDistance);
+
+        petal.classList.add("is-leaving");
+        petal.style.transform=
+            `translate(-50%,-50%) translate3d(${flyX}px,${flyY}px,0) rotate(${state.rotation+240}deg) scale(.65)`;
+
+        window.setTimeout(()=>petal.remove(),620);
+    },
+
+    scatterAll(){
+        const petals=Array.from(document.querySelectorAll("#stage2PetalLayer .stage2-drag-petal"));
+        petals.forEach((petal,index)=>{
+            const angle=((index*137.5)%360)*(Math.PI/180);
+            const distance=Math.max(window.innerWidth,window.innerHeight)*(1.05+(index%4)*.12);
+            petal.classList.add("is-leaving");
+            petal.style.transitionDelay=(index%8)*18+"ms";
+            petal.style.transform=
+                `translate(-50%,-50%) translate3d(${Math.cos(angle)*distance}px,${Math.sin(angle)*distance}px,0) rotate(${300+index*17}deg) scale(.5)`;
+        });
+    },
+
+    reset(){
+        this.activePointer=null;
+        this.render();
+    },
+
+    init(){
+        if(this.initialized)return;
+        this.render();
+        this.initialized=true;
+    }
+};
+
 async function verifyStage2Answer(event) {
     if (event) {
         event.preventDefault();
@@ -338,7 +520,7 @@ async function verifyStage2Answer(event) {
 
     if (!correctAnswers.includes(answer)) {
         setStage2Message(
-            "違うようだ。もう一度、桜の木の前後を見てみよう。",
+            "違うようだ。手紙の文字の並びを見直そう。",
             "error"
         );
 
@@ -362,6 +544,8 @@ async function verifyStage2Answer(event) {
     ) {
         window.clearStage(2);
     }
+
+    Stage2PetalController.scatterAll();
 
     const petalTransition =
         document.getElementById("stage2PetalTransition");
@@ -412,6 +596,7 @@ function resetStage2Puzzle() {
         .getElementById("stage2PetalTransition")
         ?.classList.remove("is-active");
 
+    Stage2PetalController.reset();
     isStage2Clearing = false;
 }
 
@@ -427,6 +612,8 @@ function initializeAllPuzzles() {
     ) {
         originalInitializePuzzles();
     }
+
+    Stage2PetalController.init();
 
     const stage2Form =
         document.getElementById("stage2Form");
@@ -513,7 +700,7 @@ const Stage4Controller={
         if(this.folded||this.completed)return;
         this.folded=true;
         this.el("stage4FoldMap")?.classList.add("is-folded");
-        this.setStatus("stage4MapMessage","NOW  HERE が、NOWHERE に見える。","success");
+        this.setStatus("stage4MapMessage","");
         window.saveStage4State?.({folded:true});
         await window.wait(1050);
         const panel=this.el("stage4ChoicePanel");
@@ -626,7 +813,7 @@ const Stage4Controller={
         if(state.folded){
             this.folded=true;
             this.el("stage4FoldMap")?.classList.add("is-folded");
-            this.setStatus("stage4MapMessage","NOW  HERE が、NOWHERE に見える。","success");
+            this.setStatus("stage4MapMessage","");
             const panel=this.el("stage4ChoicePanel");
             if(panel)panel.hidden=false;
         }
@@ -857,7 +1044,7 @@ function resetStage5Puzzle() {
         reward.hidden = !ownsIbushigin;
     }
 
-    setChefSpeech("へい、いらっしゃい。<br>何がほしい？");
+    setChefSpeech("今売り切れが多くてね。<br>さんかくの間のものなら渡せるよ。");
     setStage5Message("", "");
     stage5Clearing = false;
 }
