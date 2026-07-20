@@ -4497,3 +4497,310 @@ button {
         left: calc(50% + 1px);
     }
 }
+
+
+/* =========================================================
+   Version 0.11.9：看板・持ち物合成・レシート・FINAL
+   ========================================================= */
+
+/* 第二問：🌸絵文字そのものを使い、丸い花に見えないようにする */
+.stage2-drag-petal,
+.stage2-drag-petal.is-fixed {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none;
+    color: initial;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+    font-size: clamp(28px, var(--petal-font-size, 46px), 62px);
+    line-height: 1;
+    text-shadow: 0 6px 10px rgba(85,44,55,.22);
+}
+
+.stage2-drag-petal::after,
+.stage2-drag-petal.is-fixed::after {
+    display: none;
+}
+
+/* 電柱看板をタップで裏返す */
+.stage4-ad {
+    appearance: none;
+    height: 58px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: inherit;
+    cursor: pointer;
+    perspective: 640px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.stage4-ad__card {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .58s cubic-bezier(.25,.72,.24,1);
+}
+
+.stage4-flip-sign.is-flipped .stage4-ad__card {
+    transform: rotateY(180deg);
+}
+
+.stage4-ad__face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 6px 5px;
+    border: 1px solid rgba(58,42,31,.34);
+    background: var(--stage4-sign-bg, #e7dcc8);
+    color: #382e27;
+    line-height: 1.42;
+    text-align: center;
+    box-shadow: 0 4px 9px rgba(0,0,0,.24);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.stage4-ad__back {
+    transform: rotateY(180deg);
+    background: #2e2925;
+    color: #f7eddd;
+    font-family: "Yu Mincho", serif;
+    font-size: .66rem;
+}
+
+.stage4-ad--1 { --stage4-sign-bg: #e7dcc8; }
+.stage4-ad--2 { --stage4-sign-bg: #d9e2df; background: transparent; }
+.stage4-ad--3 { --stage4-sign-bg: #f0d4d8; background: transparent; }
+.stage4-ad--4 { --stage4-sign-bg: #e9dea4; background: transparent; }
+.stage4-ad--5 { --stage4-sign-bg: #ddd7cd; background: transparent; }
+
+.stage4-sign-message {
+    min-height: 1.8em;
+    margin: 12px 0 0;
+    color: rgba(255,255,255,.72);
+    font-size: .8rem;
+}
+
+.stage4-sign-message.is-success { color: #cdeecf; }
+
+/* 持ち物：長押し・並べ替え・合成 */
+.inventory-panel__guide {
+    margin: 12px 0 0;
+    color: rgba(255,255,255,.58);
+    font-size: .74rem;
+    line-height: 1.7;
+}
+
+.inventory-list__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 42px minmax(0,1fr) 28px;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform .18s ease, border-color .18s ease, opacity .18s ease, background .18s ease;
+}
+
+.inventory-list__item.is-hold-pending {
+    transform: scale(.985);
+    border-color: rgba(255,255,255,.34);
+}
+
+.inventory-list__item.is-drag-source {
+    opacity: .28;
+}
+
+.inventory-list__item.is-drop-target {
+    border-color: rgba(233,181,219,.92);
+    background: rgba(128,66,120,.28);
+    transform: scale(1.015);
+}
+
+.inventory-list__text { min-width: 0; }
+
+.inventory-list__grip {
+    align-self: center;
+    color: rgba(255,255,255,.38);
+    font-size: 1rem;
+    letter-spacing: -.25em;
+}
+
+.inventory-drag-ghost {
+    position: fixed !important;
+    z-index: 4000;
+    margin: 0;
+    pointer-events: none;
+    opacity: .94;
+    transform: rotate(1.5deg) scale(1.025);
+    box-shadow: 0 18px 38px rgba(0,0,0,.44);
+}
+
+.inventory-craft-message {
+    min-height: 2.1em;
+    margin: 8px 0 18px;
+    color: rgba(255,255,255,.64);
+    font-size: .79rem;
+    line-height: 1.6;
+}
+
+.inventory-craft-message.is-success { color: #d3f0d5; }
+.inventory-craft-message.is-error { color: #ffc7c7; }
+
+/* レシート入手 */
+.receipt-scene {
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at 50% 18%, rgba(255,221,163,.13), transparent 34%),
+        linear-gradient(180deg,#291b15,#0c0807);
+}
+
+.receipt-scene__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-block: 24px 44px;
+}
+
+.receipt-chef-card { margin-top: 20px; }
+
+.receipt-scene__title {
+    margin: 30px 0 0;
+    font-family: "Yu Mincho", serif;
+    font-size: clamp(1.25rem,5vw,1.8rem);
+    font-weight: 500;
+    line-height: 1.7;
+}
+
+.receipt-card {
+    width: min(100%,240px);
+    margin-top: 24px;
+    padding: 24px 20px 28px;
+    background:
+        repeating-linear-gradient(180deg,#fbfaf5 0 5px,#f7f4ed 6px 7px);
+    color: #35302b;
+    font-family: "Courier New", monospace;
+    text-align: left;
+    box-shadow: 0 16px 34px rgba(0,0,0,.32);
+    transform: rotate(-1.2deg);
+}
+
+.receipt-card p { margin: 7px 0; }
+.receipt-card__shop { text-align:center; font-weight:700; letter-spacing:.18em; }
+.receipt-card__line { margin:14px 0; border-top:1px dashed #675e55; }
+.receipt-card__total { font-size:1.18rem; font-weight:700; }
+.receipt-card__small { font-size:.7rem; text-align:center; }
+
+.receipt-scene__message {
+    margin: 24px 0 28px;
+    color: rgba(255,255,255,.74);
+    font-family: "Yu Mincho", serif;
+    line-height: 2;
+}
+
+/* 寿司屋へ戻る */
+.sushi-return-scene { overflow-y:auto; }
+.sushi-return-scene__inner { padding-block:20px 44px; }
+.sushi-return-scene__lead {
+    margin: 18px 0 4px;
+    color: rgba(255,255,255,.76);
+    font-family: "Yu Mincho", serif;
+    line-height: 1.95;
+}
+.stage4-street--return { margin-top: 22px; }
+
+/* FINAL前ストーリー */
+.pre-final-story-scene {
+    overflow-y:auto;
+    background:
+        radial-gradient(circle at 50% 28%,rgba(255,242,204,.14),transparent 36%),
+        linear-gradient(180deg,#151b20,#080a0c);
+}
+
+.pre-final-story-scene__inner {
+    display:grid;
+    place-items:center;
+    min-height:100%;
+    padding-block:30px;
+}
+
+.pre-final-story-sheet {
+    position:relative;
+    width:min(100%,560px);
+    margin:0 auto;
+}
+
+.pre-final-story-sheet .story-sheet__body {
+    font-family:"Yu Mincho",serif;
+    line-height:2.1;
+}
+
+/* FINAL：持ち物から二つを選択 */
+.final-inventory-picker {
+    margin-top: 24px;
+}
+
+.final-inventory-picker__title {
+    margin: 0;
+    color: rgba(255,255,255,.84);
+    font-family: "Yu Mincho", serif;
+    font-size: 1rem;
+    letter-spacing: .08em;
+}
+
+.final-inventory-choices {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+    margin-top: 17px;
+}
+
+.final-inventory-choice {
+    appearance:none;
+    min-height:52px;
+    padding:10px 8px;
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:11px;
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    font-family:"Yu Mincho",serif;
+    cursor:pointer;
+}
+
+.final-inventory-choice.is-selected {
+    border-color:#e0a7dc;
+    background:rgba(130,63,130,.42);
+    box-shadow:0 0 0 2px rgba(226,165,221,.18);
+}
+
+.final-inventory-choice:disabled { opacity:.54; cursor:default; }
+
+.final-inventory-choices__empty {
+    grid-column:1/-1;
+    margin:0;
+    color:rgba(255,255,255,.56);
+}
+
+.final-inventory-picker__count {
+    margin:14px 0 0;
+    color:rgba(255,255,255,.62);
+    font-size:.8rem;
+}
+
+.final-inventory-picker__button {
+    width:min(100%,280px);
+    margin-top:16px;
+}
+
+@media(max-width:390px){
+    .stage4-ad { height: 55px; }
+    .stage4-ad__back { font-size:.58rem; }
+    .final-inventory-choices { grid-template-columns:1fr; }
+}
