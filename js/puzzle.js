@@ -372,6 +372,8 @@ const Stage2PetalController = {
         petal.style.top=data.y+"%";
         petal.style.setProperty("--petal-size",data.size+"%");
         petal.style.setProperty("--petal-rotation",data.rotation+"deg");
+        petal.style.setProperty("--petal-font-size",(data.size*4.2)+"px");
+        petal.textContent="🌸";
         petal.addEventListener("pointerdown",event=>this.startDrag(event,petal));
         return petal;
     },
@@ -1086,87 +1088,190 @@ window.resetStage5Puzzle = resetStage5Puzzle;
 const Stage6Controller={
     initialized:false,
     state:null,
+    selectedItems:[],
+
     el(id){return document.getElementById(id)},
-    normalize(value){return String(value||"").trim().replace(/\s+/g,"").replace(/[!！?？。、,.・]+/g,"").toLowerCase()},
+
+    normalize(value){
+        return String(value||"")
+            .trim()
+            .replace(/\s+/g,"")
+            .replace(/[!！?？。、,.・]+/g,"")
+            .toLowerCase();
+    },
+
     setMessage(id,text,type=""){
-        const el=this.el(id); if(!el)return;
-        el.textContent=text; el.classList.remove("is-error","is-success");
+        const el=this.el(id);
+        if(!el)return;
+        el.textContent=text;
+        el.classList.remove("is-error","is-success");
         if(type)el.classList.add("is-"+type);
     },
-    save(partial){this.state=Object.assign({},this.state||window.getStage6State?.()||{},partial||{});window.saveStage6State?.(partial||{})},
+
+    save(partial){
+        this.state=Object.assign({},this.state||window.getStage6State?.()||{},partial||{});
+        window.saveStage6State?.(partial||{});
+    },
+
+    getInventoryItems(){
+        if(typeof window.getUsableInventoryItems==="function"){
+            return window.getUsableInventoryItems();
+        }
+        const saveData=typeof window.getSaveData==="function"?window.getSaveData():null;
+        return Array.isArray(saveData?.items)?saveData.items:[];
+    },
+
     flashPurple(){
         const flash=this.el("finalStatuePurpleFlash");
         const statue=this.el("finalStatue");
-        if(flash){flash.classList.remove("is-active");void flash.offsetWidth;flash.classList.add("is-active")}
-        if(statue){statue.classList.add("is-purple-flash");setTimeout(()=>statue.classList.remove("is-purple-flash"),900)}
+        if(flash){
+            flash.classList.remove("is-active");
+            void flash.offsetWidth;
+            flash.classList.add("is-active");
+        }
+        if(statue){
+            statue.classList.add("is-purple-flash");
+            setTimeout(()=>statue.classList.remove("is-purple-flash"),900);
+        }
     },
+
     async solvePatina(event){
         event?.preventDefault();
         const input=this.el("stage6PatinaAnswer");
         const button=this.el("stage6PatinaSubmit");
         if(!input||!button)return;
+
         const answer=this.normalize(input.value);
-        if(!answer){this.setMessage("stage6PatinaMessage","緑色の正体を入力してください。","error");input.focus();return}
-        if(!["緑青","ろくしょう"].includes(answer)){
-            this.setMessage("stage6PatinaMessage","素材と、長い年月で生まれた色を調べよう。","error");input.select();return
+        if(!answer){
+            this.setMessage("stage6PatinaMessage","色または素材を入力してください。","error");
+            input.focus();
+            return;
         }
-        input.disabled=true;button.disabled=true;
+
+        const currentColorAnswers=["緑","緑色","みどり","みどりいろ","青銅","せいどう","青緑","あおみどり"];
+        if(currentColorAnswers.includes(answer)){
+            this.setMessage("stage6PatinaMessage","今はね","error");
+            input.select();
+            return;
+        }
+
+        const correctAnswers=["銅","どう","銅色","どういろ","赤茶","赤茶色","あかちゃ","あかちゃいろ","赤褐色","せきかっしょく"];
+        if(!correctAnswers.includes(answer)){
+            this.setMessage("stage6PatinaMessage","作られた素材と、本来の色を調べてみよう。","error");
+            input.select();
+            return;
+        }
+
+        input.disabled=true;
+        button.disabled=true;
         this.el("finalStatue")?.classList.add("is-copper");
-        this.setMessage("stage6PatinaMessage","正解。像は銅で作られ、緑青によって今の色になった。","success");
+        this.setMessage("stage6PatinaMessage","正解。自由の女神は、もともと銅の赤茶色だった。","success");
         this.save({patinaSolved:true});
+
         await window.wait(1000);
-        const panel=this.el("stage6PurplePanel");if(panel)panel.hidden=false;
+        const panel=this.el("stage6PurplePanel");
+        if(panel)panel.hidden=false;
+        this.selectedItems=[];
+        this.renderInventoryChoices();
         panel?.scrollIntoView({behavior:"smooth",block:"center"});
     },
-    selectPen(color){
+
+    renderInventoryChoices(){
+        const container=this.el("stage6InventoryChoices");
+        const count=this.el("stage6SelectionCount");
+        const submit=this.el("stage6UseSelectedItems");
+        if(!container)return;
+
+        const items=this.getInventoryItems();
+        container.replaceChildren();
+
+        if(items.length===0){
+            const empty=document.createElement("p");
+            empty.className="final-inventory-choices__empty";
+            empty.textContent="選べる持ち物がない。";
+            container.appendChild(empty);
+        }else{
+            items.forEach(itemName=>{
+                const button=document.createElement("button");
+                button.type="button";
+                button.className="final-inventory-choice";
+                button.dataset.itemName=itemName;
+                button.textContent=itemName;
+                const selected=this.selectedItems.includes(itemName);
+                button.classList.toggle("is-selected",selected);
+                button.setAttribute("aria-pressed",selected?"true":"false");
+                button.addEventListener("click",()=>this.toggleInventoryItem(itemName));
+                container.appendChild(button);
+            });
+        }
+
+        if(count)count.textContent=`${this.selectedItems.length} / 2`;
+        if(submit)submit.disabled=this.selectedItems.length!==2||Boolean(this.state?.transformed);
+    },
+
+    toggleInventoryItem(itemName){
         if(this.state?.transformed)return;
-        const key=color==="red"?"redSelected":"blueSelected";
-        this.state[key]=true;
-        this.el(color==="red"?"stage6RedPen":"stage6BluePen")?.classList.add("is-selected");
-        this.save({[key]:true});
-        if(this.state.redSelected&&this.state.blueSelected&&!this.state.inkMixed){
-            this.state.inkMixed=true;
-            const result=this.el("stage6MixerResult");
-            if(result){result.textContent="紫のインクができた。";result.classList.add("is-purple")}
-            const apply=this.el("stage6ApplyInk");if(apply)apply.disabled=false;
-            if(typeof window.obtainItem==="function")window.obtainItem("紫のインク");else window.addItem?.("紫のインク");
-            this.save({inkMixed:true});
-            this.setMessage("stage6PurpleMessage","第一の紫を手に入れた。","success");
+        const index=this.selectedItems.indexOf(itemName);
+        if(index>=0){
+            this.selectedItems.splice(index,1);
+        }else if(this.selectedItems.length<2){
+            this.selectedItems.push(itemName);
+        }else{
+            this.setMessage("stage6PurpleMessage","選べるのは二つまでだ。","error");
+            return;
         }
+        this.setMessage("stage6PurpleMessage","");
+        this.renderInventoryChoices();
     },
-    applyInk(){
-        if(!this.state?.inkMixed||this.state.inkApplied)return;
-        this.state.inkApplied=true;this.el("stage6ApplyInk")?.closest(".final-purple-item")?.classList.add("is-used");
-        const b=this.el("stage6ApplyInk");if(b)b.disabled=true;
-        this.el("stage6PurpleDot1")?.classList.add("is-filled");this.flashPurple();this.save({inkApplied:true});
-        this.setMessage("stage6PurpleMessage","一つ目の紫をかけた。","success");this.checkTransformation();
-    },
-    applySoy(){
-        if(this.state?.soyApplied)return;
-        if(!(typeof window.hasItem==="function"&&window.hasItem("醤油"))){
-            this.setMessage("stage6PurpleMessage","寿司屋で受け取ったものが必要だ。","error");return
+
+    async useSelectedItems(){
+        if(this.state?.transformed||this.selectedItems.length!==2)return;
+        const selected=this.selectedItems.slice().sort((a,b)=>a.localeCompare(b,"ja"));
+        const correct=["紫のインク","醤油"].sort((a,b)=>a.localeCompare(b,"ja"));
+        const isCorrect=selected[0]===correct[0]&&selected[1]===correct[1];
+
+        if(!isCorrect){
+            this.setMessage("stage6PurpleMessage","その二つでは、むらさきが二つにならない。","error");
+            this.selectedItems=[];
+            this.renderInventoryChoices();
+            return;
         }
-        this.state.soyApplied=true;this.el("stage6ApplySoy")?.closest(".final-purple-item")?.classList.add("is-used");
-        const b=this.el("stage6ApplySoy");if(b)b.disabled=true;
-        this.el("stage6PurpleDot2")?.classList.add("is-filled");this.flashPurple();this.save({soyApplied:true});
-        this.setMessage("stage6PurpleMessage","寿司屋で『むらさき』と呼ばれる醤油をかけた。","success");this.checkTransformation();
-    },
-    async checkTransformation(){
-        if(!this.state.inkApplied||!this.state.soyApplied||this.state.transformed)return;
-        this.state.transformed=true;this.save({transformed:true});
+
+        this.state.transformed=true;
+        this.save({transformed:true});
+        const submit=this.el("stage6UseSelectedItems");
+        if(submit)submit.disabled=true;
+        document.querySelectorAll(".final-inventory-choice").forEach(button=>button.disabled=true);
+        this.flashPurple();
         await window.wait(900);
+
         this.el("finalStatue")?.classList.add("is-gun");
-        const kanji=this.el("stage6NameKanji");if(kanji){kanji.style.opacity="0";kanji.style.transform="scale(.75)";setTimeout(()=>{kanji.textContent="銃";kanji.style.opacity="1";kanji.style.transform="scale(1)"},360)}
+        const kanji=this.el("stage6NameKanji");
+        if(kanji){
+            kanji.style.opacity="0";
+            kanji.style.transform="scale(.75)";
+            setTimeout(()=>{
+                kanji.textContent="銃";
+                kanji.style.opacity="1";
+                kanji.style.transform="scale(1)";
+            },360);
+        }
         this.el("stage6NameReading")?.classList.add("is-gun");
-        this.setMessage("stage6PurpleMessage","『ゆ』が小さくなった。じゆうは、じゅうになった。","success");
+        this.setMessage("stage6PurpleMessage","銃の女神へと成った","success");
+
         await window.wait(1150);
-        const panel=this.el("stage6ShadowPanel");if(panel)panel.hidden=false;
+        const panel=this.el("stage6ShadowPanel");
+        if(panel)panel.hidden=false;
         panel?.scrollIntoView({behavior:"smooth",block:"center"});
     },
+
     async shootShadow(){
         if(this.state?.shadowShot)return;
-        this.state.shadowShot=true;this.save({shadowShot:true});
-        const target=this.el("stage6ShadowTarget");target?.classList.add("is-shot");if(target)target.disabled=true;
+        this.state.shadowShot=true;
+        this.save({shadowShot:true});
+        const target=this.el("stage6ShadowTarget");
+        target?.classList.add("is-shot");
+        if(target)target.disabled=true;
         this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success");
         document.querySelectorAll("audio").forEach(audio=>{try{audio.pause()}catch(_){}});
         window.clearStage?.(6);
@@ -1174,39 +1279,92 @@ const Stage6Controller={
         await window.SceneManager.changeScene("stage6-clear",{fadeOutTime:900,blackTime:700,fadeInTime:1100});
         FinalLetterController.restore();
     },
+
     restore(){
         this.reset({preserveSave:true});
         this.state=window.getStage6State?.()||{};
-        const s=this.state;
-        if(s.patinaSolved){this.el("finalStatue")?.classList.add("is-copper");const i=this.el("stage6PatinaAnswer"),b=this.el("stage6PatinaSubmit");if(i)i.disabled=true;if(b)b.disabled=true;this.setMessage("stage6PatinaMessage","正解。像は銅で作られ、緑青によって今の色になった。","success");const p=this.el("stage6PurplePanel");if(p)p.hidden=false}
-        if(s.redSelected)this.el("stage6RedPen")?.classList.add("is-selected");
-        if(s.blueSelected)this.el("stage6BluePen")?.classList.add("is-selected");
-        if(s.inkMixed){const r=this.el("stage6MixerResult");if(r){r.textContent="紫のインクができた。";r.classList.add("is-purple")}const b=this.el("stage6ApplyInk");if(b)b.disabled=false}
-        if(s.inkApplied){this.el("stage6PurpleDot1")?.classList.add("is-filled");this.el("stage6ApplyInk")?.closest(".final-purple-item")?.classList.add("is-used");const b=this.el("stage6ApplyInk");if(b)b.disabled=true}
-        if(s.soyApplied){this.el("stage6PurpleDot2")?.classList.add("is-filled");this.el("stage6ApplySoy")?.closest(".final-purple-item")?.classList.add("is-used");const b=this.el("stage6ApplySoy");if(b)b.disabled=true}
-        if(s.transformed){this.el("finalStatue")?.classList.add("is-gun");const k=this.el("stage6NameKanji");if(k)k.textContent="銃";this.el("stage6NameReading")?.classList.add("is-gun");const p=this.el("stage6ShadowPanel");if(p)p.hidden=false;this.setMessage("stage6PurpleMessage","『ゆ』が小さくなった。じゆうは、じゅうになった。","success")}
-        if(s.shadowShot){const target=this.el("stage6ShadowTarget");target?.classList.add("is-shot");if(target)target.disabled=true;this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success")}
+        const state=this.state;
+
+        if(state.patinaSolved){
+            this.el("finalStatue")?.classList.add("is-copper");
+            const input=this.el("stage6PatinaAnswer");
+            const button=this.el("stage6PatinaSubmit");
+            if(input)input.disabled=true;
+            if(button)button.disabled=true;
+            this.setMessage("stage6PatinaMessage","正解。自由の女神は、もともと銅の赤茶色だった。","success");
+            const panel=this.el("stage6PurplePanel");
+            if(panel)panel.hidden=false;
+            this.renderInventoryChoices();
+        }
+
+        if(state.transformed){
+            this.el("finalStatue")?.classList.add("is-gun");
+            const kanji=this.el("stage6NameKanji");
+            if(kanji)kanji.textContent="銃";
+            this.el("stage6NameReading")?.classList.add("is-gun");
+            this.setMessage("stage6PurpleMessage","銃の女神へと成った","success");
+            const panel=this.el("stage6ShadowPanel");
+            if(panel)panel.hidden=false;
+            document.querySelectorAll(".final-inventory-choice").forEach(button=>button.disabled=true);
+            const submit=this.el("stage6UseSelectedItems");
+            if(submit)submit.disabled=true;
+        }
+
+        if(state.shadowShot){
+            const target=this.el("stage6ShadowTarget");
+            target?.classList.add("is-shot");
+            if(target)target.disabled=true;
+            this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success");
+        }
     },
+
     reset({preserveSave=false}={}){
-        this.state={patinaSolved:false,redSelected:false,blueSelected:false,inkMixed:false,inkApplied:false,soyApplied:false,transformed:false,shadowShot:false,letterFolded:false,ended:false};
+        this.state={patinaSolved:false,transformed:false,shadowShot:false,letterFolded:false,ended:false};
+        this.selectedItems=[];
         this.el("finalStatue")?.classList.remove("is-copper","is-gun","is-purple-flash");
-        const k=this.el("stage6NameKanji");if(k){k.textContent="自由";k.style.opacity="";k.style.transform=""}this.el("stage6NameReading")?.classList.remove("is-gun");
-        const i=this.el("stage6PatinaAnswer"),s=this.el("stage6PatinaSubmit");if(i){i.value="";i.disabled=false}if(s)s.disabled=false;
-        const pp=this.el("stage6PurplePanel");if(pp)pp.hidden=true;const sp=this.el("stage6ShadowPanel");if(sp)sp.hidden=true;
-        ["stage6RedPen","stage6BluePen"].forEach(id=>this.el(id)?.classList.remove("is-selected"));
-        const result=this.el("stage6MixerResult");if(result){result.textContent="まだ混ざっていない";result.classList.remove("is-purple")}
-        const ink=this.el("stage6ApplyInk"),soy=this.el("stage6ApplySoy");if(ink)ink.disabled=true;if(soy)soy.disabled=false;
-        document.querySelectorAll(".final-purple-item").forEach(el=>el.classList.remove("is-used"));["stage6PurpleDot1","stage6PurpleDot2"].forEach(id=>this.el(id)?.classList.remove("is-filled"));
-        const target=this.el("stage6ShadowTarget");target?.classList.remove("is-shot");if(target)target.disabled=false;
-        ["stage6PatinaMessage","stage6PurpleMessage"].forEach(id=>this.setMessage(id,""));this.setMessage("stage6ShadowMessage","影に狙いを定めよう。");
+        const kanji=this.el("stage6NameKanji");
+        if(kanji){
+            kanji.textContent="自由";
+            kanji.style.opacity="";
+            kanji.style.transform="";
+        }
+        this.el("stage6NameReading")?.classList.remove("is-gun");
+
+        const input=this.el("stage6PatinaAnswer");
+        const submitAnswer=this.el("stage6PatinaSubmit");
+        if(input){input.value="";input.disabled=false;}
+        if(submitAnswer)submitAnswer.disabled=false;
+
+        const purplePanel=this.el("stage6PurplePanel");
+        const shadowPanel=this.el("stage6ShadowPanel");
+        if(purplePanel)purplePanel.hidden=true;
+        if(shadowPanel)shadowPanel.hidden=true;
+
+        const target=this.el("stage6ShadowTarget");
+        target?.classList.remove("is-shot");
+        if(target)target.disabled=false;
+
+        const choices=this.el("stage6InventoryChoices");
+        if(choices)choices.replaceChildren();
+        const count=this.el("stage6SelectionCount");
+        if(count)count.textContent="0 / 2";
+        const useButton=this.el("stage6UseSelectedItems");
+        if(useButton)useButton.disabled=true;
+
+        ["stage6PatinaMessage","stage6PurpleMessage"].forEach(id=>this.setMessage(id,""));
+        this.setMessage("stage6ShadowMessage","影に狙いを定めよう。");
         if(!preserveSave)window.resetStage6State?.();
     },
+
     init(){
         if(this.initialized)return;
         this.el("stage6PatinaForm")?.addEventListener("submit",event=>this.solvePatina(event));
-        this.el("stage6RedPen")?.addEventListener("click",()=>this.selectPen("red"));this.el("stage6BluePen")?.addEventListener("click",()=>this.selectPen("blue"));
-        this.el("stage6ApplyInk")?.addEventListener("click",()=>this.applyInk());this.el("stage6ApplySoy")?.addEventListener("click",()=>this.applySoy());
-        this.el("stage6ShadowTarget")?.addEventListener("click",()=>this.shootShadow());this.initialized=true;
+        this.el("stage6UseSelectedItems")?.addEventListener("click",()=>this.useSelectedItems());
+        this.el("stage6ShadowTarget")?.addEventListener("click",()=>this.shootShadow());
+        document.addEventListener("inventory:changed",()=>{
+            if(this.state?.patinaSolved&&!this.state?.transformed)this.renderInventoryChoices();
+        });
+        this.initialized=true;
     }
 };
 
