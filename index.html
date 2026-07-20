@@ -24,7 +24,11 @@
             <div class="inventory-panel__body">
                 <p class="scene-label">ITEMS</p>
                 <h2 id="inventory-title" class="inventory-panel__title">持ち物</h2>
+                <p class="inventory-panel__guide">
+                    アイテムを少し長押しすると、動かして並べ替えられる。
+                </p>
                 <div id="inventoryList" class="inventory-list"></div>
+                <p id="inventoryCraftMessage" class="inventory-craft-message" aria-live="polite"></p>
                 <button id="inventoryCloseButton" class="sub-button" type="button">閉じる</button>
             </div>
         </div>
@@ -250,7 +254,8 @@
                         >
 
                             <p class="letter-back-message">
-                                さては謎解き好きだね？
+                                さては謎解き好きだね？<br>
+                                気になったら触ってみるよね
                             </p>
 
                             <button
@@ -856,11 +861,36 @@
                 <div class="stage4-street">
                     <aside class="stage4-pole" aria-label="電柱に貼られた広告">
                         <div class="stage4-pole__body" aria-hidden="true"></div>
-                        <div class="stage4-ad stage4-ad--1">湯呑み<br>販売中</div>
-                        <div class="stage4-ad stage4-ad--2">ビルオーナー<br>募集中</div>
-                        <div class="stage4-ad stage4-ad--3">ハンドクリーム<br>試供品配布中</div>
-                        <div class="stage4-ad stage4-ad--4">さかな<br>盗まれました</div>
-                        <div class="stage4-ad stage4-ad--5">女神<br>探してます</div>
+                        <button class="stage4-ad stage4-ad--1 stage4-flip-sign" type="button" data-sign-key="teacup" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">湯呑み<br>販売中</span>
+                                <span class="stage4-ad__face stage4-ad__back">ちょっとだけね</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--2 stage4-flip-sign" type="button" data-sign-key="building" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">ビルオーナー<br>募集中</span>
+                                <span class="stage4-ad__face stage4-ad__back">ずっと来ない…</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--3 stage4-flip-sign" type="button" data-sign-key="handcream" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">ハンドクリーム<br>試供品配布中</span>
+                                <span class="stage4-ad__face stage4-ad__back">ノスタルジックな香り</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--4 stage4-flip-sign" type="button" data-sign-key="fish" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">さかな<br>盗まれました</span>
+                                <span class="stage4-ad__face stage4-ad__back">うそじゃないよ</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--5 stage4-flip-sign" type="button" data-sign-key="goddess" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">女神<br>探してます</span>
+                                <span class="stage4-ad__face stage4-ad__back">え、ほんとは銅色なんだ</span>
+                            </span>
+                        </button>
                     </aside>
 
                     <div class="stage4-shop">
@@ -875,6 +905,8 @@
                         </div>
                     </div>
                 </div>
+
+                <p id="stage4SignMessage" class="stage4-sign-message" aria-live="polite"></p>
 
                 <section id="stage4ChoicePanel" class="stage4-choice-panel" hidden>
                     <h2 class="stage4-choice-panel__title">扉の開け方　正解はどれ？</h2>
@@ -1034,6 +1066,167 @@
                 <button id="stage5ContinueButton" class="start-button" type="button">次へ進む</button>
             </div>
         </section>
+
+        <!-- =======================================================
+             STAGE5追加：0円のレシート
+        ======================================================== -->
+        <section
+            id="scene-stage5-receipt"
+            class="scene receipt-scene"
+            data-scene="stage5-receipt"
+            aria-labelledby="stage5-receipt-title"
+            hidden
+        >
+            <div class="scene__inner receipt-scene__inner">
+                <p class="scene-label">ITEM GET</p>
+
+                <div class="chef-card receipt-chef-card">
+                    <div class="chef-card__face" aria-hidden="true">
+                        <span class="chef-card__headband"></span>
+                        <span class="chef-card__eye chef-card__eye--left"></span>
+                        <span class="chef-card__eye chef-card__eye--right"></span>
+                        <span class="chef-card__mouth"></span>
+                    </div>
+
+                    <div class="chef-card__speech">
+                        <p>
+                            実は今日さかな盗まれちゃってて…<br>
+                            だからもうお愛想で頼むよ
+                        </p>
+                    </div>
+                </div>
+
+                <h1 id="stage5-receipt-title" class="receipt-scene__title">
+                    0円のレシートを受け取った。
+                </h1>
+
+                <div class="receipt-card" aria-label="合計0円のレシート">
+                    <p class="receipt-card__shop">寿司屋</p>
+                    <div class="receipt-card__line"></div>
+                    <p>ご注文　0点</p>
+                    <p class="receipt-card__total">合計　￥0</p>
+                    <div class="receipt-card__line"></div>
+                    <p class="receipt-card__small">ありがとうございました</p>
+                </div>
+
+                <p class="receipt-scene__message">
+                    まだ何も頼んでいないから、0円のレシート。<br>
+                    とりあえず記念に貰っておこう。
+                </p>
+
+                <button id="stage5ReceiptContinueButton" class="start-button" type="button">
+                    店を出る
+                </button>
+            </div>
+        </section>
+
+        <!-- =======================================================
+             寿司屋の前へ戻る
+        ======================================================== -->
+        <section
+            id="scene-sushi-return"
+            class="scene stage4-scene sushi-return-scene"
+            data-scene="sushi-return"
+            aria-labelledby="sushi-return-title"
+            hidden
+        >
+            <div class="scene__inner stage4-scene__inner sushi-return-scene__inner">
+                <p class="scene-label">OUTSIDE</p>
+                <h1 id="sushi-return-title" class="stage4-scene__title">寿司屋の扉</h1>
+
+                <p class="sushi-return-scene__lead">
+                    どこへ向かえばいいんだろう。<br>
+                    近くに看板等は見当たらない。<br>
+                    どこかに記されているのだろうか。
+                </p>
+
+                <div class="stage4-street stage4-street--return">
+                    <aside class="stage4-pole" aria-label="電柱に貼られた広告">
+                        <div class="stage4-pole__body" aria-hidden="true"></div>
+                        <button class="stage4-ad stage4-ad--1 stage4-flip-sign" type="button" data-sign-key="teacup" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">湯呑み<br>販売中</span>
+                                <span class="stage4-ad__face stage4-ad__back">ちょっとだけね</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--2 stage4-flip-sign" type="button" data-sign-key="building" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">ビルオーナー<br>募集中</span>
+                                <span class="stage4-ad__face stage4-ad__back">ずっと来ない…</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--3 stage4-flip-sign" type="button" data-sign-key="handcream" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">ハンドクリーム<br>試供品配布中</span>
+                                <span class="stage4-ad__face stage4-ad__back">ノスタルジックな香り</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--4 stage4-flip-sign" type="button" data-sign-key="fish" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">さかな<br>盗まれました</span>
+                                <span class="stage4-ad__face stage4-ad__back">うそじゃないよ</span>
+                            </span>
+                        </button>
+                        <button class="stage4-ad stage4-ad--5 stage4-flip-sign" type="button" data-sign-key="goddess" aria-pressed="false">
+                            <span class="stage4-ad__card">
+                                <span class="stage4-ad__face stage4-ad__front">女神<br>探してます</span>
+                                <span class="stage4-ad__face stage4-ad__back">え、ほんとは銅色なんだ</span>
+                            </span>
+                        </button>
+                    </aside>
+
+                    <div class="stage4-shop">
+                        <div class="stage4-shop__sign">寿司屋</div>
+                        <div class="stage4-door-frame">
+                            <div class="stage4-door">
+                                <div class="stage4-door__inner-line"></div>
+                                <div class="stage4-door__handle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p id="sushiReturnSignMessage" class="stage4-sign-message" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <!-- =======================================================
+             FINAL前ストーリー
+        ======================================================== -->
+        <section
+            id="scene-pre-final-story"
+            class="scene pre-final-story-scene"
+            data-scene="pre-final-story"
+            aria-labelledby="pre-final-story-title"
+            hidden
+        >
+            <div class="scene__inner pre-final-story-scene__inner">
+                <article class="story-sheet pre-final-story-sheet">
+                    <p class="story-sheet__label">STORY</p>
+                    <h1 id="pre-final-story-title" class="story-sheet__title">女神へ</h1>
+
+                    <div class="story-sheet__body">
+                        <p>
+                            “女神”…“世界を照らす自由の像”…つまり、
+                            “自由の女神”に会いに行けということなのか。
+                        </p>
+                        <p>
+                            いつのまにか、帰路に着くことを忘れ、
+                            この画面に没頭していた。
+                        </p>
+                        <p>
+                            「自由ってなんだろう」
+                            そんなことを考えながら、向かうのであった。
+                        </p>
+                    </div>
+
+                    <button id="preFinalContinueButton" class="start-button story-sheet__button" type="button">
+                        女神のもとへ向かう
+                    </button>
+                </article>
+            </div>
+        </section>
+
         <!-- =======================================================
              STAGE6：最終ステージ
         ======================================================== -->
@@ -1086,17 +1279,17 @@
                 <!-- 緑青を答える導入 -->
                 <section id="stage6PatinaPanel" class="final-panel" aria-labelledby="stage6-patina-title">
                     <h2 id="stage6-patina-title" class="final-panel__title">
-                        この緑色の正体は？
+                        自由の女神は何色？
                     </h2>
 
                     <p class="final-panel__text">
                         検索してもよい。<br>
-                        像が作られた素材と、今の色の関係を調べよう。
+                        像が作られた素材と、本来の色を調べよう。
                     </p>
 
                     <form id="stage6PatinaForm" class="answer-form final-answer-form" novalidate>
                         <label class="answer-form__label" for="stage6PatinaAnswer">
-                            緑色の正体
+                            本来の色
                         </label>
                         <input
                             id="stage6PatinaAnswer"
@@ -1106,7 +1299,7 @@
                             autocomplete="off"
                             spellcheck="false"
                             maxlength="12"
-                            placeholder="漢字またはひらがな"
+                            placeholder="色または素材"
                         >
                         <button id="stage6PatinaSubmit" class="answer-form__submit" type="submit">
                             答える
@@ -1116,57 +1309,26 @@
                     <p id="stage6PatinaMessage" class="final-status" aria-live="polite"></p>
                 </section>
 
-                <!-- 紫を二つ用意する最終指示 -->
+                <!-- 持ち物から二つを選ぶ最終指示 -->
                 <section id="stage6PurplePanel" class="final-panel final-purple-panel" hidden>
                     <p class="final-purple-panel__eyebrow">LAST INSTRUCTION</p>
-                    <h2 class="final-purple-panel__command">紫を二つかけろ</h2>
+                    <h2 class="final-purple-panel__command">むらさきを２つかけろ</h2>
 
-                    <p class="final-panel__text">
-                        一つは、桜の前で見た二色から。<br>
-                        もう一つは、寿司屋で受け取ったものから。
-                    </p>
+                    <div class="final-inventory-picker">
+                        <p class="final-inventory-picker__title">アイテムから２つを選択</p>
 
-                    <div class="final-mixer">
-                        <p class="final-mixer__title">赤と青を混ぜる</p>
+                        <div
+                            id="stage6InventoryChoices"
+                            class="final-inventory-choices"
+                            role="group"
+                            aria-label="像にかけるアイテムを二つ選択"
+                        ></div>
 
-                        <div class="final-mixer__tools">
-                            <button id="stage6RedPen" class="final-pen final-pen--red" type="button">
-                                赤ペン
-                            </button>
-                            <span class="final-mixer__plus">＋</span>
-                            <button id="stage6BluePen" class="final-pen final-pen--blue" type="button">
-                                青ペン
-                            </button>
-                        </div>
+                        <p id="stage6SelectionCount" class="final-inventory-picker__count">0 / 2</p>
 
-                        <div id="stage6MixerResult" class="final-mixer__result" aria-live="polite">
-                            まだ混ざっていない
-                        </div>
-                    </div>
-
-                    <div class="final-purple-items">
-                        <article class="final-purple-item">
-                            <div class="final-purple-item__icon final-purple-item__icon--ink" aria-hidden="true">紫</div>
-                            <h3>第一の紫</h3>
-                            <p>赤と青を混ぜた紫のインク。</p>
-                            <button id="stage6ApplyInk" class="sub-button" type="button" disabled>
-                                像にかける
-                            </button>
-                        </article>
-
-                        <article class="final-purple-item">
-                            <div class="final-purple-item__icon final-purple-item__icon--soy" aria-hidden="true">瓶</div>
-                            <h3>第二の紫</h3>
-                            <p>大将が「紫」として渡したもの。</p>
-                            <button id="stage6ApplySoy" class="sub-button" type="button">
-                                像にかける
-                            </button>
-                        </article>
-                    </div>
-
-                    <div class="final-purple-progress" aria-label="紫をかけた回数">
-                        <span id="stage6PurpleDot1"></span>
-                        <span id="stage6PurpleDot2"></span>
+                        <button id="stage6UseSelectedItems" class="start-button final-inventory-picker__button" type="button" disabled>
+                            選んだ２つをかける
+                        </button>
                     </div>
 
                     <p id="stage6PurpleMessage" class="final-status" aria-live="polite"></p>
