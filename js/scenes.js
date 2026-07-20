@@ -742,6 +742,9 @@ function getResumeSceneLabel(sceneName) {
         "stage4-clear": "寿司屋へ入る場面",
         stage5: "第五問",
         "stage5-clear": "醤油を手に入れた場面",
+        "stage5-receipt": "0円のレシートを受け取った場面",
+        "sushi-return": "寿司屋の前へ戻った場面",
+        "pre-final-story": "女神へ向かう場面",
         stage6: "最終ステージ",
         "stage6-clear": "最後の手紙",
         "ending-plane": "紙飛行機を飛ばす場面",
@@ -1135,7 +1138,90 @@ document.addEventListener(
 );
 
 /* Version 0.9 navigation */
-document.addEventListener("click",async function(e){const b4=e.target.closest("#stage4ContinueButton");if(b4){e.preventDefault();e.stopImmediatePropagation();if(b4.dataset.transitioning==="true")return;b4.dataset.transitioning="true";b4.disabled=true;try{window.resetStage5Puzzle?.();await window.SceneManager.changeScene("stage5",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b4.disabled=false;b4.dataset.transitioning="false"}return}const b5=e.target.closest("#stage5ContinueButton");if(!b5)return;e.preventDefault();e.stopImmediatePropagation();if(b5.dataset.transitioning==="true")return;b5.dataset.transitioning="true";b5.disabled=true;try{window.Stage6Controller?.reset();await window.SceneManager.changeScene("stage6",{fadeOutTime:720,blackTime:320,fadeInTime:860})}finally{b5.disabled=false;b5.dataset.transitioning="false"}},true);
+document.addEventListener("click", async function stage45NavigationV0119(event) {
+    const stage4Button = event.target.closest("#stage4ContinueButton");
+    if (stage4Button) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (stage4Button.dataset.transitioning === "true") return;
+        stage4Button.dataset.transitioning = "true";
+        stage4Button.disabled = true;
+        try {
+            window.resetStage5Puzzle?.();
+            await window.SceneManager.changeScene("stage5", {
+                fadeOutTime: 720,
+                blackTime: 320,
+                fadeInTime: 860
+            });
+        } finally {
+            stage4Button.disabled = false;
+            stage4Button.dataset.transitioning = "false";
+        }
+        return;
+    }
+
+    const soyButton = event.target.closest("#stage5ContinueButton");
+    if (soyButton) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (soyButton.dataset.transitioning === "true") return;
+        soyButton.dataset.transitioning = "true";
+        soyButton.disabled = true;
+        try {
+            window.obtainItem?.("レシート");
+            await window.SceneManager.changeScene("stage5-receipt", {
+                fadeOutTime: 720,
+                blackTime: 320,
+                fadeInTime: 880
+            });
+        } finally {
+            soyButton.disabled = false;
+            soyButton.dataset.transitioning = "false";
+        }
+        return;
+    }
+
+    const receiptButton = event.target.closest("#stage5ReceiptContinueButton");
+    if (receiptButton) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (receiptButton.dataset.transitioning === "true") return;
+        receiptButton.dataset.transitioning = "true";
+        receiptButton.disabled = true;
+        try {
+            await window.SceneManager.changeScene("sushi-return", {
+                fadeOutTime: 720,
+                blackTime: 320,
+                fadeInTime: 880
+            });
+        } finally {
+            receiptButton.disabled = false;
+            receiptButton.dataset.transitioning = "false";
+        }
+        return;
+    }
+
+    const finalStoryButton = event.target.closest("#preFinalContinueButton");
+    if (!finalStoryButton) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (finalStoryButton.dataset.transitioning === "true") return;
+    finalStoryButton.dataset.transitioning = "true";
+    finalStoryButton.disabled = true;
+
+    try {
+        window.Stage6Controller?.reset();
+        await window.SceneManager.changeScene("stage6", {
+            fadeOutTime: 820,
+            blackTime: 420,
+            fadeInTime: 980
+        });
+    } finally {
+        finalStoryButton.disabled = false;
+        finalStoryButton.dataset.transitioning = "false";
+    }
+}, true);
 
 
 /* =========================================================
@@ -1217,7 +1303,7 @@ async function hideIntroElementV011(
 
 const introLetterTextV011 =
     "拝啓、この手紙を受け取ってくれた人へ。\n\n" +
-    "明日僕は空の世界に旅立つようです。病室から見ていた空は青く、白く、大きな海のようでした。\n\n" +
+    "明日私は空の世界に旅立つようです。病室から見ていた空は青く、白く、大きな海のようでした。\n\n" +
     "このベッドから出て、外へ出てみたかったなぁ。あぁ1度でいいから***をこの目で見たい。\n\n" +
     "世界を照らす自由の像って呼ばれてるんだって。物事の背景って面白いよね。";
 
@@ -2028,3 +2114,53 @@ function initializeStage1ClearReward(){
 }
 
 document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
+
+
+/* =========================================================
+   Version 0.11.9：電柱看板／レシート導線
+   ========================================================= */
+(function initializeStage4FlipSignsV0119(){
+    "use strict";
+
+    function findMessage(sign){
+        const scene=sign.closest(".scene");
+        return scene?.querySelector(".stage4-sign-message") || null;
+    }
+
+    document.addEventListener("click",function(event){
+        const sign=event.target.closest?.(".stage4-flip-sign");
+        if(!sign)return;
+
+        event.preventDefault();
+        const flipped=!sign.classList.contains("is-flipped");
+        sign.classList.toggle("is-flipped",flipped);
+        sign.setAttribute("aria-pressed",flipped?"true":"false");
+
+        if(flipped&&sign.dataset.signKey==="handcream"){
+            const alreadyOwned=typeof window.hasItem==="function"&&window.hasItem("ハンドクリーム");
+            if(!alreadyOwned)window.obtainItem?.("ハンドクリーム");
+            const message=findMessage(sign);
+            if(message){
+                message.textContent=alreadyOwned
+                    ? "「ハンドクリーム」は入手済みだ。"
+                    : "「ハンドクリーム」を手に入れた。";
+                message.classList.add("is-success");
+            }
+        }
+    });
+
+    let finalReceiptTransitioning=false;
+    document.addEventListener("inventory:finalReceiptReady",async function(){
+        if(finalReceiptTransitioning)return;
+        finalReceiptTransitioning=true;
+        try{
+            await window.SceneManager.changeScene("pre-final-story",{
+                fadeOutTime:760,
+                blackTime:420,
+                fadeInTime:960
+            });
+        }finally{
+            finalReceiptTransitioning=false;
+        }
+    });
+})();
