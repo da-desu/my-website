@@ -2545,9 +2545,11 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
 })();
 
 /* =========================================================
+   Version 0.11.18：LOG8「FINAL STAGE」を追加
+
    Version 0.11.10：進行ログ／過去場面への再訪
 
-   ・進行に応じてLOG1〜LOG7を順番に解放
+   ・進行に応じてLOG1〜LOG8を順番に解放
    ・解放済みの場面へ戻り、取り逃したアイテムを取得可能
    ・再訪中も本来の進行地点は保持
    ・「現在地点へ戻る」で元のシーンへ復帰
@@ -2565,7 +2567,8 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         { key:"stage3", rank:4, number:4, title:"海辺の看板", scene:"stage3" },
         { key:"stage4", rank:5, number:5, title:"寿司屋の扉", scene:"stage4" },
         { key:"stage5", rank:6, number:6, title:"大将に注文しよう", scene:"stage5" },
-        { key:"sushi-return", rank:7, number:7, title:"寿司屋の扉（勘定後）", scene:"sushi-return" }
+        { key:"sushi-return", rank:7, number:7, title:"寿司屋の扉（勘定後）", scene:"sushi-return" },
+        { key:"final-stage", rank:8, number:8, title:"FINAL STAGE（世界を照らす像）", scene:"stage6" }
     ];
 
     const SCENE_LOG_RANK = {
@@ -2583,10 +2586,11 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         "stage5-receipt":6,
         "sushi-return":7,
         "pre-final-story":7,
-        stage6:7,
-        "stage6-clear":7,
-        "ending-plane":7,
-        end:7
+        stage6:8,
+        "stage6-clear":8,
+        "ending-plane":8,
+        "ending-reflection":8,
+        end:8
     };
 
     function readLogRank(){
@@ -2797,6 +2801,18 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
                 const message = document.getElementById("sushiReturnAnswerMessage");
                 if(input){ input.disabled = false; input.value = ""; }
                 if(message){ message.textContent = ""; message.classList.remove("is-error", "is-success"); }
+                break;
+            }
+            case "final-stage": {
+                /*
+                   Version 0.11.18
+                   LOG8では保存済みの最終状態を消さず、
+                   FINAL STAGEの問題画面だけを初期状態から再表示します。
+                */
+                window.Stage6Controller?.reset?.({ preserveSave:true });
+                const finalScene = document.getElementById("scene-stage6");
+                if(finalScene) finalScene.scrollTop = 0;
+                window.scrollTo({top:0, left:0, behavior:"auto"});
                 break;
             }
         }
