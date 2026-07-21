@@ -110,7 +110,7 @@ async function verifyStage1Answer() {
 
     if (selectedOnlyDuplicatePair) {
         setStage1Message(
-            "他にも“同じソメイヨシノがあるようだ”",
+            "他にも“同じソメイヨシノ”があるようだ",
             ""
         );
         return;
