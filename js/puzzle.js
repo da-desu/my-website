@@ -1413,7 +1413,11 @@ const FinalLetterController = {
         this.finishing = true;
 
         const { video, playButton } = this.elements();
-        document.body.classList.remove("is-final-video-playing");
+
+        /*
+           動画終了直後は、動画専用UIの状態を保ったまま暗転を開始します。
+           暗転完了前に通常UIが一瞬見えることを防ぎます。
+        */
         try {
             video?.pause();
         } catch (_) {}
@@ -1428,14 +1432,34 @@ const FinalLetterController = {
 
         if (window.SceneManager?.changeScene) {
             await window.SceneManager.changeScene("ending-plane", {
-                fadeOutTime: 300,
-                blackTime: 120,
-                fadeInTime: 520
+                /* 動画の最終フレームから、ゆっくり黒へフェードします。 */
+                fadeOutTime: 650,
+
+                /* 完全な黒画面を1秒間維持します。 */
+                blackTime: 1000,
+
+                /* 黒から「ゲームの終わり」へフェードインします。 */
+                fadeInTime: 650
             });
         } else {
-            window.SceneManager?.showImmediately?.("ending-plane");
+            /* SceneManagerが使えない場合も、1秒の黒画面を挟みます。 */
+            const transitionLayer = document.getElementById("transitionLayer");
+            if (transitionLayer) {
+                transitionLayer.style.transitionDuration = "650ms";
+                transitionLayer.classList.add("is-visible");
+                await window.wait(670);
+                window.SceneManager?.showImmediately?.("ending-plane");
+                await window.wait(1000);
+                transitionLayer.style.transitionDuration = "650ms";
+                transitionLayer.classList.remove("is-visible");
+                await window.wait(670);
+            } else {
+                await window.wait(1000);
+                window.SceneManager?.showImmediately?.("ending-plane");
+            }
         }
 
+        document.body.classList.remove("is-final-video-playing");
         this.finishing = false;
     },
 
@@ -1528,6 +1552,19 @@ const EndingPlaneController = {
 
         const reveal = () => {
             active.classList.add("is-visible");
+
+            /*
+               1枚目を下まで読んだ位置が、2枚目へ引き継がれないようにします。
+               iPhone / iPad Safariでも「帰り道」のタイトルから表示します。
+            */
+            const storyScene = document.getElementById("scene-ending-plane");
+            if (storyScene) storyScene.scrollTop = 0;
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+            window.requestAnimationFrame(() => {
+                if (storyScene) storyScene.scrollTop = 0;
+            });
+
             if (this.step === 2) this.resetPlane();
         };
 
