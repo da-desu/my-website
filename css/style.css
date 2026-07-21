@@ -5582,7 +5582,7 @@ body.is-conclusion-story .log-return-button {
 
 
 /* =========================================================
-   Version 0.11.16：「帰り道」を独立スクロール領域へ分離
+   Version 0.11.17：「帰り道」を独立スクロール領域へ分離
    ========================================================= */
 
 /*
@@ -5645,6 +5645,70 @@ body.is-conclusion-story .log-return-button {
 
 @media (max-width: 390px) {
     .conclusion-story-viewport .conclusion-story-scene__inner {
+        padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
+        padding-inline: 12px;
+    }
+}
+
+
+/* =========================================================
+   Version 0.11.17：「ゲームの終わり」と「帰り道」を別シーンへ分離
+   ========================================================= */
+
+/*
+   Version 0.11.17のabsoluteな内部viewport方式は使用しません。
+   それぞれを独立した.sceneとして通常フローで表示することで、
+   「画面を閉じる」後の空白とスクロール継承を同時に防ぎます。
+*/
+#scene-ending-plane,
+#scene-ending-reflection {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: start center;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    overflow-anchor: none;
+    scroll-behavior: auto;
+    padding: 0;
+}
+
+#scene-ending-plane .conclusion-story-scene__inner,
+#scene-ending-reflection .conclusion-story-scene__inner {
+    width: min(100%, var(--content-width));
+    min-height: 100%;
+    margin-inline: auto;
+    padding:
+        max(24px, calc(env(safe-area-inset-top) + 16px))
+        clamp(14px, 4vw, 24px)
+        max(48px, calc(env(safe-area-inset-bottom) + 30px));
+    place-items: start center;
+    align-content: start;
+}
+
+#scene-ending-plane.is-pinning-story-top,
+#scene-ending-reflection.is-pinning-story-top {
+    overflow-y: hidden !important;
+    scroll-behavior: auto !important;
+    overscroll-behavior: none;
+}
+
+#scene-ending-plane .conclusion-story-sheet,
+#scene-ending-reflection .conclusion-story-sheet {
+    margin-top: 0;
+    margin-bottom: 42px;
+}
+
+#scene-ending-reflection #reflectionEndingStory {
+    width: min(100%, 580px);
+    max-width: 580px;
+}
+
+@media (max-width: 390px) {
+    #scene-ending-plane .conclusion-story-scene__inner,
+    #scene-ending-reflection .conclusion-story-scene__inner {
         padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
         padding-inline: 12px;
     }
