@@ -2117,9 +2117,9 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
 
 
 /* =========================================================
-   Version 0.11.9：電柱看板／レシート導線
+   Version 0.11.9.3：電柱看板／寿司屋前の行き先回答
    ========================================================= */
-(function initializeStage4FlipSignsV0119(){
+(function initializeStage4FlipSignsAndDestinationV01193(){
     "use strict";
 
     function findMessage(sign){
@@ -2137,120 +2137,124 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         sign.setAttribute("aria-pressed",flipped?"true":"false");
 
         if(flipped&&sign.dataset.signKey==="handcream"){
-            const alreadyOwned=typeof window.hasItem==="function"&&window.hasItem("ハンドクリーム");
+            const alreadyOwned=(
+                typeof window.hasUsableItem==="function"&&
+                window.hasUsableItem("ハンドクリーム")
+            )||(
+                typeof window.hasItem==="function"&&
+                window.hasItem("ハンドクリーム")
+            );
+
             if(!alreadyOwned)window.obtainItem?.("ハンドクリーム");
+
             const message=findMessage(sign);
             if(message){
                 message.textContent=alreadyOwned
                     ? "「ハンドクリーム」は入手済みだ。"
                     : "「ハンドクリーム」を手に入れた。";
+                message.classList.remove("is-error");
                 message.classList.add("is-success");
             }
         }
     });
 
-    let finalReceiptTransitioning=false;
-
-    function hasFinalReceiptV01192(){
-        return (
-            typeof window.hasUsableItem === "function" &&
-            window.hasUsableItem("女神へのレシート")
-        ) || (
-            typeof window.hasItem === "function" &&
-            window.hasItem("女神へのレシート")
-        );
+    function normalizeDestinationAnswer(value){
+        return String(value||"")
+            .normalize("NFKC")
+            .trim()
+            .replace(/[\s\u3000、。・,，.．!！?？「」『』（）()]/g,"")
+            .replace(/[ァ-ヶ]/g,char=>
+                String.fromCharCode(char.charCodeAt(0)-0x60)
+            );
     }
 
-    async function goToPreFinalStoryV01192(){
-        if(finalReceiptTransitioning)return;
+    function isCorrectDestinationAnswer(value){
+        const answer=normalizeDestinationAnswer(value);
+        return [
+            "自由の女神",
+            "自由女神",
+            "じゆうのめがみ",
+            "じゆうめがみ"
+        ].includes(answer);
+    }
 
-        const target=document.getElementById("scene-pre-final-story");
-        if(target&&!target.hidden&&target.classList.contains("is-active"))return;
+    let destinationTransitioning=false;
 
-        finalReceiptTransitioning=true;
+    async function submitDestinationAnswer(event){
+        event.preventDefault();
+        if(destinationTransitioning)return;
+
+        const input=document.getElementById("sushiReturnAnswer");
+        const button=document.getElementById("sushiReturnSubmitButton");
+        const message=document.getElementById("sushiReturnAnswerMessage");
+        const answer=input?.value||"";
+
+        if(!answer.trim()){
+            if(message){
+                message.textContent="行き先を入力しよう。";
+                message.classList.remove("is-success");
+                message.classList.add("is-error");
+            }
+            input?.focus();
+            return;
+        }
+
+        if(!isCorrectDestinationAnswer(answer)){
+            const hasGoddessReceipt=(
+                typeof window.hasUsableItem==="function"&&
+                window.hasUsableItem("女神へのレシート")
+            )||(
+                typeof window.hasItem==="function"&&
+                window.hasItem("女神へのレシート")
+            );
+
+            if(message){
+                message.textContent=hasGoddessReceipt
+                    ? "印字が消えたレシートを、もう一度確認しよう。"
+                    : "持ち物の中に、行き先を示すものがないだろうか。";
+                message.classList.remove("is-success");
+                message.classList.add("is-error");
+            }
+            input?.select();
+            return;
+        }
+
+        destinationTransitioning=true;
+        if(button)button.disabled=true;
+
+        if(message){
+            message.textContent="自由の女神へ向かおう。";
+            message.classList.remove("is-error");
+            message.classList.add("is-success");
+        }
+
         try{
-            if(typeof window.forcePreFinalStoryTransition === "function"){
-                await window.forcePreFinalStoryTransition();
-                return;
-            }
-
-            window.closeInventory?.();
-
-            if(window.SceneManager&&typeof window.SceneManager.changeScene==="function"){
-                await window.SceneManager.changeScene("pre-final-story",{
-                    fadeOutTime:520,
-                    blackTime:240,
-                    fadeInTime:720
-                });
-                return;
-            }
-
-            if(target){
-                document.querySelectorAll(".scene").forEach(scene=>{
-                    scene.classList.remove("is-active");
-                    scene.hidden=true;
-                    scene.setAttribute("aria-hidden","true");
-                });
-                target.hidden=false;
-                target.setAttribute("aria-hidden","false");
-                target.classList.add("is-active");
-                window.saveCurrentScene?.("pre-final-story");
-            }
+            await new Promise(resolve=>window.setTimeout(resolve,520));
+            await window.SceneManager.changeScene("pre-final-story",{
+                fadeOutTime:720,
+                blackTime:320,
+                fadeInTime:900
+            });
         }catch(error){
-            console.error("女神へのレシート完成後の遷移に失敗しました。",error);
-        }finally{
-            finalReceiptTransitioning=false;
-        }
-    }
-
-    window.goToPreFinalStory=goToPreFinalStoryV01192;
-
-    document.addEventListener("inventory:finalReceiptReady",function(){
-        void goToPreFinalStoryV01192();
-    });
-
-    function recoverFinalReceiptTransitionV01192(){
-        if(!hasFinalReceiptV01192())return;
-
-        const current=window.SceneManager?.currentScene || "";
-        const visibleScene=document.querySelector(".scene.is-active:not([hidden])")?.dataset.scene || "";
-        const scene=current || visibleScene;
-
-        if(["sushi-return","stage5-receipt","stage5-clear"].includes(scene)){
-            void goToPreFinalStoryV01192();
-        }
-    }
-
-    /*
-        再開処理で寿司屋前が表示された直後にも救済判定します。
-        これにより、旧版ですでに女神へのレシートを作成済みでも進めます。
-    */
-    if(window.SceneManager&&typeof window.SceneManager.showImmediately==="function"&&
-       window.SceneManager.showImmediately.datasetV01192!=="true"){
-        const showImmediatelyBeforeV01192=window.SceneManager.showImmediately;
-        const wrappedShowImmediatelyV01192=function(sceneName){
-            const result=showImmediatelyBeforeV01192.apply(this,arguments);
-            if(["sushi-return","stage5-receipt","stage5-clear"].includes(sceneName)){
-                window.setTimeout(recoverFinalReceiptTransitionV01192,140);
+            console.error("行き先正解後の画面遷移に失敗しました。",error);
+            if(message){
+                message.textContent="画面を進められませんでした。もう一度決定してください。";
+                message.classList.remove("is-success");
+                message.classList.add("is-error");
             }
-            return result;
-        };
-        wrappedShowImmediatelyV01192.datasetV01192="true";
-        window.SceneManager.showImmediately=wrappedShowImmediatelyV01192;
+        }finally{
+            destinationTransitioning=false;
+            if(button)button.disabled=false;
+        }
     }
 
-    document.addEventListener("inventory:changed",function(){
-        window.setTimeout(recoverFinalReceiptTransitionV01192,100);
-    });
+    function initializeDestinationQuestion(){
+        const form=document.getElementById("sushiReturnAnswerForm");
+        if(!form||form.dataset.boundV01193==="true")return;
 
-    document.addEventListener("DOMContentLoaded",function(){
-        window.setTimeout(recoverFinalReceiptTransitionV01192,1200);
-    });
+        form.addEventListener("submit",submitDestinationAnswer);
+        form.dataset.boundV01193="true";
+    }
 
-    window.addEventListener("pageshow",function(){
-        window.setTimeout(recoverFinalReceiptTransitionV01192,900);
-    });
+    document.addEventListener("DOMContentLoaded",initializeDestinationQuestion);
 })();
-
-
-/* Version 0.11.9.2: レシート完成後の強制遷移とキャッシュ対策 */
