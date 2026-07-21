@@ -5579,3 +5579,73 @@ body.is-conclusion-story .log-return-button {
 #reflection-ending-title:focus {
     outline: none;
 }
+
+
+/* =========================================================
+   Version 0.11.16：「帰り道」を独立スクロール領域へ分離
+   ========================================================= */
+
+/*
+   同じスクロール領域の中で2枚の長いシートを差し替える方式をやめ、
+   各ストーリーに独立したスクロール領域を持たせます。
+   これにより「ゲームの終わり」の最下部位置が「帰り道」へ継承されません。
+*/
+.conclusion-story-scene {
+    overflow: hidden !important;
+    place-items: stretch;
+    padding: 0;
+}
+
+.conclusion-story-viewport {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+
+    scroll-behavior: auto;
+    scroll-padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
+    overflow-anchor: none;
+}
+
+.conclusion-story-viewport[hidden] {
+    display: none !important;
+}
+
+.conclusion-story-viewport .conclusion-story-scene__inner {
+    width: min(100%, var(--content-width));
+    min-height: 100%;
+    margin-inline: auto;
+    padding:
+        max(24px, calc(env(safe-area-inset-top) + 16px))
+        clamp(14px, 4vw, 24px)
+        max(48px, calc(env(safe-area-inset-bottom) + 30px));
+}
+
+/* 表示確定まで、対象viewport自身のスクロールだけを固定します。 */
+.conclusion-story-viewport.is-pinning-story-top {
+    overflow-y: hidden !important;
+    scroll-behavior: auto !important;
+    overscroll-behavior: none;
+}
+
+/* 旧方式のシーン全体固定は使いません。 */
+.conclusion-story-scene.is-pinning-story-top {
+    overflow: hidden !important;
+}
+
+#girlEndingStory,
+#reflectionEndingStory {
+    margin-top: 0;
+}
+
+@media (max-width: 390px) {
+    .conclusion-story-viewport .conclusion-story-scene__inner {
+        padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
+        padding-inline: 12px;
+    }
+}
