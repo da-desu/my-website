@@ -1353,12 +1353,80 @@ async function hideIntroElementV011(
 }
 
 
-const introLetterTextV011 =
+const introLetterBeforeSecretV01112 =
     "拝啓、この手紙を受け取ってくれた人へ。\n\n" +
     "もしかして、あっという間に過ぎていく、変化のない日常に退屈してたりするかな？\n\n" +
-    "もしそうだったら、私が作ったゲーム、遊んでみてよ。いい暇つぶしになると思うよ。\n\n" +
-    "*****（ぼやけて読めない）を目指してね。\n\n" +
+    "もしそうだったら、私が作ったゲーム、遊んでみてよ。いい暇つぶしになると思うよ。\n\n";
+
+const introLetterSecretV01112 = "銃の女神";
+
+const introLetterAfterSecretV01112 =
+    "を目指してね。\n\n" +
     "世界を照らす像って呼ばれてるんだって。物事の背景って面白いよね。";
+
+/*
+    本当は「銃の女神」と書かれていますが、
+    プレイヤーには読めない強さでぼかして表示します。
+    通常の文字列置換では一瞬見えてしまうため、
+    ぼかしたspanを最初からDOMへ挿入します。
+*/
+function waitIntroLetterV01112(ms) {
+    return new Promise(function (resolve) {
+        window.setTimeout(resolve, ms);
+    });
+}
+
+async function typeTextNodeV01112(node, value, speed) {
+    const text = String(value || "");
+    for (const character of text) {
+        node.data += character;
+        let delay = speed;
+        if (character === "。" || character === "、") delay = speed * 4;
+        if (character === "\n") delay = speed * 5;
+        await waitIntroLetterV01112(delay);
+    }
+}
+
+function appendBlurredSecretV01112(target) {
+    const secret = document.createElement("span");
+    secret.className = "letter-secret-blur";
+    secret.textContent = introLetterSecretV01112;
+    secret.setAttribute("aria-hidden", "true");
+    secret.setAttribute("draggable", "false");
+
+    const accessible = document.createElement("span");
+    accessible.className = "visually-hidden";
+    accessible.textContent = "ぼやけて読めない文字";
+
+    target.append(secret, accessible);
+}
+
+async function typeIntroLetterV01112(target, speed) {
+    if (!target) return;
+    target.replaceChildren();
+
+    const beforeNode = document.createTextNode("");
+    target.appendChild(beforeNode);
+    await typeTextNodeV01112(beforeNode, introLetterBeforeSecretV01112, speed);
+
+    appendBlurredSecretV01112(target);
+
+    const afterNode = document.createTextNode("");
+    target.appendChild(afterNode);
+    await typeTextNodeV01112(afterNode, introLetterAfterSecretV01112, speed);
+}
+
+function renderIntroLetterInstantV01112(target) {
+    if (!target) return;
+    target.replaceChildren(document.createTextNode(introLetterBeforeSecretV01112));
+    appendBlurredSecretV01112(target);
+    target.appendChild(document.createTextNode(introLetterAfterSecretV01112));
+}
+
+const introLetterTextV011 =
+    introLetterBeforeSecretV01112 +
+    introLetterSecretV01112 +
+    introLetterAfterSecretV01112;
 
 
 /**
@@ -1535,9 +1603,8 @@ async function showIntroLetterV011() {
         return;
     }
 
-    await window.typeText(
+    await typeIntroLetterV01112(
         text,
-        introLetterTextV011,
         19
     );
 
@@ -2693,7 +2760,7 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
             card.style.setProperty("--intro-peel-progress", "0");
         }
 
-        if(text) text.textContent = introLetterTextV011;
+        if(text) renderIntroLetterInstantV01112(text);
         cursor?.classList.add("is-hidden");
         gesture?.setAttribute("aria-disabled", "false");
         introLetterGestureReadyV011 = true;
