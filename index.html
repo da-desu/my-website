@@ -12,7 +12,7 @@
 
     <title>世界は姿を変える</title>
 
-    <link rel="stylesheet" href="css/style.css?v=01116">
+    <link rel="stylesheet" href="css/style.css?v=01117">
 </head>
 
 <body>
@@ -1448,95 +1448,100 @@
             </div>
         </section>
 
-        <!-- =======================================================
-             結末：二つのストーリーシート
 
-             Version 0.11.16
-             「ゲームの終わり」と「帰り道」を別々のスクロール領域に分離。
-             前画面の最下部位置をSafariが引き継がない構造にしています。
+        <!-- =======================================================
+             結末：独立した二つのストーリーシーン
+
+             Version 0.11.17
+             「ゲームの終わり」と「帰り道」を別々の.sceneへ完全分離。
+             前画面のスクロール位置やフォーカスを引き継がない構造です。
         ======================================================== -->
         <section
             id="scene-ending-plane"
-            class="scene conclusion-story-scene"
+            class="scene conclusion-story-scene conclusion-story-scene--game-end"
             data-scene="ending-plane"
             aria-labelledby="girl-ending-title"
             hidden
         >
-            <div id="girlEndingViewport" class="conclusion-story-viewport">
-                <div class="scene__inner conclusion-story-scene__inner">
-                    <article id="girlEndingStory" class="story-sheet conclusion-story-sheet">
-                        <p class="story-sheet__label">STORY</p>
-                        <h1 id="girl-ending-title" class="story-sheet__title">ゲームの終わり</h1>
+            <div class="scene__inner conclusion-story-scene__inner">
+                <article id="girlEndingStory" class="story-sheet conclusion-story-sheet">
+                    <p class="story-sheet__label">STORY</p>
+                    <h1 id="girl-ending-title" class="story-sheet__title">ゲームの終わり</h1>
 
-                        <div class="story-sheet__body conclusion-story-sheet__body conclusion-story-sheet__body--with-girl">
-                            <p>
-                                どう、楽しかった？それとも…びっくりしたかな！まさか“自由の女神”に出会って終わり、なんて思ってたわけないよね。“醤油”をかけちゃったら、“銃の女神”になっちゃうじゃん！あたりまえだよね。
-                            </p>
-                            <p>
-                                ともあれ、ゲームはこれでおしまい。たのしい時間になってるといいな
-                            </p>
-                        </div>
-
-                        <div class="ending-girl-portrait" role="img" aria-label="満開の桜の木の下にいた女の子"></div>
-
-                        <button id="girlEndingNextButton" class="start-button story-sheet__button" type="button">
-                            画面を閉じる
-                        </button>
-                    </article>
-                </div>
-            </div>
-
-            <div id="reflectionEndingViewport" class="conclusion-story-viewport" hidden>
-                <div class="scene__inner conclusion-story-scene__inner">
-                    <article id="reflectionEndingStory" class="story-sheet conclusion-story-sheet" aria-labelledby="reflection-ending-title">
-                        <p class="story-sheet__label">STORY</p>
-                        <h2 id="reflection-ending-title" class="story-sheet__title">帰り道</h2>
-
-                        <div class="story-sheet__body conclusion-story-sheet__body">
-                            <p>
-                                うん、たのしかった…かな。自分の中で何か大きな変化があったわけではないが、今悩んでいることの全てがちっぽけに思えた気がした。
-                            </p>
-                            <p>
-                                自由と銃は似て非なるものである。でも、些細なきっかけで姿が変わってしまう…なんてこともあるのかもしれない。
-                            </p>
-                            <p>
-                                「自由」とは、「選択肢が無限にあること」なのではなく、「自分の意思で選択ができること」なのだろう。ゲームの中であっても、自分の選択が世界に影響を与えられたことが、ちょっぴり嬉しかった。
-                            </p>
-                            <p>
-                                そんなことを考えながら、飛んできた紙飛行機を月に向かって投げ返した。
-                            </p>
-                        </div>
-
-                        <div
-                            id="endingPlaneArea"
-                            class="ending-plane-area reflection-ending-plane-area"
-                            aria-label="紙飛行機を左下から右上へ飛ばす操作"
-                        >
-                            <div class="ending-plane-area__night" aria-hidden="true"></div>
-                            <div class="ending-plane-area__stars" aria-hidden="true"></div>
-                            <div id="endingPlaneTrail" class="ending-plane-trail" aria-hidden="true"></div>
-
-                            <button
-                                id="endingPlane"
-                                class="ending-plane"
-                                type="button"
-                                aria-describedby="endingPlaneMessage"
-                                aria-label="紙飛行機。左下から右上へ大きくスワイプして飛ばす"
-                                tabindex="-1"
-                                disabled
-                            >
-                                <span aria-hidden="true">➤</span>
-                            </button>
-
-                            <span class="ending-plane-area__start" aria-hidden="true">START</span>
-                            <span class="ending-plane-area__goal" aria-hidden="true">MOON</span>
-                        </div>
-
-                        <p id="endingPlaneMessage" class="ending-plane-message" aria-live="polite">
-                            紙飛行機に触れて、そのまま右上へ。
+                    <div class="story-sheet__body conclusion-story-sheet__body conclusion-story-sheet__body--with-girl">
+                        <p>
+                            どう、楽しかった？それとも…びっくりしたかな！まさか“自由の女神”に出会って終わり、なんて思ってたわけないよね。“醤油”をかけちゃったら、“銃の女神”になっちゃうじゃん！あたりまえだよね。
                         </p>
-                    </article>
-                </div>
+                        <p>
+                            ともあれ、ゲームはこれでおしまい。たのしい時間になってるといいな
+                        </p>
+                    </div>
+
+                    <div class="ending-girl-portrait" role="img" aria-label="満開の桜の木の下にいた女の子"></div>
+
+                    <button id="girlEndingNextButton" class="start-button story-sheet__button" type="button">
+                        画面を閉じる
+                    </button>
+                </article>
+            </div>
+        </section>
+
+        <section
+            id="scene-ending-reflection"
+            class="scene conclusion-story-scene conclusion-story-scene--reflection"
+            data-scene="ending-reflection"
+            aria-labelledby="reflection-ending-title"
+            hidden
+        >
+            <div class="scene__inner conclusion-story-scene__inner">
+                <article id="reflectionEndingStory" class="story-sheet conclusion-story-sheet" aria-labelledby="reflection-ending-title">
+                    <p class="story-sheet__label">STORY</p>
+                    <h2 id="reflection-ending-title" class="story-sheet__title">帰り道</h2>
+
+                    <div class="story-sheet__body conclusion-story-sheet__body">
+                        <p>
+                            うん、たのしかった…かな。自分の中で何か大きな変化があったわけではないが、今悩んでいることの全てがちっぽけに思えた気がした。
+                        </p>
+                        <p>
+                            自由と銃は似て非なるものである。でも、些細なきっかけで姿が変わってしまう…なんてこともあるのかもしれない。
+                        </p>
+                        <p>
+                            「自由」とは、「選択肢が無限にあること」なのではなく、「自分の意思で選択ができること」なのだろう。ゲームの中であっても、自分の選択が世界に影響を与えられたことが、ちょっぴり嬉しかった。
+                        </p>
+                        <p>
+                            そんなことを考えながら、飛んできた紙飛行機を月に向かって投げ返した。
+                        </p>
+                    </div>
+
+                    <div
+                        id="endingPlaneArea"
+                        class="ending-plane-area reflection-ending-plane-area"
+                        aria-label="紙飛行機を左下から右上へ飛ばす操作"
+                    >
+                        <div class="ending-plane-area__night" aria-hidden="true"></div>
+                        <div class="ending-plane-area__stars" aria-hidden="true"></div>
+                        <div id="endingPlaneTrail" class="ending-plane-trail" aria-hidden="true"></div>
+
+                        <button
+                            id="endingPlane"
+                            class="ending-plane"
+                            type="button"
+                            aria-describedby="endingPlaneMessage"
+                            aria-label="紙飛行機。左下から右上へ大きくスワイプして飛ばす"
+                            tabindex="-1"
+                            disabled
+                        >
+                            <span aria-hidden="true">➤</span>
+                        </button>
+
+                        <span class="ending-plane-area__start" aria-hidden="true">START</span>
+                        <span class="ending-plane-area__goal" aria-hidden="true">MOON</span>
+                    </div>
+
+                    <p id="endingPlaneMessage" class="ending-plane-message" aria-live="polite">
+                        紙飛行機に触れて、そのまま右上へ。
+                    </p>
+                </article>
             </div>
         </section>
 
@@ -1584,11 +1589,11 @@
     <!--
         セーブ管理は、ゲーム本体より先に読み込みます。
     -->
-    <script src="js/save.js?v=01116"></script>
-    <script src="js/inventory.js?v=01116"></script>
-    <script src="js/game.js?v=01116"></script>
-    <script src="js/puzzle.js?v=01116"></script>
-    <script src="js/scenes.js?v=01116"></script>
+    <script src="js/save.js?v=01117"></script>
+    <script src="js/inventory.js?v=01117"></script>
+    <script src="js/game.js?v=01117"></script>
+    <script src="js/puzzle.js?v=01117"></script>
+    <script src="js/scenes.js?v=01117"></script>
 
 </body>
 </html>
