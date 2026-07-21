@@ -1,7 +1,7 @@
 /*
 ============================================================
 inventory.js
-Version 0.11.9.2
+Version 0.11.9.3.2
 
 役割
 ・取得済みアイテムの表示
@@ -49,7 +49,7 @@ const ITEM_PRESENTATIONS = {
     },
     "女神へのレシート": {
         icon: "女",
-        description: "印字が消え、「女神に会いに行ってね」という文字だけが残ったレシート。"
+        description: "印字が消え、「自由の女神」とだけ表示されているレシート。"
     },
     "いぶしぎん": {
         icon: "銀",
@@ -176,101 +176,6 @@ function normalizeRecipePair(first, second) {
 }
 
 
-let finalReceiptForceTransitionPromise = null;
-
-function showPreFinalStoryDirectlyV01192() {
-    const target = document.getElementById("scene-pre-final-story");
-    if (!target) {
-        console.error("FINAL前ストーリーのシーンが見つかりません。");
-        return false;
-    }
-
-    document.querySelectorAll(".scene").forEach(scene => {
-        scene.classList.remove("is-active");
-        scene.hidden = true;
-        scene.setAttribute("aria-hidden", "true");
-    });
-
-    const transitionLayer = document.getElementById("transitionLayer");
-    if (transitionLayer) {
-        transitionLayer.classList.remove("is-visible");
-        transitionLayer.style.transitionDuration = "";
-    }
-
-    target.hidden = false;
-    target.setAttribute("aria-hidden", "false");
-    target.scrollTop = 0;
-
-    window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-            target.classList.add("is-active");
-        });
-    });
-
-    if (window.SceneManager) {
-        window.SceneManager.currentScene = "pre-final-story";
-    }
-
-    window.saveCurrentScene?.("pre-final-story");
-    window.scrollTo?.(0, 0);
-    return true;
-}
-
-async function forcePreFinalStoryTransitionV01192() {
-    const target = document.getElementById("scene-pre-final-story");
-
-    if (target && !target.hidden && target.classList.contains("is-active")) {
-        return true;
-    }
-
-    if (finalReceiptForceTransitionPromise) {
-        return finalReceiptForceTransitionPromise;
-    }
-
-    finalReceiptForceTransitionPromise = (async () => {
-        closeInventory();
-
-        const panel = document.getElementById("inventoryPanel");
-        if (panel) {
-            panel.hidden = true;
-            panel.setAttribute("aria-hidden", "true");
-            panel.style.display = "none";
-        }
-
-        await new Promise(resolve => {
-            window.requestAnimationFrame(() => {
-                window.requestAnimationFrame(resolve);
-            });
-        });
-
-        try {
-            if (window.SceneManager && typeof window.SceneManager.changeScene === "function") {
-                await window.SceneManager.changeScene("pre-final-story", {
-                    fadeOutTime: 520,
-                    blackTime: 240,
-                    fadeInTime: 720
-                });
-            }
-        } catch (error) {
-            console.error("通常の画面遷移に失敗したため、直接表示へ切り替えます。", error);
-        }
-
-        const transitioned = target && !target.hidden;
-        if (!transitioned) {
-            showPreFinalStoryDirectlyV01192();
-        }
-
-        if (panel) {
-            panel.style.display = "";
-        }
-
-        return true;
-    })().finally(() => {
-        finalReceiptForceTransitionPromise = null;
-    });
-
-    return finalReceiptForceTransitionPromise;
-}
 
 function combineInventoryItems(first, second) {
     const pair = normalizeRecipePair(first, second);
@@ -305,10 +210,7 @@ function combineInventoryItems(first, second) {
 
     if (pair === receiptPair) {
         if (hasUsableItem("女神へのレシート")) {
-            setInventoryMessage("レシートには、もう女神への言葉だけが残っている。", "success");
-            window.setTimeout(() => {
-                void forcePreFinalStoryTransitionV01192();
-            }, 180);
+            setInventoryMessage("印字が消えたレシートには、「自由の女神」と表示されている。", "success");
             return true;
         }
 
@@ -323,14 +225,9 @@ function combineInventoryItems(first, second) {
         nextMeta.order.splice(receiptIndex >= 0 ? receiptIndex : nextMeta.order.length, 0, "女神へのレシート");
         writeInventoryMeta(nextMeta);
 
-        setInventoryMessage("印字が消え、「女神に会いに行ってね」という文字だけが残った。", "success");
+        setInventoryMessage("印字が消え、レシートに「自由の女神」と表示された。", "success");
         renderInventory();
         document.dispatchEvent(new CustomEvent("inventory:changed"));
-        document.dispatchEvent(new CustomEvent("inventory:finalReceiptReady"));
-
-        window.setTimeout(() => {
-            void forcePreFinalStoryTransitionV01192();
-        }, 720);
 
         return true;
     }
@@ -599,4 +496,3 @@ window.getUsableInventoryItems = getInventoryItems;
 window.hasUsableItem = hasUsableItem;
 window.combineInventoryItems = combineInventoryItems;
 window.closeInventory = closeInventory;
-window.forcePreFinalStoryTransition = forcePreFinalStoryTransitionV01192;
