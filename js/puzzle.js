@@ -1572,34 +1572,45 @@ const EndingPlaneController = {
     completed: false,
     scrollPinToken: 0,
 
+    elements() {
+        return {
+            firstScene: document.getElementById("scene-ending-plane"),
+            secondScene: document.getElementById("scene-ending-reflection"),
+            firstStory: document.getElementById("girlEndingStory"),
+            secondStory: document.getElementById("reflectionEndingStory"),
+            nextButton: document.getElementById("girlEndingNextButton"),
+            plane: document.getElementById("endingPlane")
+        };
+    },
+
     /**
-     * Version 0.11.16
-     * 2枚の物語を別々のスクロール領域に分けています。
-     * 前の画面の最下部位置を次の画面へ引き継がないよう、
-     * 現在表示するviewportだけを先頭へ固定します。
+     * Version 0.11.17
+     * 「ゲームの終わり」と「帰り道」は、同じシーン内の表示切替ではなく
+     * 完全に別の.sceneとして表示します。
+     * これにより、前画面のスクロール位置を構造上引き継ぎません。
      */
-    pinStoryToTop({ step = this.step, duration = 1100 } = {}) {
+    forceSceneTop(scene, { duration = 900, enablePlane = false } = {}) {
         const token = ++this.scrollPinToken;
-        const viewport = document.getElementById(
-            step === 2 ? "reflectionEndingViewport" : "girlEndingViewport"
-        );
-        const storyScene = document.getElementById("scene-ending-plane");
-        const plane = document.getElementById("endingPlane");
+        const { plane } = this.elements();
+        if (!scene) return;
 
-        if (!viewport) return;
+        scene.classList.add("is-pinning-story-top");
 
-        viewport.classList.add("is-pinning-story-top");
+        if (plane) {
+            plane.disabled = true;
+            plane.setAttribute("tabindex", "-1");
+        }
 
         const resetTop = () => {
             if (token !== this.scrollPinToken) return;
+            scene.scrollTop = 0;
+            scene.scrollLeft = 0;
+            scene.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
 
-            viewport.scrollTop = 0;
-            viewport.scrollLeft = 0;
-            viewport.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
-
-            if (storyScene) {
-                storyScene.scrollTop = 0;
-                storyScene.scrollLeft = 0;
+            const inner = scene.querySelector(".conclusion-story-scene__inner");
+            if (inner) {
+                inner.scrollTop = 0;
+                inner.scrollLeft = 0;
             }
 
             const scrollingElement = document.scrollingElement;
@@ -1619,96 +1630,77 @@ const EndingPlaneController = {
             window.requestAnimationFrame(resetTop);
         });
 
-        [40, 120, 260, 520, 860].forEach(delay => {
+        [40, 120, 260, 520, 780].forEach(delay => {
             window.setTimeout(resetTop, delay);
         });
 
         window.setTimeout(() => {
             if (token !== this.scrollPinToken) return;
-
             resetTop();
-            viewport.classList.remove("is-pinning-story-top");
+            scene.classList.remove("is-pinning-story-top");
             resetTop();
-            window.requestAnimationFrame(resetTop);
 
-            if (this.step === 2 && !this.completed && plane) {
+            if (enablePlane && this.step === 2 && !this.completed && plane) {
                 plane.disabled = false;
                 plane.removeAttribute("tabindex");
             }
         }, duration);
     },
 
-    showStep(step, animate = false) {
-        const first = document.getElementById("girlEndingStory");
-        const second = document.getElementById("reflectionEndingStory");
-        const firstViewport = document.getElementById("girlEndingViewport");
-        const secondViewport = document.getElementById("reflectionEndingViewport");
-        const storyScene = document.getElementById("scene-ending-plane");
-        const nextButton = document.getElementById("girlEndingNextButton");
-        const plane = document.getElementById("endingPlane");
+    showSceneDirectly(sceneName) {
+        const target = document.querySelector('[data-scene="' + sceneName + '"]');
+        if (!target) return false;
 
-        if (!first || !second || !firstViewport || !secondViewport) return;
-
-        this.step = step === 2 ? 2 : 1;
-
-        /*
-           画面下部の紙飛行機を、帰り道を表示するより前に無効化します。
-           Safariがフォーカス先として選び、下端へ自動スクロールする隙を作りません。
-        */
-        if (plane) {
-            plane.disabled = true;
-            plane.setAttribute("tabindex", "-1");
-        }
-
-        const focused = document.activeElement;
-        if (focused && focused !== document.body && typeof focused.blur === "function") {
-            focused.blur();
-        }
-
-        [firstViewport, secondViewport].forEach(viewport => {
-            viewport.classList.remove("is-pinning-story-top");
-            viewport.scrollTop = 0;
-            viewport.scrollLeft = 0;
-            viewport.hidden = true;
+        document.querySelectorAll(".scene").forEach(scene => {
+            scene.classList.remove("is-active");
+            scene.hidden = true;
+            scene.setAttribute("aria-hidden", "true");
         });
 
-        [first, second].forEach(sheet => {
-            sheet.classList.remove("is-visible", "is-leaving");
-            sheet.hidden = true;
+        target.hidden = false;
+        target.setAttribute("aria-hidden", "false");
+        target.classList.add("is-active");
+
+        if (window.SceneManager) {
+            window.SceneManager.currentScene = sceneName;
+        }
+
+        return true;
+    },
+
+    prepareFirstStory() {
+        const { firstStory, nextButton } = this.elements();
+        this.step = 1;
+        document.body.classList.add("is-conclusion-story");
+
+        if (nextButton) nextButton.disabled = false;
+        if (firstStory) {
+            firstStory.hidden = false;
+            firstStory.classList.remove("is-leaving");
+            firstStory.classList.add("is-visible");
+        }
+
+        const scene = document.getElementById("scene-ending-plane");
+        this.forceSceneTop(scene, { duration: 500 });
+    },
+
+    prepareReflectionStory() {
+        const { secondStory } = this.elements();
+        this.step = 2;
+        document.body.classList.add("is-conclusion-story");
+        this.resetPlane({ temporarilyDisabled: true });
+
+        if (secondStory) {
+            secondStory.hidden = false;
+            secondStory.classList.remove("is-leaving");
+            secondStory.classList.add("is-visible");
+        }
+
+        const scene = document.getElementById("scene-ending-reflection");
+        this.forceSceneTop(scene, {
+            duration: 1000,
+            enablePlane: true
         });
-
-        const activeViewport = this.step === 1 ? firstViewport : secondViewport;
-        const activeSheet = this.step === 1 ? first : second;
-
-        if (this.step === 2) {
-            this.resetPlane({ temporarilyDisabled: true });
-            if (nextButton) nextButton.disabled = true;
-            storyScene?.setAttribute("aria-labelledby", "reflection-ending-title");
-        } else {
-            if (nextButton) nextButton.disabled = false;
-            storyScene?.setAttribute("aria-labelledby", "girl-ending-title");
-        }
-
-        activeSheet.hidden = false;
-        activeViewport.scrollTop = 0;
-        activeViewport.scrollLeft = 0;
-        activeViewport.hidden = false;
-        activeViewport.scrollTop = 0;
-
-        const reveal = () => {
-            activeViewport.scrollTop = 0;
-            activeSheet.classList.add("is-visible");
-            this.pinStoryToTop({
-                step: this.step,
-                duration: this.step === 2 ? 1100 : 480
-            });
-        };
-
-        if (animate) {
-            window.requestAnimationFrame(() => window.requestAnimationFrame(reveal));
-        } else {
-            reveal();
-        }
     },
 
     resetPlane({ temporarilyDisabled = false } = {}) {
@@ -1747,14 +1739,42 @@ const EndingPlaneController = {
     reset({ forceFirst = false } = {}) {
         this.transitioning = false;
         document.body.classList.add("is-conclusion-story");
+
         const state = window.getStage6State?.() || {};
         const step = forceFirst ? 1 : Number(state.endingStoryStep) === 2 ? 2 : 1;
-        this.showStep(step, true);
+
+        if (step === 2) {
+            if (
+                window.SceneManager &&
+                typeof window.SceneManager.showImmediately === "function"
+            ) {
+                window.SceneManager.showImmediately("ending-reflection");
+            } else {
+                this.showSceneDirectly("ending-reflection");
+            }
+            this.prepareReflectionStory();
+        } else {
+            const activeScene = document.querySelector(".scene.is-active:not([hidden])");
+            if (!activeScene || activeScene.dataset.scene !== "ending-plane") {
+                if (
+                    window.SceneManager &&
+                    typeof window.SceneManager.showImmediately === "function"
+                ) {
+                    window.SceneManager.showImmediately("ending-plane");
+                } else {
+                    this.showSceneDirectly("ending-plane");
+                }
+            }
+            this.prepareFirstStory();
+        }
+
         window.saveStage6State?.({ endingStoryStep: step });
     },
 
     async next(event) {
         event?.preventDefault?.();
+        event?.stopPropagation?.();
+
         const button = event?.currentTarget;
         button?.blur?.();
 
@@ -1762,26 +1782,61 @@ const EndingPlaneController = {
         this.transitioning = true;
         if (button) button.disabled = true;
 
-        const plane = document.getElementById("endingPlane");
-        if (plane) {
-            plane.disabled = true;
-            plane.setAttribute("tabindex", "-1");
+        const { firstStory, secondStory } = this.elements();
+        const reflectionScene = document.getElementById("scene-ending-reflection");
+
+        firstStory?.classList.remove("is-visible");
+        firstStory?.classList.add("is-leaving");
+
+        this.step = 2;
+        this.resetPlane({ temporarilyDisabled: true });
+
+        if (secondStory) {
+            secondStory.hidden = false;
+            secondStory.classList.remove("is-leaving");
+            secondStory.classList.add("is-visible");
         }
 
-        const first = document.getElementById("girlEndingStory");
-        first?.classList.remove("is-visible");
-        first?.classList.add("is-leaving");
-        await window.wait(330);
+        if (reflectionScene) {
+            reflectionScene.scrollTop = 0;
+            reflectionScene.scrollLeft = 0;
+        }
 
-        this.showStep(2, true);
         window.saveStage6State?.({ endingStoryStep: 2 });
-        this.transitioning = false;
+
+        try {
+            await window.wait(260);
+
+            if (
+                window.SceneManager &&
+                typeof window.SceneManager.changeScene === "function"
+            ) {
+                await window.SceneManager.changeScene("ending-reflection", {
+                    fadeOutTime: 260,
+                    blackTime: 120,
+                    fadeInTime: 420
+                });
+            } else if (!this.showSceneDirectly("ending-reflection")) {
+                throw new Error("ending-reflection scene was not found.");
+            }
+
+            this.prepareReflectionStory();
+
+        } catch (error) {
+            console.error("帰り道への遷移に失敗しました。", error);
+
+            if (this.showSceneDirectly("ending-reflection")) {
+                this.prepareReflectionStory();
+            }
+        } finally {
+            this.transitioning = false;
+        }
     },
 
     beginPlaneGesture(event) {
         if (this.step !== 2 || this.completed || this.pointerId !== null) return;
         const plane = document.getElementById("endingPlane");
-        if (!plane) return;
+        if (!plane || plane.disabled) return;
 
         event.preventDefault();
         this.pointerId = event.pointerId;
@@ -1890,7 +1945,10 @@ const EndingPlaneController = {
     init() {
         if (this.initialized) return;
 
-        document.getElementById("girlEndingNextButton")?.addEventListener("click", event => this.next(event));
+        document.getElementById("girlEndingNextButton")?.addEventListener(
+            "click",
+            event => this.next(event)
+        );
 
         const plane = document.getElementById("endingPlane");
         plane?.addEventListener("pointerdown", event => this.beginPlaneGesture(event));
