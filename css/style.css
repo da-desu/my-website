@@ -5172,3 +5172,232 @@ body.is-log-replay .scene__inner {
     }
 }
 
+
+
+/* =========================================================
+   Version 0.11.11：合成謎／変身動画／新エンディング
+   ========================================================= */
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* 持ち物の合成前に表示する一枚謎 */
+.inventory-recipe-puzzle {
+    position: fixed;
+    inset: 0;
+    z-index: 5200;
+    display: grid;
+    place-items: center;
+    padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+}
+
+.inventory-recipe-puzzle[hidden],
+.inventory-recipe-puzzle[aria-hidden="true"] {
+    display: none !important;
+}
+
+.inventory-recipe-puzzle__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.inventory-recipe-puzzle__body {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 520px);
+    max-height: min(92svh, 840px);
+    overflow-y: auto;
+    padding: clamp(22px, 5vw, 34px);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 17px;
+    background:
+        radial-gradient(circle at 50% 0, rgba(255,255,255,.08), transparent 33%),
+        #101216;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 26px 80px rgba(0,0,0,.68);
+}
+
+.inventory-recipe-puzzle__title {
+    margin: 8px 0 0;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(1.25rem, 5.5vw, 1.8rem);
+    font-weight: 500;
+    letter-spacing: .06em;
+}
+
+.inventory-recipe-puzzle__question {
+    margin: 17px 0 0;
+    color: rgba(255,255,255,.86);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(.96rem, 4vw, 1.15rem);
+    line-height: 1.8;
+}
+
+.inventory-recipe-puzzle__image {
+    display: block;
+    width: 100%;
+    max-height: 48svh;
+    margin: 18px auto 0;
+    border-radius: 11px;
+    object-fit: contain;
+    background: #f5f2ec;
+    box-shadow: 0 14px 35px rgba(0,0,0,.38);
+}
+
+.inventory-recipe-puzzle__form {
+    margin-top: 20px;
+}
+
+.inventory-recipe-puzzle__message {
+    min-height: 1.8em;
+    margin: 13px 0 0;
+    color: rgba(255,255,255,.64);
+    font-size: .8rem;
+}
+
+.inventory-recipe-puzzle__message.is-error { color: #ffc4c4; }
+.inventory-recipe-puzzle__message.is-success { color: #ccefcf; }
+.inventory-recipe-puzzle__cancel { margin-top: 15px; }
+
+body.is-recipe-puzzle-open {
+    overflow: hidden;
+}
+
+/* 正しい2アイテムを選んだ後の、黒背景・動画専用画面 */
+.final-video-scene {
+    z-index: 3000;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+.final-video-scene__inner {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    background: #000;
+}
+
+.final-transformation-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.final-video-play-button {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 4;
+    min-width: min(76vw, 270px);
+    transform: translate(-50%, -50%);
+}
+
+.final-video-message {
+    position: absolute;
+    left: 50%;
+    bottom: max(26px, env(safe-area-inset-bottom));
+    z-index: 3;
+    width: min(88vw, 440px);
+    margin: 0;
+    color: rgba(255,255,255,.78);
+    font-size: .78rem;
+    text-align: center;
+    transform: translateX(-50%);
+}
+
+body.is-final-video-playing .inventory-button,
+body.is-final-video-playing .log-button,
+body.is-final-video-playing .log-return-button {
+    display: none !important;
+}
+
+/* 動画後の二枚のストーリーシート */
+.conclusion-story-scene {
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at 78% 14%, rgba(224,189,224,.13), transparent 30%),
+        radial-gradient(circle at 18% 88%, rgba(251,205,215,.09), transparent 35%),
+        linear-gradient(180deg, #15171c, #07080b);
+}
+
+.conclusion-story-scene__inner {
+    display: grid;
+    place-items: center;
+    min-height: 100%;
+    padding-block: 30px 46px;
+}
+
+.conclusion-story-sheet {
+    position: relative;
+    width: min(100%, 620px);
+    margin: 0 auto;
+}
+
+.conclusion-story-sheet__body {
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(.9rem, 3.8vw, 1.02rem);
+    line-height: 2.05;
+    text-align: left;
+}
+
+.conclusion-story-sheet__body--with-girl {
+    padding-bottom: clamp(118px, 31vw, 176px);
+}
+
+.ending-girl-portrait {
+    position: absolute;
+    right: clamp(14px, 4vw, 30px);
+    bottom: clamp(82px, 15vw, 108px);
+    width: clamp(102px, 27vw, 155px);
+    aspect-ratio: 1 / 1.08;
+    border: 2px solid rgba(255,255,255,.28);
+    border-radius: 50% 50% 16px 16px;
+    background-image: url("../img/ending/girl_portrait.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center 24%;
+    box-shadow: 0 14px 36px rgba(0,0,0,.5);
+    filter: saturate(.92) contrast(1.02);
+}
+
+#reflectionEndingStory[hidden],
+#girlEndingStory[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 390px) {
+    .inventory-recipe-puzzle__body { padding: 20px 16px 24px; }
+    .inventory-recipe-puzzle__image { max-height: 43svh; }
+    .conclusion-story-sheet { padding-inline: 19px; }
+    .ending-girl-portrait { bottom: 78px; }
+}
+
+body.is-conclusion-story .inventory-button,
+body.is-conclusion-story .log-button,
+body.is-conclusion-story .log-return-button {
+    display: none !important;
+}
