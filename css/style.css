@@ -5473,3 +5473,52 @@ body.is-conclusion-story .log-return-button {
         height: 62px;
     }
 }
+
+
+/* =========================================================
+   Version 0.11.13：動画後の黒画面／「帰り道」表示位置修正
+   ========================================================= */
+
+/*
+   長いストーリーシートを画面中央へ配置すると、
+   内容が画面より高い端末で上端が画面外へ押し出されることがあります。
+   上揃えに変更し、タイトルから確実に読めるようにします。
+*/
+.conclusion-story-scene__inner {
+    place-items: start center;
+    align-content: start;
+    min-height: 100%;
+    padding:
+        max(24px, calc(env(safe-area-inset-top) + 16px))
+        clamp(14px, 4vw, 24px)
+        max(48px, calc(env(safe-area-inset-bottom) + 30px));
+}
+
+/* 帰り道だけが大きく見えないよう、本文幅と文字サイズを整えます。 */
+#reflectionEndingStory {
+    width: min(100%, 580px);
+    max-width: 580px;
+    margin: 0 auto 42px;
+}
+
+#reflectionEndingStory .story-sheet__title {
+    font-size: clamp(1.35rem, 5.1vw, 1.9rem);
+    line-height: 1.35;
+}
+
+#reflectionEndingStory .conclusion-story-sheet__body {
+    font-size: clamp(.86rem, 3.3vw, .98rem);
+    line-height: 1.95;
+}
+
+/* iPhoneの狭い画面では、上部余白を確保しつつ横幅を抑えます。 */
+@media (max-width: 390px) {
+    .conclusion-story-scene__inner {
+        padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
+        padding-inline: 12px;
+    }
+
+    #reflectionEndingStory {
+        padding-inline: 16px;
+    }
+}
