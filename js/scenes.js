@@ -1202,7 +1202,7 @@ document.addEventListener("click", async function stage45NavigationV0119(event) 
     }
 
     /*
-       Version 0.11.9.6
+       Version 0.11.10
        以前は中央の「女神のもとへ向かう」ボタンを押した時だけ進行していました。
        現在はFINAL前ストーリー画面内のどこをタップしても進行します。
     */
@@ -1357,7 +1357,7 @@ const introLetterTextV011 =
     "拝啓、この手紙を受け取ってくれた人へ。\n\n" +
     "明日私は空の世界に旅立つようです。病室から見ていた空は青く、白く、大きな海のようでした。\n\n" +
     "このベッドから出て、外へ出てみたかったなぁ。あぁ1度でいいから***をこの目で見たい。\n\n" +
-    "世界を照らす自由の像って呼ばれてるんだって。物事の背景って面白いよね。";
+    "世界を照らす像って呼ばれてるんだって。物事の背景って面白いよね。";
 
 
 /**
@@ -1445,6 +1445,9 @@ async function showIntroLetterV011() {
     const letterCard =
         document.getElementById("letterCard");
 
+    const letterHeading =
+        document.getElementById("letterHeading");
+
     const text =
         document.getElementById("typewriterText");
 
@@ -1465,6 +1468,7 @@ async function showIntroLetterV011() {
         !storySheet ||
         !button ||
         !letterCard ||
+        !letterHeading ||
         !text ||
         !cursor ||
         !gestureZone
@@ -1486,6 +1490,9 @@ async function showIntroLetterV011() {
     if (runId !== introBrushupRunIdV011) {
         return;
     }
+
+    letterHeading.hidden = false;
+    letterHeading.classList.remove("is-leaving", "is-visible");
 
     letterCard.hidden = false;
     letterCard.classList.remove(
@@ -1518,6 +1525,7 @@ async function showIntroLetterV011() {
 
     await waitForPaintV011();
 
+    letterHeading.classList.add("is-visible");
     letterCard.classList.add("is-visible");
 
     await window.wait(620);
@@ -1740,6 +1748,9 @@ async function showStoryBeforeStage1V011() {
     const letterCard =
         document.getElementById("letterCard");
 
+    const letterHeading =
+        document.getElementById("letterHeading");
+
     const storySheet =
         document.getElementById(
             "storySheetBeforeStage1"
@@ -1756,11 +1767,17 @@ async function showStoryBeforeStage1V011() {
     button.dataset.transitioning = "true";
     button.disabled = true;
 
+    letterHeading?.classList.remove("is-visible");
+    letterHeading?.classList.add("is-leaving");
     letterCard.classList.remove("is-visible");
     letterCard.classList.add("is-leaving");
 
     await window.wait(440);
 
+    if (letterHeading) {
+        letterHeading.hidden = true;
+        letterHeading.classList.remove("is-leaving");
+    }
     letterCard.hidden = true;
     letterCard.classList.remove("is-leaving");
 
@@ -1830,6 +1847,7 @@ resetIntroScene = function resetIntroSceneV011() {
     const ids = [
         "introSilence",
         "storySheetBeforeLetter",
+        "letterHeading",
         "letterCard",
         "storySheetBeforeStage1"
     ];
@@ -2169,7 +2187,7 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
 
 
 /* =========================================================
-   Version 0.11.9.6：電柱看板／寿司屋前の行き先回答／高速遷移
+   Version 0.11.10：電柱看板／寿司屋前の行き先回答／高速遷移
 
    修正内容
    ・正解後の遷移を SceneManager.changeScene だけに依存しない
@@ -2457,3 +2475,444 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         submitDestinationAnswer(event);
     },true);
 })();
+
+/* =========================================================
+   Version 0.11.10：進行ログ／過去場面への再訪
+
+   ・進行に応じてLOG1〜LOG7を順番に解放
+   ・解放済みの場面へ戻り、取り逃したアイテムを取得可能
+   ・再訪中も本来の進行地点は保持
+   ・「現在地点へ戻る」で元のシーンへ復帰
+   ========================================================= */
+(function initializeProgressLogV01110(){
+    "use strict";
+
+    const LOG_PROGRESS_KEY = "nazotokiLogProgressV01110";
+    const LOG_REPLAY_KEY = "nazotokiLogReplayV01110";
+
+    const LOG_ENTRIES = [
+        { key:"letter", rank:1, number:1, title:"見知らぬ手紙", scene:"intro" },
+        { key:"sakura-clear", rank:2, number:2, title:"満開の桜", scene:"stage1-clear" },
+        { key:"stage2", rank:3, number:3, title:"桜の向こうにあるもの", scene:"stage2" },
+        { key:"stage3", rank:4, number:4, title:"海辺の看板", scene:"stage3" },
+        { key:"stage4", rank:5, number:5, title:"寿司屋の扉", scene:"stage4" },
+        { key:"stage5", rank:6, number:6, title:"大将に注文しよう", scene:"stage5" },
+        { key:"sushi-return", rank:7, number:7, title:"寿司屋の扉（勘定後）", scene:"sushi-return" }
+    ];
+
+    const SCENE_LOG_RANK = {
+        intro:0,
+        stage1:1,
+        "stage1-clear":2,
+        stage2:3,
+        "stage2-clear":3,
+        stage3:4,
+        "stage3-clear":4,
+        stage4:5,
+        "stage4-clear":5,
+        stage5:6,
+        "stage5-clear":6,
+        "stage5-receipt":6,
+        "sushi-return":7,
+        "pre-final-story":7,
+        stage6:7,
+        "stage6-clear":7,
+        "ending-plane":7,
+        end:7
+    };
+
+    function readLogRank(){
+        const value = Number.parseInt(localStorage.getItem(LOG_PROGRESS_KEY) || "0", 10);
+        return Number.isFinite(value) ? Math.max(0, Math.min(LOG_ENTRIES.length, value)) : 0;
+    }
+
+    function writeLogRank(rank){
+        const next = Math.max(readLogRank(), Math.max(0, Math.min(LOG_ENTRIES.length, rank || 0)));
+        localStorage.setItem(LOG_PROGRESS_KEY, String(next));
+        renderLogList();
+        syncLogButton();
+        return next;
+    }
+
+    function readReplayState(){
+        try{
+            const parsed = JSON.parse(sessionStorage.getItem(LOG_REPLAY_KEY) || "null");
+            return parsed && typeof parsed === "object" ? parsed : null;
+        }catch(error){
+            console.warn("ログ再訪情報を読み込めませんでした。", error);
+            return null;
+        }
+    }
+
+    function writeReplayState(state){
+        sessionStorage.setItem(LOG_REPLAY_KEY, JSON.stringify(state));
+    }
+
+    function clearReplayState(){
+        sessionStorage.removeItem(LOG_REPLAY_KEY);
+    }
+
+    function getActiveSceneName(){
+        const active = Array.from(document.querySelectorAll(".scene")).find(function(scene){
+            return !scene.hidden && scene.classList.contains("is-active");
+        });
+        return active?.dataset.scene || window.SceneManager?.currentScene || "top";
+    }
+
+    function closeOtherPanels(){
+        const inventoryPanel = document.getElementById("inventoryPanel");
+        if(inventoryPanel){
+            inventoryPanel.hidden = true;
+            inventoryPanel.setAttribute("aria-hidden", "true");
+        }
+        document.body.classList.remove("is-inventory-open", "inventory-open", "is-modal-open");
+    }
+
+    function syncLogButton(){
+        const button = document.getElementById("logButton");
+        const count = document.getElementById("logCount");
+        const rank = readLogRank();
+        if(button) button.hidden = rank < 1;
+        if(count) count.textContent = rank + "/" + LOG_ENTRIES.length;
+    }
+
+    function openLogPanel(){
+        const panel = document.getElementById("logPanel");
+        if(!panel) return;
+        closeOtherPanels();
+        renderLogList();
+        panel.hidden = false;
+        panel.setAttribute("aria-hidden", "false");
+        document.body.classList.add("is-log-panel-open");
+        window.requestAnimationFrame(function(){
+            panel.classList.add("is-open");
+            panel.querySelector(".log-entry:not(:disabled)")?.focus({preventScroll:true});
+        });
+    }
+
+    function closeLogPanel(){
+        const panel = document.getElementById("logPanel");
+        if(!panel) return;
+        panel.classList.remove("is-open");
+        panel.hidden = true;
+        panel.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("is-log-panel-open");
+    }
+
+    function renderLogList(){
+        const list = document.getElementById("logList");
+        if(!list) return;
+        const rank = readLogRank();
+        list.replaceChildren();
+
+        LOG_ENTRIES.forEach(function(entry){
+            const unlocked = rank >= entry.rank;
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "log-entry" + (unlocked ? " is-unlocked" : " is-locked");
+            button.dataset.logKey = entry.key;
+            button.disabled = !unlocked;
+            button.setAttribute("role", "listitem");
+
+            const number = document.createElement("span");
+            number.className = "log-entry__number";
+            number.textContent = "LOG " + entry.number;
+
+            const title = document.createElement("span");
+            title.className = "log-entry__title";
+            title.textContent = unlocked ? entry.title : "未解放";
+
+            const status = document.createElement("span");
+            status.className = "log-entry__status";
+            status.textContent = unlocked ? "この場面へ戻る" : "物語を進めると解放";
+
+            button.append(number, title, status);
+            list.appendChild(button);
+        });
+    }
+
+    function showSceneWithoutSaving(sceneName){
+        const target = document.querySelector('[data-scene="' + sceneName + '"]');
+        if(!target){
+            console.error("ログの移動先が見つかりません。", sceneName);
+            return false;
+        }
+
+        document.querySelectorAll(".scene").forEach(function(scene){
+            scene.classList.remove("is-active");
+            scene.hidden = true;
+            scene.setAttribute("aria-hidden", "true");
+        });
+
+        target.hidden = false;
+        target.setAttribute("aria-hidden", "false");
+        target.classList.add("is-active");
+        target.scrollTop = 0;
+        window.scrollTo({top:0, left:0, behavior:"auto"});
+
+        if(window.SceneManager){
+            window.SceneManager.currentScene = sceneName;
+        }
+
+        if(sceneName === "pre-final-story"){
+            const sheet = target.querySelector(".pre-final-story-sheet");
+            sheet?.classList.add("is-visible");
+            target.dataset.readyToAdvance = "true";
+        }
+
+        return true;
+    }
+
+    function prepareLetterLog(){
+        if(typeof resetIntroScene === "function") resetIntroScene();
+
+        const silence = document.getElementById("introSilence");
+        const before = document.getElementById("storySheetBeforeLetter");
+        const after = document.getElementById("storySheetBeforeStage1");
+        const heading = document.getElementById("letterHeading");
+        const card = document.getElementById("letterCard");
+        const text = document.getElementById("typewriterText");
+        const cursor = document.getElementById("typewriterCursor");
+        const gesture = document.getElementById("letterGestureZone");
+
+        [silence, before, after].forEach(function(element){
+            if(element) element.hidden = true;
+        });
+
+        if(heading){
+            heading.hidden = false;
+            heading.classList.remove("is-leaving");
+            heading.classList.add("is-visible");
+        }
+
+        if(card){
+            card.hidden = false;
+            card.classList.remove("is-flipped", "is-leaving", "is-swiping");
+            card.classList.add("is-visible", "is-gesture-ready");
+            card.style.setProperty("--intro-peel-progress", "0");
+        }
+
+        if(text) text.textContent = introLetterTextV011;
+        cursor?.classList.add("is-hidden");
+        gesture?.setAttribute("aria-disabled", "false");
+        introLetterGestureReadyV011 = true;
+        introLetterFlippedV011 = false;
+        introLetterPointerV011 = null;
+        isIntroRunning = false;
+    }
+
+    function prepareLogScene(entry){
+        switch(entry.key){
+            case "letter":
+                prepareLetterLog();
+                break;
+            case "sakura-clear":
+                document.getElementById("stage1PensReward")?.setAttribute("hidden", "");
+                if(typeof updateStage1ChildSpotState === "function") updateStage1ChildSpotState();
+                if(typeof initializeStage1ClearReward === "function") initializeStage1ClearReward();
+                break;
+            case "stage2":
+                window.resetStage2Puzzle?.();
+                break;
+            case "stage3":
+                window.resetStage3Puzzle?.();
+                break;
+            case "stage4":
+                window.Stage4Controller?.reset?.();
+                window.resetStage4Puzzle?.();
+                break;
+            case "stage5":
+                window.resetStage5Puzzle?.();
+                break;
+            case "sushi-return": {
+                const input = document.getElementById("sushiReturnAnswer");
+                const message = document.getElementById("sushiReturnAnswerMessage");
+                if(input){ input.disabled = false; input.value = ""; }
+                if(message){ message.textContent = ""; message.classList.remove("is-error", "is-success"); }
+                break;
+            }
+        }
+    }
+
+    function enterLog(entry){
+        const currentScene = getActiveSceneName();
+        const resumeScene = typeof window.getResumeScene === "function"
+            ? window.getResumeScene()
+            : currentScene;
+
+        writeReplayState({
+            returnScene: currentScene,
+            resumeScene: resumeScene,
+            logKey: entry.key,
+            startedAt: Date.now()
+        });
+
+        closeLogPanel();
+        closeOtherPanels();
+        document.body.classList.add("is-log-replay");
+        const returnButton = document.getElementById("logReturnButton");
+        if(returnButton) returnButton.hidden = false;
+
+        if(showSceneWithoutSaving(entry.scene)){
+            prepareLogScene(entry);
+        }
+    }
+
+    function restoreSceneSpecificState(sceneName){
+        if(sceneName === "intro"){
+            if(typeof runIntroScene === "function") runIntroScene();
+        }else if(sceneName === "stage1-clear"){
+            if(typeof updateStage1ChildSpotState === "function") updateStage1ChildSpotState();
+        }else if(sceneName === "stage4"){
+            window.restoreStage4Puzzle?.();
+        }else if(sceneName === "stage6"){
+            window.Stage6Controller?.restore?.();
+        }else if(sceneName === "stage6-clear"){
+            window.FinalLetterController?.restore?.();
+        }else if(sceneName === "ending-plane"){
+            window.EndingPlaneController?.reset?.();
+        }else if(sceneName === "end"){
+            window.updateEndSecretBadge?.();
+        }
+    }
+
+    function returnFromLog(){
+        const state = readReplayState();
+        const returnScene = state?.returnScene || state?.resumeScene || "top";
+        const resumeScene = state?.resumeScene || returnScene;
+
+        clearReplayState();
+        document.body.classList.remove("is-log-replay");
+        const returnButton = document.getElementById("logReturnButton");
+        if(returnButton) returnButton.hidden = true;
+
+        showSceneWithoutSaving(returnScene);
+        restoreSceneSpecificState(returnScene);
+
+        if(typeof window.saveCurrentScene === "function"){
+            try{
+                window.saveCurrentScene(resumeScene);
+            }catch(error){
+                console.warn("ログ再訪前の進行地点を復元できませんでした。", error);
+            }
+        }
+    }
+
+    function updateProgressFromScene(sceneName){
+        if(readReplayState()) return;
+        const rank = SCENE_LOG_RANK[sceneName] || 0;
+        if(rank > 0) writeLogRank(rank);
+    }
+
+    function observeSceneProgress(){
+        let lastScene = "";
+        const update = function(){
+            const current = getActiveSceneName();
+            if(current && current !== lastScene){
+                lastScene = current;
+                updateProgressFromScene(current);
+            }
+        };
+
+        const observer = new MutationObserver(update);
+        document.querySelectorAll(".scene").forEach(function(scene){
+            observer.observe(scene, {attributes:true, attributeFilter:["class", "hidden"]});
+        });
+        update();
+    }
+
+    function initializeLogSystem(){
+        /*
+           ログ再訪中に各ステージの通常遷移が発生しても、
+           本来の再開地点を上書きしないよう保存処理を保護します。
+        */
+        if(
+            typeof window.saveCurrentScene === "function" &&
+            window.saveCurrentScene.datasetLogGuardV01110 !== "true"
+        ){
+            const saveCurrentSceneBeforeLogV01110 = window.saveCurrentScene;
+            const guardedSaveCurrentSceneV01110 = function(sceneName){
+                if(readReplayState()) return;
+                return saveCurrentSceneBeforeLogV01110.apply(this, arguments);
+            };
+            guardedSaveCurrentSceneV01110.datasetLogGuardV01110 = "true";
+            window.saveCurrentScene = guardedSaveCurrentSceneV01110;
+        }
+
+        if(
+            typeof window.resetSave === "function" &&
+            window.resetSave.datasetLogResetV01110 !== "true"
+        ){
+            const resetSaveBeforeLogV01110 = window.resetSave;
+            const resetSaveWithLogV01110 = function(){
+                localStorage.removeItem(LOG_PROGRESS_KEY);
+                clearReplayState();
+                document.body.classList.remove("is-log-replay", "is-log-panel-open");
+                return resetSaveBeforeLogV01110.apply(this, arguments);
+            };
+            resetSaveWithLogV01110.datasetLogResetV01110 = "true";
+            window.resetSave = resetSaveWithLogV01110;
+        }
+
+        const savedScene = typeof window.getResumeScene === "function" ? window.getResumeScene() : "top";
+        if(SCENE_LOG_RANK[savedScene]) writeLogRank(SCENE_LOG_RANK[savedScene]);
+
+        syncLogButton();
+        renderLogList();
+        observeSceneProgress();
+
+        const replay = readReplayState();
+        if(replay){
+            document.body.classList.add("is-log-replay");
+            const returnButton = document.getElementById("logReturnButton");
+            if(returnButton) returnButton.hidden = false;
+        }
+    }
+
+    document.addEventListener("click", function(event){
+        if(event.target.closest("#logButton")){
+            event.preventDefault();
+            openLogPanel();
+            return;
+        }
+
+        if(event.target.closest("#logCloseButton") || event.target.closest("#logBackdrop")){
+            event.preventDefault();
+            closeLogPanel();
+            return;
+        }
+
+        const entryButton = event.target.closest(".log-entry[data-log-key]");
+        if(entryButton && !entryButton.disabled){
+            event.preventDefault();
+            const entry = LOG_ENTRIES.find(function(item){ return item.key === entryButton.dataset.logKey; });
+            if(entry) enterLog(entry);
+            return;
+        }
+
+        if(event.target.closest("#logReturnButton")){
+            event.preventDefault();
+            returnFromLog();
+            return;
+        }
+
+        if(event.target.closest("#restartButton") || event.target.closest("#restartFromEndButton")){
+            localStorage.removeItem(LOG_PROGRESS_KEY);
+            clearReplayState();
+            document.body.classList.remove("is-log-replay");
+        }
+    }, true);
+
+    document.addEventListener("keydown", function(event){
+        if(event.key === "Escape" && !document.getElementById("logPanel")?.hidden){
+            closeLogPanel();
+        }
+    });
+
+    if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", initializeLogSystem, {once:true});
+    }else{
+        initializeLogSystem();
+    }
+})();
+
