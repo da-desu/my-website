@@ -4812,3 +4812,39 @@ button {
 .inventory-panel[hidden] {
     display: none !important;
 }
+
+
+/* Version 0.11.9.2: 遷移中も持ち物パネルを確実に隠す */
+.inventory-panel[aria-hidden="true"] { display: none !important; }
+
+
+/* =========================================================
+   Version 0.11.9.3：寿司屋前の行き先回答
+   ========================================================= */
+.sushi-return-answer-form {
+    width: min(100%, 430px);
+    margin: 24px auto 0;
+}
+
+.sushi-return-answer-message {
+    min-height: 1.8em;
+    margin: 14px 0 0;
+    color: rgba(255,255,255,.72);
+    font-size: .84rem;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.sushi-return-answer-message.is-error {
+    color: #ffd0d0;
+}
+
+.sushi-return-answer-message.is-success {
+    color: #d1f4d7;
+}
+
+@media (max-width: 430px) {
+    .sushi-return-answer-form {
+        width: 100%;
+    }
+}
