@@ -2150,17 +2150,84 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
     });
 
     let finalReceiptTransitioning=false;
-    document.addEventListener("inventory:finalReceiptReady",async function(){
+
+    async function goToPreFinalStoryV01191(){
         if(finalReceiptTransitioning)return;
+
+        const currentScene=window.SceneManager?.currentScene || "";
+        if(["pre-final-story","stage6","stage6-clear","ending-plane","end"].includes(currentScene)){
+            return;
+        }
+
         finalReceiptTransitioning=true;
+
         try{
+            /*
+                inventory-panelにはdisplay:gridが指定されているため、
+                hidden属性だけでなく明示的に閉じてから遷移します。
+            */
+            window.closeInventory?.();
+
+            const inventoryPanel=document.getElementById("inventoryPanel");
+            if(inventoryPanel){
+                inventoryPanel.hidden=true;
+                inventoryPanel.setAttribute("aria-hidden","true");
+            }
+
+            await new Promise(resolve=>{
+                window.requestAnimationFrame(()=>{
+                    window.requestAnimationFrame(resolve);
+                });
+            });
+
+            if(!window.SceneManager || typeof window.SceneManager.changeScene!=="function"){
+                throw new Error("SceneManager.changeScene is unavailable.");
+            }
+
             await window.SceneManager.changeScene("pre-final-story",{
                 fadeOutTime:760,
                 blackTime:420,
                 fadeInTime:960
             });
+        }catch(error){
+            console.error("女神へのレシート完成後の遷移に失敗しました。",error);
         }finally{
             finalReceiptTransitioning=false;
         }
+    }
+
+    window.goToPreFinalStory=goToPreFinalStoryV01191;
+
+    document.addEventListener("inventory:finalReceiptReady",function(){
+        void goToPreFinalStoryV01191();
+    });
+
+    /*
+        Version 0.11.9で既に女神へのレシートを作ったものの、
+        遷移しなかったセーブデータも自動的に救済します。
+    */
+    function recoverFinalReceiptTransitionV01191(){
+        const hasFinalReceipt=
+            (typeof window.hasUsableItem==="function"&&window.hasUsableItem("女神へのレシート")) ||
+            (typeof window.hasItem==="function"&&window.hasItem("女神へのレシート"));
+
+        if(!hasFinalReceipt)return;
+
+        const returnScene=document.querySelector('[data-scene="sushi-return"]');
+        const currentlyAtReturn=
+            window.SceneManager?.currentScene==="sushi-return" ||
+            Boolean(returnScene&&!returnScene.hidden);
+
+        if(currentlyAtReturn){
+            void goToPreFinalStoryV01191();
+        }
+    }
+
+    document.addEventListener("inventory:changed",function(){
+        window.setTimeout(recoverFinalReceiptTransitionV01191,80);
+    });
+
+    document.addEventListener("DOMContentLoaded",function(){
+        window.setTimeout(recoverFinalReceiptTransitionV01191,700);
     });
 })();
