@@ -656,9 +656,8 @@ window.resetStage2Puzzle =
 let isStage3Clearing=false;
 function setStage3AnswerMessage(text,type){const m=document.getElementById("stage3Message");if(!m)return;m.textContent=text;m.classList.remove("is-error","is-success");if(type)m.classList.add("is-"+type)}
 async function verifyStage3Answer(e){e?.preventDefault();if(isStage3Clearing)return;const input=document.getElementById("stage3Answer"),button=document.getElementById("stage3SubmitButton");if(!input||!button)return;const answer=String(input.value||"").trim().replace(/\s+/g,"");if(!answer){setStage3AnswerMessage("方向を入力してください。","error");input.focus();return}if(answer!=="北"){setStage3AnswerMessage("違うようだ。看板の組み合わせを見直そう。","error");input.select();return}isStage3Clearing=true;input.disabled=true;button.disabled=true;setStage3AnswerMessage("正解。北へ向かおう。","success");window.clearStage?.(3);if(window.obtainItem)window.obtainItem("寿司屋への地図");else window.addItem?.("寿司屋への地図");await window.wait(720);await window.SceneManager.changeScene("stage3-clear",{fadeOutTime:720,blackTime:320,fadeInTime:900});isStage3Clearing=false}
-function toggleStage3Hint(){const h=document.getElementById("stage3Hint"),b=document.getElementById("stage3HintButton");if(!h||!b)return;h.hidden=!h.hidden;b.textContent=h.hidden?"ヒントを見る":"ヒントを閉じる"}
-function resetStage3Puzzle(){const i=document.getElementById("stage3Answer"),b=document.getElementById("stage3SubmitButton"),h=document.getElementById("stage3Hint"),hb=document.getElementById("stage3HintButton");if(i){i.value="";i.disabled=false}if(b)b.disabled=false;if(h)h.hidden=true;if(hb)hb.textContent="ヒントを見る";setStage3AnswerMessage("","");isStage3Clearing=false}
-const prevInit=window.initializePuzzles;window.initializePuzzles=function(){prevInit?.();const f=document.getElementById("stage3Form"),h=document.getElementById("stage3HintButton");if(f&&!f.dataset.initialized){f.addEventListener("submit",verifyStage3Answer);f.dataset.initialized="true"}if(h&&!h.dataset.initialized){h.addEventListener("click",toggleStage3Hint);h.dataset.initialized="true"}};window.resetStage3Puzzle=resetStage3Puzzle;
+function resetStage3Puzzle(){const i=document.getElementById("stage3Answer"),b=document.getElementById("stage3SubmitButton");if(i){i.value="";i.disabled=false}if(b)b.disabled=false;setStage3AnswerMessage("","");isStage3Clearing=false}
+const prevInit=window.initializePuzzles;window.initializePuzzles=function(){prevInit?.();const f=document.getElementById("stage3Form");if(f&&!f.dataset.initialized){f.addEventListener("submit",verifyStage3Answer);f.dataset.initialized="true"}};window.resetStage3Puzzle=resetStage3Puzzle;
 
 /* =========================================================
    Version 0.8 Rebuild：第4問コントローラー
@@ -1505,6 +1504,12 @@ const EndingPlaneController = {
     initialized: false,
     transitioning: false,
     step: 1,
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    currentY: 0,
+    completed: false,
 
     showStep(step, animate = false) {
         const first = document.getElementById("girlEndingStory");
@@ -1521,11 +1526,42 @@ const EndingPlaneController = {
         const active = this.step === 1 ? first : second;
         active.hidden = false;
 
-        const reveal = () => active.classList.add("is-visible");
+        const reveal = () => {
+            active.classList.add("is-visible");
+            if (this.step === 2) this.resetPlane();
+        };
+
         if (animate) {
             window.requestAnimationFrame(() => window.requestAnimationFrame(reveal));
         } else {
             reveal();
+        }
+    },
+
+    resetPlane() {
+        this.pointerId = null;
+        this.startX = 0;
+        this.startY = 0;
+        this.currentX = 0;
+        this.currentY = 0;
+        this.completed = false;
+
+        const plane = document.getElementById("endingPlane");
+        const trail = document.getElementById("endingPlaneTrail");
+        const message = document.getElementById("endingPlaneMessage");
+
+        if (plane) {
+            plane.classList.remove("is-dragging", "is-flying");
+            plane.style.transform = "rotate(-18deg)";
+            plane.style.opacity = "";
+            plane.disabled = false;
+        }
+
+        trail?.classList.remove("is-visible");
+
+        if (message) {
+            message.textContent = "紙飛行機に触れて、そのまま右上へ。";
+            message.classList.remove("is-error", "is-success");
         }
     },
 
@@ -1539,39 +1575,141 @@ const EndingPlaneController = {
     },
 
     async next() {
-        if (this.transitioning) return;
+        if (this.transitioning || this.step !== 1) return;
         this.transitioning = true;
 
-        if (this.step === 1) {
-            const first = document.getElementById("girlEndingStory");
-            first?.classList.remove("is-visible");
-            first?.classList.add("is-leaving");
-            await window.wait(330);
-            this.showStep(2, true);
-            window.saveStage6State?.({ endingStoryStep: 2 });
+        const first = document.getElementById("girlEndingStory");
+        first?.classList.remove("is-visible");
+        first?.classList.add("is-leaving");
+        await window.wait(330);
+        this.showStep(2, true);
+        window.saveStage6State?.({ endingStoryStep: 2 });
+        this.transitioning = false;
+    },
+
+    beginPlaneGesture(event) {
+        if (this.step !== 2 || this.completed || this.pointerId !== null) return;
+        const plane = document.getElementById("endingPlane");
+        if (!plane) return;
+
+        event.preventDefault();
+        this.pointerId = event.pointerId;
+        this.startX = this.currentX = event.clientX;
+        this.startY = this.currentY = event.clientY;
+
+        try {
+            plane.setPointerCapture(event.pointerId);
+        } catch (_) {}
+
+        plane.classList.add("is-dragging");
+    },
+
+    movePlaneGesture(event) {
+        if (this.pointerId !== event.pointerId || this.completed) return;
+        const plane = document.getElementById("endingPlane");
+        if (!plane) return;
+
+        event.preventDefault();
+        this.currentX = event.clientX;
+        this.currentY = event.clientY;
+
+        const dx = this.currentX - this.startX;
+        const dy = this.currentY - this.startY;
+        plane.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(-24deg)`;
+    },
+
+    finishPlaneGesture(event) {
+        if (event && this.pointerId !== event.pointerId) return;
+        if (this.pointerId === null || this.completed) return;
+
+        const plane = document.getElementById("endingPlane");
+        const area = document.getElementById("endingPlaneArea");
+        const message = document.getElementById("endingPlaneMessage");
+        const dx = this.currentX - this.startX;
+        const dy = this.currentY - this.startY;
+        const rect = area?.getBoundingClientRect();
+        const requiredX = Math.max(90, (rect?.width || 320) * 0.28);
+        const requiredY = Math.max(72, (rect?.height || 240) * 0.25);
+
+        this.pointerId = null;
+        plane?.classList.remove("is-dragging");
+
+        if (dx >= requiredX && dy <= -requiredY) {
+            void this.completePlaneFlight();
+            return;
+        }
+
+        if (plane) plane.style.transform = "rotate(-18deg)";
+        if (message) {
+            message.textContent = "もう少し大きく、左下から右上へ飛ばそう。";
+            message.classList.remove("is-success");
+            message.classList.add("is-error");
+        }
+    },
+
+    async completePlaneFlight() {
+        if (this.completed || this.transitioning) return;
+        this.completed = true;
+        this.transitioning = true;
+
+        const plane = document.getElementById("endingPlane");
+        const area = document.getElementById("endingPlaneArea");
+        const trail = document.getElementById("endingPlaneTrail");
+        const message = document.getElementById("endingPlaneMessage");
+
+        if (!plane || !area) {
+            this.completed = false;
             this.transitioning = false;
             return;
         }
 
-        window.saveStage6State?.({ ended: true });
+        plane.disabled = true;
+        plane.classList.remove("is-dragging");
+        plane.classList.add("is-flying");
+        trail?.classList.add("is-visible");
+
+        const rect = area.getBoundingClientRect();
+        plane.style.transform = `translate3d(${rect.width * 0.82}px, -${rect.height * 0.82}px, 0) rotate(-29deg)`;
+
+        if (message) {
+            message.textContent = "紙飛行機は、月へ向かって飛んでいった。";
+            message.classList.remove("is-error");
+            message.classList.add("is-success");
+        }
+
+        window.saveStage6State?.({ ended: true, endingStoryStep: 2 });
         document.body.classList.remove("is-conclusion-story");
+
+        await window.wait(1050);
+
         if (window.SceneManager?.changeScene) {
             await window.SceneManager.changeScene("end", {
-                fadeOutTime: 620,
-                blackTime: 280,
-                fadeInTime: 900
+                fadeOutTime: 700,
+                blackTime: 360,
+                fadeInTime: 980
             });
         } else {
             window.SceneManager?.showImmediately?.("end");
         }
+
         updateEndSecretBadge();
         this.transitioning = false;
     },
 
     init() {
         if (this.initialized) return;
+
         document.getElementById("girlEndingNextButton")?.addEventListener("click", () => this.next());
-        document.getElementById("reflectionEndingNextButton")?.addEventListener("click", () => this.next());
+
+        const plane = document.getElementById("endingPlane");
+        plane?.addEventListener("pointerdown", event => this.beginPlaneGesture(event));
+        plane?.addEventListener("pointermove", event => this.movePlaneGesture(event));
+        plane?.addEventListener("pointerup", event => {
+            event.preventDefault();
+            this.finishPlaneGesture(event);
+        });
+        plane?.addEventListener("pointercancel", event => this.finishPlaneGesture(event));
+
         this.initialized = true;
     }
 };
