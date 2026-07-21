@@ -2117,9 +2117,14 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
 
 
 /* =========================================================
-   Version 0.11.9.3：電柱看板／寿司屋前の行き先回答
+   Version 0.11.9.4：電柱看板／寿司屋前の行き先回答
+
+   修正内容
+   ・正解後の遷移を SceneManager.changeScene だけに依存しない
+   ・対象シーンの hidden / aria-hidden / is-active を直接更新
+   ・フォーム submit、決定ボタン、Enterキーの各経路を確実に拾う
    ========================================================= */
-(function initializeStage4FlipSignsAndDestinationV01193(){
+(function initializeStage4FlipSignsAndDestinationV01194(){
     "use strict";
 
     function findMessage(sign){
@@ -2163,9 +2168,9 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
             .normalize("NFKC")
             .trim()
             .replace(/[\s\u3000、。・,，.．!！?？「」『』（）()]/g,"")
-            .replace(/[ァ-ヶ]/g,char=>
-                String.fromCharCode(char.charCodeAt(0)-0x60)
-            );
+            .replace(/[ァ-ヶ]/g,function(char){
+                return String.fromCharCode(char.charCodeAt(0)-0x60);
+            });
     }
 
     function isCorrectDestinationAnswer(value){
@@ -2178,83 +2183,199 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         ].includes(answer);
     }
 
+    function hasGoddessReceipt(){
+        return (
+            typeof window.hasUsableItem==="function"&&
+            window.hasUsableItem("女神へのレシート")
+        )||(
+            typeof window.hasItem==="function"&&
+            window.hasItem("女神へのレシート")
+        );
+    }
+
+    function setDestinationMessage(text,type){
+        const message=document.getElementById("sushiReturnAnswerMessage");
+        if(!message)return;
+        message.textContent=text;
+        message.classList.remove("is-success","is-error");
+        if(type)message.classList.add("is-"+type);
+    }
+
+    /*
+       SceneManagerが利用できない、またはアニメーション処理が停止しても
+       必ず指定シーンを表示するための直接切り替え処理です。
+    */
+    function showSceneDirectly(sceneName){
+        const nextScene=document.querySelector('[data-scene="'+sceneName+'"]');
+        if(!nextScene){
+            console.error("直接遷移先のシーンが見つかりません。",sceneName);
+            return false;
+        }
+
+        document.querySelectorAll(".scene").forEach(function(scene){
+            scene.classList.remove("is-active");
+            scene.hidden=true;
+            scene.setAttribute("aria-hidden","true");
+        });
+
+        nextScene.hidden=false;
+        nextScene.setAttribute("aria-hidden","false");
+
+        window.requestAnimationFrame(function(){
+            window.requestAnimationFrame(function(){
+                nextScene.classList.add("is-active");
+            });
+        });
+
+        if(window.SceneManager){
+            window.SceneManager.currentScene=sceneName;
+        }
+
+        if(typeof window.saveCurrentScene==="function"){
+            try{
+                window.saveCurrentScene(sceneName);
+            }catch(error){
+                console.warn("シーン保存に失敗しました。",error);
+            }
+        }
+
+        const inventoryModal=document.getElementById("inventoryModal");
+        if(inventoryModal){
+            inventoryModal.hidden=true;
+            inventoryModal.setAttribute("aria-hidden","true");
+        }
+        document.body.classList.remove("is-inventory-open","inventory-open","is-modal-open");
+
+        nextScene.scrollTop=0;
+        window.scrollTo({top:0,left:0,behavior:"auto"});
+        return true;
+    }
+
+    function waitMs(ms){
+        return new Promise(function(resolve){
+            window.setTimeout(resolve,ms);
+        });
+    }
+
+    async function goToPreFinalStoryDirectly(){
+        const transitionLayer=document.getElementById("transitionLayer");
+
+        if(transitionLayer){
+            transitionLayer.style.transitionDuration="320ms";
+            transitionLayer.classList.add("is-visible");
+            await waitMs(340);
+        }else{
+            await waitMs(260);
+        }
+
+        const shown=showSceneDirectly("pre-final-story");
+        if(!shown){
+            throw new Error("pre-final-story scene was not found.");
+        }
+
+        await waitMs(160);
+
+        if(transitionLayer){
+            transitionLayer.style.transitionDuration="520ms";
+            transitionLayer.classList.remove("is-visible");
+        }
+    }
+
     let destinationTransitioning=false;
 
     async function submitDestinationAnswer(event){
-        event.preventDefault();
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+
         if(destinationTransitioning)return;
 
         const input=document.getElementById("sushiReturnAnswer");
         const button=document.getElementById("sushiReturnSubmitButton");
-        const message=document.getElementById("sushiReturnAnswerMessage");
         const answer=input?.value||"";
 
         if(!answer.trim()){
-            if(message){
-                message.textContent="行き先を入力しよう。";
-                message.classList.remove("is-success");
-                message.classList.add("is-error");
-            }
+            setDestinationMessage("行き先を入力しよう。","error");
             input?.focus();
             return;
         }
 
         if(!isCorrectDestinationAnswer(answer)){
-            const hasGoddessReceipt=(
-                typeof window.hasUsableItem==="function"&&
-                window.hasUsableItem("女神へのレシート")
-            )||(
-                typeof window.hasItem==="function"&&
-                window.hasItem("女神へのレシート")
-            );
-
-            if(message){
-                message.textContent=hasGoddessReceipt
+            setDestinationMessage(
+                hasGoddessReceipt()
                     ? "印字が消えたレシートを、もう一度確認しよう。"
-                    : "持ち物の中に、行き先を示すものがないだろうか。";
-                message.classList.remove("is-success");
-                message.classList.add("is-error");
-            }
+                    : "持ち物の中に、行き先を示すものがないだろうか。",
+                "error"
+            );
             input?.select();
             return;
         }
 
         destinationTransitioning=true;
         if(button)button.disabled=true;
-
-        if(message){
-            message.textContent="自由の女神へ向かおう。";
-            message.classList.remove("is-error");
-            message.classList.add("is-success");
-        }
+        if(input)input.disabled=true;
+        setDestinationMessage("自由の女神へ向かおう。","success");
 
         try{
-            await new Promise(resolve=>window.setTimeout(resolve,520));
-            await window.SceneManager.changeScene("pre-final-story",{
-                fadeOutTime:720,
-                blackTime:320,
-                fadeInTime:900
-            });
+            await waitMs(420);
+            await goToPreFinalStoryDirectly();
         }catch(error){
-            console.error("行き先正解後の画面遷移に失敗しました。",error);
-            if(message){
-                message.textContent="画面を進められませんでした。もう一度決定してください。";
-                message.classList.remove("is-success");
-                message.classList.add("is-error");
+            console.error("行き先正解後の直接遷移に失敗しました。",error);
+
+            /* 最終手段：演出を使わず即時表示します。 */
+            if(!showSceneDirectly("pre-final-story")){
+                setDestinationMessage(
+                    "画面を進められませんでした。ページを再読み込みしてください。",
+                    "error"
+                );
+                destinationTransitioning=false;
+                if(button)button.disabled=false;
+                if(input)input.disabled=false;
             }
-        }finally{
-            destinationTransitioning=false;
-            if(button)button.disabled=false;
         }
     }
 
     function initializeDestinationQuestion(){
         const form=document.getElementById("sushiReturnAnswerForm");
-        if(!form||form.dataset.boundV01193==="true")return;
+        const button=document.getElementById("sushiReturnSubmitButton");
+        const input=document.getElementById("sushiReturnAnswer");
 
-        form.addEventListener("submit",submitDestinationAnswer);
-        form.dataset.boundV01193="true";
+        if(form&&form.dataset.boundV01194!=="true"){
+            form.addEventListener("submit",submitDestinationAnswer);
+            form.dataset.boundV01194="true";
+        }
+
+        /* submitイベントが発生しない環境のための決定ボタン保険 */
+        if(button&&button.dataset.boundV01194!=="true"){
+            button.addEventListener("click",function(event){
+                event.preventDefault();
+                submitDestinationAnswer(event);
+            });
+            button.dataset.boundV01194="true";
+        }
+
+        /* iOSのソフトウェアキーボードでEnterを押した場合の保険 */
+        if(input&&input.dataset.boundV01194!=="true"){
+            input.addEventListener("keydown",function(event){
+                if(event.key!=="Enter")return;
+                event.preventDefault();
+                submitDestinationAnswer(event);
+            });
+            input.dataset.boundV01194="true";
+        }
     }
 
-    document.addEventListener("DOMContentLoaded",initializeDestinationQuestion);
+    /*
+       scenes.jsがDOMContentLoaded後に読み込まれた場合にも初期化します。
+    */
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",initializeDestinationQuestion,{once:true});
+    }else{
+        initializeDestinationQuestion();
+    }
+
+    /* DOMの差し替え等があってもsubmitを取り逃がさない委譲処理 */
+    document.addEventListener("submit",function(event){
+        if(event.target?.id!=="sushiReturnAnswerForm")return;
+        submitDestinationAnswer(event);
+    },true);
 })();
