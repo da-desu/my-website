@@ -1201,25 +1201,77 @@ document.addEventListener("click", async function stage45NavigationV0119(event) 
         return;
     }
 
+    /*
+       Version 0.11.9.6
+       以前は中央の「女神のもとへ向かう」ボタンを押した時だけ進行していました。
+       現在はFINAL前ストーリー画面内のどこをタップしても進行します。
+    */
     const finalStoryButton = event.target.closest("#preFinalContinueButton");
-    if (!finalStoryButton) return;
+    const finalStoryScene = event.target.closest("#scene-pre-final-story");
+    if (!finalStoryButton && !finalStoryScene) return;
+
+    const activeStoryScene = document.getElementById("scene-pre-final-story");
+    if (!activeStoryScene || !activeStoryScene.classList.contains("is-active")) return;
+
+    /*
+       ストーリーシートが表示される前のタップでは進行しません。
+       必ず本文を一度表示してから、次のタップでFINALへ進みます。
+    */
+    if (activeStoryScene.dataset.readyToAdvance !== "true") return;
 
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (finalStoryButton.dataset.transitioning === "true") return;
-    finalStoryButton.dataset.transitioning = "true";
-    finalStoryButton.disabled = true;
+
+    if (activeStoryScene.dataset.transitioning === "true") return;
+    activeStoryScene.dataset.transitioning = "true";
+    activeStoryScene.classList.add("is-transitioning");
+
+    if (finalStoryButton) finalStoryButton.disabled = true;
 
     try {
         window.Stage6Controller?.reset();
-        await window.SceneManager.changeScene("stage6", {
-            fadeOutTime: 820,
-            blackTime: 420,
-            fadeInTime: 980
-        });
+
+        if (
+            window.SceneManager &&
+            typeof window.SceneManager.changeScene === "function"
+        ) {
+            /* 旧版の2.22秒から、約0.62秒へ短縮します。 */
+            await window.SceneManager.changeScene("stage6", {
+                fadeOutTime: 220,
+                blackTime: 70,
+                fadeInTime: 330
+            });
+        } else {
+            throw new Error("SceneManager is unavailable.");
+        }
+    } catch (error) {
+        console.error("FINAL STAGEへの遷移に失敗したため直接表示します。", error);
+
+        const stage6Scene = document.querySelector('[data-scene="stage6"]');
+        if (stage6Scene) {
+            document.querySelectorAll(".scene").forEach(function (scene) {
+                scene.classList.remove("is-active");
+                scene.hidden = true;
+                scene.setAttribute("aria-hidden", "true");
+            });
+
+            stage6Scene.hidden = false;
+            stage6Scene.setAttribute("aria-hidden", "false");
+            stage6Scene.classList.add("is-active");
+            stage6Scene.scrollTop = 0;
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+            if (window.SceneManager) {
+                window.SceneManager.currentScene = "stage6";
+            }
+            if (typeof window.saveCurrentScene === "function") {
+                window.saveCurrentScene("stage6");
+            }
+        }
     } finally {
-        finalStoryButton.disabled = false;
-        finalStoryButton.dataset.transitioning = "false";
+        activeStoryScene.dataset.transitioning = "false";
+        activeStoryScene.classList.remove("is-transitioning");
+        if (finalStoryButton) finalStoryButton.disabled = false;
     }
 }, true);
 
@@ -2117,14 +2169,14 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
 
 
 /* =========================================================
-   Version 0.11.9.4：電柱看板／寿司屋前の行き先回答
+   Version 0.11.9.6：電柱看板／寿司屋前の行き先回答／高速遷移
 
    修正内容
    ・正解後の遷移を SceneManager.changeScene だけに依存しない
    ・対象シーンの hidden / aria-hidden / is-active を直接更新
    ・フォーム submit、決定ボタン、Enterキーの各経路を確実に拾う
    ========================================================= */
-(function initializeStage4FlipSignsAndDestinationV01194(){
+(function initializeStage4FlipSignsAndDestinationV01196(){
     "use strict";
 
     function findMessage(sign){
@@ -2221,6 +2273,32 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         nextScene.hidden=false;
         nextScene.setAttribute("aria-hidden","false");
 
+        /*
+           FINAL前ストーリーの本文は、共通CSS上では初期状態が opacity: 0 です。
+           そのため、シーンだけを表示してもシート本体が透明なままになる場合がありました。
+           pre-final-storyへ移動する時は、シートの表示クラスを必ず付け直します。
+        */
+        if(sceneName==="pre-final-story"){
+            const storySheet=nextScene.querySelector(".pre-final-story-sheet");
+            nextScene.dataset.readyToAdvance="false";
+
+            if(storySheet){
+                storySheet.classList.remove("is-leaving","is-visible");
+                void storySheet.offsetWidth;
+                storySheet.classList.add("is-visible");
+            }
+
+            /*
+               正解ボタンを押した指が、そのまま次画面へのタップとして
+               誤認されないよう、表示後しばらくはFINALへ進ませません。
+            */
+            window.setTimeout(function(){
+                if(!nextScene.hidden&&nextScene.classList.contains("is-active")){
+                    nextScene.dataset.readyToAdvance="true";
+                }
+            },900);
+        }
+
         window.requestAnimationFrame(function(){
             window.requestAnimationFrame(function(){
                 nextScene.classList.add("is-active");
@@ -2261,11 +2339,11 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         const transitionLayer=document.getElementById("transitionLayer");
 
         if(transitionLayer){
-            transitionLayer.style.transitionDuration="320ms";
+            transitionLayer.style.transitionDuration="150ms";
             transitionLayer.classList.add("is-visible");
-            await waitMs(340);
+            await waitMs(170);
         }else{
-            await waitMs(260);
+            await waitMs(100);
         }
 
         const shown=showSceneDirectly("pre-final-story");
@@ -2273,10 +2351,10 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
             throw new Error("pre-final-story scene was not found.");
         }
 
-        await waitMs(160);
+        await waitMs(70);
 
         if(transitionLayer){
-            transitionLayer.style.transitionDuration="520ms";
+            transitionLayer.style.transitionDuration="230ms";
             transitionLayer.classList.remove("is-visible");
         }
     }
@@ -2316,7 +2394,7 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         setDestinationMessage("自由の女神へ向かおう。","success");
 
         try{
-            await waitMs(420);
+            await waitMs(120);
             await goToPreFinalStoryDirectly();
         }catch(error){
             console.error("行き先正解後の直接遷移に失敗しました。",error);
@@ -2339,28 +2417,28 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         const button=document.getElementById("sushiReturnSubmitButton");
         const input=document.getElementById("sushiReturnAnswer");
 
-        if(form&&form.dataset.boundV01194!=="true"){
+        if(form&&form.dataset.boundV01196!=="true"){
             form.addEventListener("submit",submitDestinationAnswer);
-            form.dataset.boundV01194="true";
+            form.dataset.boundV01196="true";
         }
 
         /* submitイベントが発生しない環境のための決定ボタン保険 */
-        if(button&&button.dataset.boundV01194!=="true"){
+        if(button&&button.dataset.boundV01196!=="true"){
             button.addEventListener("click",function(event){
                 event.preventDefault();
                 submitDestinationAnswer(event);
             });
-            button.dataset.boundV01194="true";
+            button.dataset.boundV01196="true";
         }
 
         /* iOSのソフトウェアキーボードでEnterを押した場合の保険 */
-        if(input&&input.dataset.boundV01194!=="true"){
+        if(input&&input.dataset.boundV01196!=="true"){
             input.addEventListener("keydown",function(event){
                 if(event.key!=="Enter")return;
                 event.preventDefault();
                 submitDestinationAnswer(event);
             });
-            input.dataset.boundV01194="true";
+            input.dataset.boundV01196="true";
         }
     }
 
