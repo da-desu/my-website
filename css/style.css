@@ -5522,3 +5522,29 @@ body.is-conclusion-story .log-return-button {
         padding-inline: 16px;
     }
 }
+
+/* =========================================================
+   Version 0.11.14：第5問ヒント削除／動画・帰り道の再精査
+   ========================================================= */
+
+/*
+   共通.sceneの余白と結末画面専用の余白が二重にならないようにします。
+   横幅が必要以上に狭くなって文字が大きく見える現象を防ぎます。
+*/
+.conclusion-story-scene {
+    padding: 0;
+    overflow-x: hidden;
+    scroll-padding-top: max(20px, calc(env(safe-area-inset-top) + 12px));
+}
+
+.conclusion-story-scene__inner {
+    width: 100%;
+    max-width: var(--content-width);
+    margin-inline: auto;
+}
+
+/* 帰り道のタイトルは、表示直後から十分な上余白を確保します。 */
+#reflectionEndingStory {
+    scroll-margin-top: max(20px, calc(env(safe-area-inset-top) + 12px));
+}
+
