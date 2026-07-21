@@ -2151,44 +2151,51 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
 
     let finalReceiptTransitioning=false;
 
-    async function goToPreFinalStoryV01191(){
+    function hasFinalReceiptV01192(){
+        return (
+            typeof window.hasUsableItem === "function" &&
+            window.hasUsableItem("女神へのレシート")
+        ) || (
+            typeof window.hasItem === "function" &&
+            window.hasItem("女神へのレシート")
+        );
+    }
+
+    async function goToPreFinalStoryV01192(){
         if(finalReceiptTransitioning)return;
 
-        const currentScene=window.SceneManager?.currentScene || "";
-        if(["pre-final-story","stage6","stage6-clear","ending-plane","end"].includes(currentScene)){
-            return;
-        }
+        const target=document.getElementById("scene-pre-final-story");
+        if(target&&!target.hidden&&target.classList.contains("is-active"))return;
 
         finalReceiptTransitioning=true;
-
         try{
-            /*
-                inventory-panelにはdisplay:gridが指定されているため、
-                hidden属性だけでなく明示的に閉じてから遷移します。
-            */
+            if(typeof window.forcePreFinalStoryTransition === "function"){
+                await window.forcePreFinalStoryTransition();
+                return;
+            }
+
             window.closeInventory?.();
 
-            const inventoryPanel=document.getElementById("inventoryPanel");
-            if(inventoryPanel){
-                inventoryPanel.hidden=true;
-                inventoryPanel.setAttribute("aria-hidden","true");
-            }
-
-            await new Promise(resolve=>{
-                window.requestAnimationFrame(()=>{
-                    window.requestAnimationFrame(resolve);
+            if(window.SceneManager&&typeof window.SceneManager.changeScene==="function"){
+                await window.SceneManager.changeScene("pre-final-story",{
+                    fadeOutTime:520,
+                    blackTime:240,
+                    fadeInTime:720
                 });
-            });
-
-            if(!window.SceneManager || typeof window.SceneManager.changeScene!=="function"){
-                throw new Error("SceneManager.changeScene is unavailable.");
+                return;
             }
 
-            await window.SceneManager.changeScene("pre-final-story",{
-                fadeOutTime:760,
-                blackTime:420,
-                fadeInTime:960
-            });
+            if(target){
+                document.querySelectorAll(".scene").forEach(scene=>{
+                    scene.classList.remove("is-active");
+                    scene.hidden=true;
+                    scene.setAttribute("aria-hidden","true");
+                });
+                target.hidden=false;
+                target.setAttribute("aria-hidden","false");
+                target.classList.add("is-active");
+                window.saveCurrentScene?.("pre-final-story");
+            }
         }catch(error){
             console.error("女神へのレシート完成後の遷移に失敗しました。",error);
         }finally{
@@ -2196,38 +2203,54 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
         }
     }
 
-    window.goToPreFinalStory=goToPreFinalStoryV01191;
+    window.goToPreFinalStory=goToPreFinalStoryV01192;
 
     document.addEventListener("inventory:finalReceiptReady",function(){
-        void goToPreFinalStoryV01191();
+        void goToPreFinalStoryV01192();
     });
 
-    /*
-        Version 0.11.9で既に女神へのレシートを作ったものの、
-        遷移しなかったセーブデータも自動的に救済します。
-    */
-    function recoverFinalReceiptTransitionV01191(){
-        const hasFinalReceipt=
-            (typeof window.hasUsableItem==="function"&&window.hasUsableItem("女神へのレシート")) ||
-            (typeof window.hasItem==="function"&&window.hasItem("女神へのレシート"));
+    function recoverFinalReceiptTransitionV01192(){
+        if(!hasFinalReceiptV01192())return;
 
-        if(!hasFinalReceipt)return;
+        const current=window.SceneManager?.currentScene || "";
+        const visibleScene=document.querySelector(".scene.is-active:not([hidden])")?.dataset.scene || "";
+        const scene=current || visibleScene;
 
-        const returnScene=document.querySelector('[data-scene="sushi-return"]');
-        const currentlyAtReturn=
-            window.SceneManager?.currentScene==="sushi-return" ||
-            Boolean(returnScene&&!returnScene.hidden);
-
-        if(currentlyAtReturn){
-            void goToPreFinalStoryV01191();
+        if(["sushi-return","stage5-receipt","stage5-clear"].includes(scene)){
+            void goToPreFinalStoryV01192();
         }
     }
 
+    /*
+        再開処理で寿司屋前が表示された直後にも救済判定します。
+        これにより、旧版ですでに女神へのレシートを作成済みでも進めます。
+    */
+    if(window.SceneManager&&typeof window.SceneManager.showImmediately==="function"&&
+       window.SceneManager.showImmediately.datasetV01192!=="true"){
+        const showImmediatelyBeforeV01192=window.SceneManager.showImmediately;
+        const wrappedShowImmediatelyV01192=function(sceneName){
+            const result=showImmediatelyBeforeV01192.apply(this,arguments);
+            if(["sushi-return","stage5-receipt","stage5-clear"].includes(sceneName)){
+                window.setTimeout(recoverFinalReceiptTransitionV01192,140);
+            }
+            return result;
+        };
+        wrappedShowImmediatelyV01192.datasetV01192="true";
+        window.SceneManager.showImmediately=wrappedShowImmediatelyV01192;
+    }
+
     document.addEventListener("inventory:changed",function(){
-        window.setTimeout(recoverFinalReceiptTransitionV01191,80);
+        window.setTimeout(recoverFinalReceiptTransitionV01192,100);
     });
 
     document.addEventListener("DOMContentLoaded",function(){
-        window.setTimeout(recoverFinalReceiptTransitionV01191,700);
+        window.setTimeout(recoverFinalReceiptTransitionV01192,1200);
+    });
+
+    window.addEventListener("pageshow",function(){
+        window.setTimeout(recoverFinalReceiptTransitionV01192,900);
     });
 })();
+
+
+/* Version 0.11.9.2: レシート完成後の強制遷移とキャッシュ対策 */
