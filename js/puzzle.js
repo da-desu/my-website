@@ -1570,6 +1570,82 @@ const EndingPlaneController = {
     currentX: 0,
     currentY: 0,
     completed: false,
+    scrollPinToken: 0,
+
+    /**
+     * iPhone / iPad Safariが、非表示になったボタンの次のフォーカス先として
+     * 画面下部の紙飛行機へ移動し、スクロール位置まで下へ動かす現象を防ぎます。
+     * 一定時間だけ結末シーンを先頭に固定し、レイアウト確定後に解除します。
+     */
+    pinStoryToTop({ focusTitle = false, duration = 980 } = {}) {
+        const token = ++this.scrollPinToken;
+        const storyScene = document.getElementById("scene-ending-plane");
+        const storyInner = storyScene?.querySelector(".conclusion-story-scene__inner");
+        const reflectionTitle = document.getElementById("reflection-ending-title");
+        const plane = document.getElementById("endingPlane");
+
+        if (!storyScene) return;
+
+        storyScene.classList.add("is-pinning-story-top");
+
+        const resetTop = () => {
+            if (token !== this.scrollPinToken) return;
+
+            storyScene.scrollTop = 0;
+            storyScene.scrollLeft = 0;
+            storyScene.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
+
+            if (storyInner) {
+                storyInner.scrollTop = 0;
+                storyInner.scrollLeft = 0;
+            }
+
+            const scrollingElement = document.scrollingElement;
+            if (scrollingElement) {
+                scrollingElement.scrollTop = 0;
+                scrollingElement.scrollLeft = 0;
+            }
+
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        };
+
+        resetTop();
+        window.requestAnimationFrame(() => {
+            resetTop();
+            window.requestAnimationFrame(resetTop);
+        });
+
+        [60, 160, 360, 720].forEach(delay => {
+            window.setTimeout(resetTop, delay);
+        });
+
+        if (focusTitle && reflectionTitle) {
+            window.setTimeout(() => {
+                if (token !== this.scrollPinToken) return;
+                try {
+                    reflectionTitle.focus({ preventScroll: true });
+                } catch (_) {
+                    reflectionTitle.focus();
+                    resetTop();
+                }
+            }, 40);
+        }
+
+        window.setTimeout(() => {
+            if (token !== this.scrollPinToken) return;
+            resetTop();
+            storyScene.classList.remove("is-pinning-story-top");
+            resetTop();
+            window.requestAnimationFrame(resetTop);
+            window.setTimeout(resetTop, 80);
+
+            if (this.step === 2 && !this.completed && plane) {
+                plane.disabled = false;
+            }
+        }, duration);
+    },
 
     showStep(step, animate = false) {
         const first = document.getElementById("girlEndingStory");
@@ -1577,6 +1653,22 @@ const EndingPlaneController = {
         if (!first || !second) return;
 
         this.step = step === 2 ? 2 : 1;
+
+        /*
+           「画面を閉じる」を押したボタンへフォーカスが残ったまま親要素を隠すと、
+           Safariが次のフォーカス可能要素（画面下部の紙飛行機）まで自動スクロールする
+           場合があります。内容を切り替える前に必ずフォーカスを外します。
+        */
+        const focused = document.activeElement;
+        if (focused && focused !== document.body && typeof focused.blur === "function") {
+            focused.blur();
+        }
+
+        const storyScene = document.getElementById("scene-ending-plane");
+        if (storyScene) {
+            storyScene.scrollTop = 0;
+            storyScene.scrollLeft = 0;
+        }
 
         [first, second].forEach(sheet => {
             sheet.classList.remove("is-visible", "is-leaving");
@@ -1589,31 +1681,16 @@ const EndingPlaneController = {
         const reveal = () => {
             active.classList.add("is-visible");
 
-            /*
-               1枚目を下まで読んだ位置が、2枚目へ引き継がれないようにします。
-               iPhone / iPad Safariでも「帰り道」のタイトルから表示します。
-            */
-            const storyScene = document.getElementById("scene-ending-plane");
-            const resetStoryScroll = () => {
-                if (storyScene) {
-                    storyScene.scrollTop = 0;
-                    storyScene.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
-                }
-                window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-            };
-
-            /*
-               hidden解除・表示アニメーション・画像レイアウトの各段階で
-               スクロール位置が復元される端末があるため、複数回先頭へ戻します。
-            */
-            resetStoryScroll();
-            window.requestAnimationFrame(() => {
-                resetStoryScroll();
-                window.requestAnimationFrame(resetStoryScroll);
-            });
-            window.setTimeout(resetStoryScroll, 100);
-
-            if (this.step === 2) this.resetPlane();
+            if (this.step === 2) {
+                /*
+                   紙飛行機を一時的に無効化し、Safariが自動フォーカスして
+                   画面下部へ移動する経路を遮断します。
+                */
+                this.resetPlane({ temporarilyDisabled: true });
+                this.pinStoryToTop({ focusTitle: true, duration: 980 });
+            } else {
+                this.pinStoryToTop({ focusTitle: false, duration: 420 });
+            }
         };
 
         if (animate) {
@@ -1623,7 +1700,7 @@ const EndingPlaneController = {
         }
     },
 
-    resetPlane() {
+    resetPlane({ temporarilyDisabled = false } = {}) {
         this.pointerId = null;
         this.startX = 0;
         this.startY = 0;
@@ -1639,7 +1716,7 @@ const EndingPlaneController = {
             plane.classList.remove("is-dragging", "is-flying");
             plane.style.transform = "rotate(-18deg)";
             plane.style.opacity = "";
-            plane.disabled = false;
+            plane.disabled = temporarilyDisabled;
         }
 
         trail?.classList.remove("is-visible");
@@ -1659,7 +1736,10 @@ const EndingPlaneController = {
         window.saveStage6State?.({ endingStoryStep: step });
     },
 
-    async next() {
+    async next(event) {
+        event?.preventDefault?.();
+        event?.currentTarget?.blur?.();
+
         if (this.transitioning || this.step !== 1) return;
         this.transitioning = true;
 
@@ -1784,7 +1864,7 @@ const EndingPlaneController = {
     init() {
         if (this.initialized) return;
 
-        document.getElementById("girlEndingNextButton")?.addEventListener("click", () => this.next());
+        document.getElementById("girlEndingNextButton")?.addEventListener("click", event => this.next(event));
 
         const plane = document.getElementById("endingPlane");
         plane?.addEventListener("pointerdown", event => this.beginPlaneGesture(event));
