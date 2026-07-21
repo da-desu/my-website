@@ -1057,7 +1057,7 @@ function resetStage5Puzzle() {
         reward.hidden = !ownsIbushigin;
     }
 
-    setChefSpeech("今売り切れが多くてね。<br>さんかくの間のものなら渡せるよ。");
+    setChefSpeech("今売り切れが多くてね。さんかくの間のものなら渡せるよ。");
     setStage5Message("", "");
     stage5Clearing = false;
 }
@@ -1085,632 +1085,499 @@ window.resetStage5Puzzle = resetStage5Puzzle;
 /* =========================================================
    Version 0.10：最終ステージコントローラー
    ========================================================= */
-const Stage6Controller={
-    initialized:false,
-    state:null,
-    selectedItems:[],
+const Stage6Controller = {
+    initialized: false,
+    state: null,
+    selectedItems: [],
 
-    el(id){return document.getElementById(id)},
+    el(id) {
+        return document.getElementById(id);
+    },
 
-    normalize(value){
-        return String(value||"")
+    normalize(value) {
+        return String(value || "")
             .trim()
-            .replace(/\s+/g,"")
-            .replace(/[!！?？。、,.・]+/g,"")
+            .replace(/\s+/g, "")
+            .replace(/[!！?？。、,.・]+/g, "")
             .toLowerCase();
     },
 
-    setMessage(id,text,type=""){
-        const el=this.el(id);
-        if(!el)return;
-        el.textContent=text;
-        el.classList.remove("is-error","is-success");
-        if(type)el.classList.add("is-"+type);
+    setMessage(id, text, type = "") {
+        const element = this.el(id);
+        if (!element) return;
+        element.textContent = text;
+        element.classList.remove("is-error", "is-success");
+        if (type) element.classList.add(`is-${type}`);
     },
 
-    save(partial){
-        this.state=Object.assign({},this.state||window.getStage6State?.()||{},partial||{});
-        window.saveStage6State?.(partial||{});
+    save(partial) {
+        this.state = Object.assign({}, this.state || window.getStage6State?.() || {}, partial || {});
+        window.saveStage6State?.(partial || {});
     },
 
-    getInventoryItems(){
-        if(typeof window.getUsableInventoryItems==="function"){
+    getInventoryItems() {
+        if (typeof window.getUsableInventoryItems === "function") {
             return window.getUsableInventoryItems();
         }
-        const saveData=typeof window.getSaveData==="function"?window.getSaveData():null;
-        return Array.isArray(saveData?.items)?saveData.items:[];
+        const saveData = typeof window.getSaveData === "function" ? window.getSaveData() : null;
+        return Array.isArray(saveData?.items) ? saveData.items : [];
     },
 
-    flashPurple(){
-        const flash=this.el("finalStatuePurpleFlash");
-        const statue=this.el("finalStatue");
-        if(flash){
-            flash.classList.remove("is-active");
-            void flash.offsetWidth;
-            flash.classList.add("is-active");
-        }
-        if(statue){
-            statue.classList.add("is-purple-flash");
-            setTimeout(()=>statue.classList.remove("is-purple-flash"),900);
-        }
-    },
+    async solvePatina(event) {
+        event?.preventDefault?.();
 
-    async solvePatina(event){
-        event?.preventDefault();
-        const input=this.el("stage6PatinaAnswer");
-        const button=this.el("stage6PatinaSubmit");
-        if(!input||!button)return;
+        const input = this.el("stage6PatinaAnswer");
+        const button = this.el("stage6PatinaSubmit");
+        if (!input || !button) return;
 
-        const answer=this.normalize(input.value);
-        if(!answer){
-            this.setMessage("stage6PatinaMessage","色または素材を入力してください。","error");
+        const answer = this.normalize(input.value);
+        if (!answer) {
+            this.setMessage("stage6PatinaMessage", "答えを入力してください。", "error");
             input.focus();
             return;
         }
 
-        const currentColorAnswers=["緑","緑色","みどり","みどりいろ","青銅","せいどう","青緑","あおみどり"];
-        if(currentColorAnswers.includes(answer)){
-            this.setMessage("stage6PatinaMessage","今はね","error");
+        const currentColorAnswers = ["緑", "緑色", "みどり", "みどりいろ", "青銅", "せいどう", "青緑", "あおみどり"];
+        if (currentColorAnswers.includes(answer)) {
+            this.setMessage("stage6PatinaMessage", "今はね", "error");
             input.select();
             return;
         }
 
-        const correctAnswers=["銅","どう","銅色","どういろ","赤茶","赤茶色","あかちゃ","あかちゃいろ","赤褐色","せきかっしょく"];
-        if(!correctAnswers.includes(answer)){
-            this.setMessage("stage6PatinaMessage","作られた素材と、本来の色を調べてみよう。","error");
+        const correctAnswers = ["銅", "どう", "銅色", "どういろ", "赤茶", "赤茶色", "あかちゃ", "あかちゃいろ", "赤褐色", "せきかっしょく"];
+        if (!correctAnswers.includes(answer)) {
+            this.setMessage("stage6PatinaMessage", "違うようだ。", "error");
             input.select();
             return;
         }
 
-        input.disabled=true;
-        button.disabled=true;
+        input.disabled = true;
+        button.disabled = true;
         this.el("finalStatue")?.classList.add("is-copper");
-        this.setMessage("stage6PatinaMessage","正解。自由の女神は、もともと銅の赤茶色だった。","success");
-        this.save({patinaSolved:true});
+        this.setMessage("stage6PatinaMessage", "正解。自由の女神は、もともと銅の赤茶色だった。", "success");
+        this.save({ patinaSolved: true });
 
-        await window.wait(1000);
-        const panel=this.el("stage6PurplePanel");
-        if(panel)panel.hidden=false;
-        this.selectedItems=[];
+        await window.wait(700);
+
+        const panel = this.el("stage6PurplePanel");
+        if (panel) panel.hidden = false;
+        this.selectedItems = [];
         this.renderInventoryChoices();
-        panel?.scrollIntoView({behavior:"smooth",block:"center"});
+        panel?.scrollIntoView({ behavior: "smooth", block: "center" });
     },
 
-    renderInventoryChoices(){
-        const container=this.el("stage6InventoryChoices");
-        const count=this.el("stage6SelectionCount");
-        const submit=this.el("stage6UseSelectedItems");
-        if(!container)return;
+    renderInventoryChoices() {
+        const container = this.el("stage6InventoryChoices");
+        const count = this.el("stage6SelectionCount");
+        const submit = this.el("stage6UseSelectedItems");
+        if (!container) return;
 
-        const items=this.getInventoryItems();
+        const items = this.getInventoryItems();
         container.replaceChildren();
 
-        if(items.length===0){
-            const empty=document.createElement("p");
-            empty.className="final-inventory-choices__empty";
-            empty.textContent="選べる持ち物がない。";
+        if (items.length === 0) {
+            const empty = document.createElement("p");
+            empty.className = "final-inventory-choices__empty";
+            empty.textContent = "選べる持ち物がない。";
             container.appendChild(empty);
-        }else{
-            items.forEach(itemName=>{
-                const button=document.createElement("button");
-                button.type="button";
-                button.className="final-inventory-choice";
-                button.dataset.itemName=itemName;
-                button.textContent=itemName;
-                const selected=this.selectedItems.includes(itemName);
-                button.classList.toggle("is-selected",selected);
-                button.setAttribute("aria-pressed",selected?"true":"false");
-                button.addEventListener("click",()=>this.toggleInventoryItem(itemName));
+        } else {
+            items.forEach(itemName => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "final-inventory-choice";
+                button.dataset.itemName = itemName;
+                button.textContent = itemName;
+
+                const selected = this.selectedItems.includes(itemName);
+                button.classList.toggle("is-selected", selected);
+                button.setAttribute("aria-pressed", selected ? "true" : "false");
+                button.addEventListener("click", () => this.toggleInventoryItem(itemName));
                 container.appendChild(button);
             });
         }
 
-        if(count)count.textContent=`${this.selectedItems.length} / 2`;
-        if(submit)submit.disabled=this.selectedItems.length!==2||Boolean(this.state?.transformed);
+        if (count) count.textContent = `${this.selectedItems.length} / 2`;
+        if (submit) submit.disabled = this.selectedItems.length !== 2 || Boolean(this.state?.transformed);
     },
 
-    toggleInventoryItem(itemName){
-        if(this.state?.transformed)return;
-        const index=this.selectedItems.indexOf(itemName);
-        if(index>=0){
-            this.selectedItems.splice(index,1);
-        }else if(this.selectedItems.length<2){
+    toggleInventoryItem(itemName) {
+        if (this.state?.transformed) return;
+
+        const index = this.selectedItems.indexOf(itemName);
+        if (index >= 0) {
+            this.selectedItems.splice(index, 1);
+        } else if (this.selectedItems.length < 2) {
             this.selectedItems.push(itemName);
-        }else{
-            this.setMessage("stage6PurpleMessage","選べるのは二つまでだ。","error");
+        } else {
+            this.setMessage("stage6PurpleMessage", "選べるのは二つまでだ。", "error");
             return;
         }
-        this.setMessage("stage6PurpleMessage","");
+
+        this.setMessage("stage6PurpleMessage", "");
         this.renderInventoryChoices();
     },
 
-    async useSelectedItems(){
-        if(this.state?.transformed||this.selectedItems.length!==2)return;
-        const selected=this.selectedItems.slice().sort((a,b)=>a.localeCompare(b,"ja"));
-        const correct=["紫のインク","醤油"].sort((a,b)=>a.localeCompare(b,"ja"));
-        const isCorrect=selected[0]===correct[0]&&selected[1]===correct[1];
+    useSelectedItems() {
+        if (this.state?.transformed || this.selectedItems.length !== 2) return;
 
-        if(!isCorrect){
-            this.setMessage("stage6PurpleMessage","その二つでは、むらさきが二つにならない。","error");
-            this.selectedItems=[];
+        const selected = this.selectedItems.slice().sort((a, b) => a.localeCompare(b, "ja"));
+        const correct = ["紫のインク", "醤油"].sort((a, b) => a.localeCompare(b, "ja"));
+        const isCorrect = selected[0] === correct[0] && selected[1] === correct[1];
+
+        if (!isCorrect) {
+            this.setMessage("stage6PurpleMessage", "その二つでは、むらさきが二つにならない。", "error");
+            this.selectedItems = [];
             this.renderInventoryChoices();
             return;
         }
 
-        this.state.transformed=true;
-        this.save({transformed:true});
-        const submit=this.el("stage6UseSelectedItems");
-        if(submit)submit.disabled=true;
-        document.querySelectorAll(".final-inventory-choice").forEach(button=>button.disabled=true);
-        this.flashPurple();
-        await window.wait(900);
+        this.save({
+            transformed: true,
+            endingVideoWatched: false,
+            endingStoryStep: 1,
+            ended: false
+        });
 
-        this.el("finalStatue")?.classList.add("is-gun");
-        const kanji=this.el("stage6NameKanji");
-        if(kanji){
-            kanji.style.opacity="0";
-            kanji.style.transform="scale(.75)";
-            setTimeout(()=>{
-                kanji.textContent="銃";
-                kanji.style.opacity="1";
-                kanji.style.transform="scale(1)";
-            },360);
-        }
-        this.el("stage6NameReading")?.classList.add("is-gun");
-        this.setMessage("stage6PurpleMessage","銃の女神へと成った","success");
+        const submit = this.el("stage6UseSelectedItems");
+        if (submit) submit.disabled = true;
+        document.querySelectorAll(".final-inventory-choice").forEach(button => {
+            button.disabled = true;
+        });
 
-        await window.wait(1150);
-        const panel=this.el("stage6ShadowPanel");
-        if(panel)panel.hidden=false;
-        panel?.scrollIntoView({behavior:"smooth",block:"center"});
-    },
-
-    async shootShadow(){
-        if(this.state?.shadowShot)return;
-        this.state.shadowShot=true;
-        this.save({shadowShot:true});
-        const target=this.el("stage6ShadowTarget");
-        target?.classList.add("is-shot");
-        if(target)target.disabled=true;
-        this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success");
-        document.querySelectorAll("audio").forEach(audio=>{try{audio.pause()}catch(_){}});
         window.clearStage?.(6);
-        await window.wait(1300);
-        await window.SceneManager.changeScene("stage6-clear",{fadeOutTime:900,blackTime:700,fadeInTime:1100});
-        FinalLetterController.restore();
+
+        /*
+            「選んだ2つをかける」のタップ操作が有効な間に、
+            黒い動画シーンへ即時切り替えて再生を開始します。
+            iPhone / iPadで音声付き動画の再生許可を失いにくくするため、
+            非同期の暗転処理は挟みません。
+        */
+        if (window.SceneManager?.showImmediately) {
+            window.SceneManager.showImmediately("stage6-clear");
+        } else {
+            const current = document.querySelector(".scene.is-active");
+            const next = document.getElementById("scene-stage6-clear");
+            current?.classList.remove("is-active");
+            if (current) current.hidden = true;
+            if (next) {
+                next.hidden = false;
+                next.classList.add("is-active");
+            }
+        }
+
+        FinalLetterController.start();
     },
 
-    restore(){
-        this.reset({preserveSave:true});
-        this.state=window.getStage6State?.()||{};
-        const state=this.state;
+    restore() {
+        this.reset({ preserveSave: true });
+        this.state = window.getStage6State?.() || {};
 
-        if(state.patinaSolved){
+        if (this.state.patinaSolved) {
             this.el("finalStatue")?.classList.add("is-copper");
-            const input=this.el("stage6PatinaAnswer");
-            const button=this.el("stage6PatinaSubmit");
-            if(input)input.disabled=true;
-            if(button)button.disabled=true;
-            this.setMessage("stage6PatinaMessage","正解。自由の女神は、もともと銅の赤茶色だった。","success");
-            const panel=this.el("stage6PurplePanel");
-            if(panel)panel.hidden=false;
+            const input = this.el("stage6PatinaAnswer");
+            const button = this.el("stage6PatinaSubmit");
+            if (input) input.disabled = true;
+            if (button) button.disabled = true;
+            this.setMessage("stage6PatinaMessage", "正解。自由の女神は、もともと銅の赤茶色だった。", "success");
+
+            const panel = this.el("stage6PurplePanel");
+            if (panel) panel.hidden = false;
             this.renderInventoryChoices();
         }
 
-        if(state.transformed){
-            this.el("finalStatue")?.classList.add("is-gun");
-            const kanji=this.el("stage6NameKanji");
-            if(kanji)kanji.textContent="銃";
-            this.el("stage6NameReading")?.classList.add("is-gun");
-            this.setMessage("stage6PurpleMessage","銃の女神へと成った","success");
-            const panel=this.el("stage6ShadowPanel");
-            if(panel)panel.hidden=false;
-            document.querySelectorAll(".final-inventory-choice").forEach(button=>button.disabled=true);
-            const submit=this.el("stage6UseSelectedItems");
-            if(submit)submit.disabled=true;
-        }
-
-        if(state.shadowShot){
-            const target=this.el("stage6ShadowTarget");
-            target?.classList.add("is-shot");
-            if(target)target.disabled=true;
-            this.setMessage("stage6ShadowMessage","光が、俯いていた影を貫いた。","success");
+        /* 旧版で変身済みのセーブデータも、新しい動画導線へ移します。 */
+        if (this.state.transformed) {
+            window.setTimeout(() => {
+                window.SceneManager?.showImmediately?.("stage6-clear");
+                FinalLetterController.restore();
+            }, 120);
         }
     },
 
-    reset({preserveSave=false}={}){
-        this.state={patinaSolved:false,transformed:false,shadowShot:false,letterFolded:false,ended:false};
-        this.selectedItems=[];
-        this.el("finalStatue")?.classList.remove("is-copper","is-gun","is-purple-flash");
-        const kanji=this.el("stage6NameKanji");
-        if(kanji){
-            kanji.textContent="自由";
-            kanji.style.opacity="";
-            kanji.style.transform="";
+    reset({ preserveSave = false } = {}) {
+        document.body.classList.remove("is-conclusion-story", "is-final-video-playing");
+        this.state = {
+            patinaSolved: false,
+            transformed: false,
+            endingVideoWatched: false,
+            endingStoryStep: 1,
+            ended: false
+        };
+        this.selectedItems = [];
+
+        this.el("finalStatue")?.classList.remove("is-copper", "is-gun", "is-purple-flash");
+        const kanji = this.el("stage6NameKanji");
+        if (kanji) {
+            kanji.textContent = "自由";
+            kanji.style.opacity = "";
+            kanji.style.transform = "";
         }
         this.el("stage6NameReading")?.classList.remove("is-gun");
 
-        const input=this.el("stage6PatinaAnswer");
-        const submitAnswer=this.el("stage6PatinaSubmit");
-        if(input){input.value="";input.disabled=false;}
-        if(submitAnswer)submitAnswer.disabled=false;
+        const input = this.el("stage6PatinaAnswer");
+        const submitAnswer = this.el("stage6PatinaSubmit");
+        if (input) {
+            input.value = "";
+            input.disabled = false;
+        }
+        if (submitAnswer) submitAnswer.disabled = false;
 
-        const purplePanel=this.el("stage6PurplePanel");
-        const shadowPanel=this.el("stage6ShadowPanel");
-        if(purplePanel)purplePanel.hidden=true;
-        if(shadowPanel)shadowPanel.hidden=true;
+        const purplePanel = this.el("stage6PurplePanel");
+        if (purplePanel) purplePanel.hidden = true;
 
-        const target=this.el("stage6ShadowTarget");
-        target?.classList.remove("is-shot");
-        if(target)target.disabled=false;
+        const choices = this.el("stage6InventoryChoices");
+        if (choices) choices.replaceChildren();
+        const count = this.el("stage6SelectionCount");
+        if (count) count.textContent = "0 / 2";
+        const useButton = this.el("stage6UseSelectedItems");
+        if (useButton) useButton.disabled = true;
 
-        const choices=this.el("stage6InventoryChoices");
-        if(choices)choices.replaceChildren();
-        const count=this.el("stage6SelectionCount");
-        if(count)count.textContent="0 / 2";
-        const useButton=this.el("stage6UseSelectedItems");
-        if(useButton)useButton.disabled=true;
+        this.setMessage("stage6PatinaMessage", "");
+        this.setMessage("stage6PurpleMessage", "");
 
-        ["stage6PatinaMessage","stage6PurpleMessage"].forEach(id=>this.setMessage(id,""));
-        this.setMessage("stage6ShadowMessage","影に狙いを定めよう。");
-        if(!preserveSave)window.resetStage6State?.();
+        if (!preserveSave) window.resetStage6State?.();
     },
 
-    init(){
-        if(this.initialized)return;
-        this.el("stage6PatinaForm")?.addEventListener("submit",event=>this.solvePatina(event));
-        this.el("stage6UseSelectedItems")?.addEventListener("click",()=>this.useSelectedItems());
-        this.el("stage6ShadowTarget")?.addEventListener("click",()=>this.shootShadow());
-        document.addEventListener("inventory:changed",()=>{
-            if(this.state?.patinaSolved&&!this.state?.transformed)this.renderInventoryChoices();
+    init() {
+        if (this.initialized) return;
+        this.el("stage6PatinaForm")?.addEventListener("submit", event => this.solvePatina(event));
+        this.el("stage6UseSelectedItems")?.addEventListener("click", () => this.useSelectedItems());
+        document.addEventListener("inventory:changed", () => {
+            if (this.state?.patinaSolved && !this.state?.transformed) {
+                this.renderInventoryChoices();
+            }
         });
-        this.initialized=true;
+        this.initialized = true;
     }
 };
 
-/* 最後の手紙 */
-const FinalLetterController={
-    initialized:false,
-    folded:false,
-    fold(){
-        if(this.folded)return;this.folded=true;
-        document.getElementById("finalLetter")?.classList.add("is-folded");
-        const fold=document.getElementById("foldFinalLetterButton");if(fold)fold.disabled=true;
-        const go=document.getElementById("goToWindowButton");if(go)go.hidden=false;
-        window.saveStage6State?.({letterFolded:true});
-    },
-    restore(){
-        const state=window.getStage6State?.()||{};this.folded=Boolean(state.letterFolded);
-        document.getElementById("finalLetter")?.classList.toggle("is-folded",this.folded);
-        const fold=document.getElementById("foldFinalLetterButton");if(fold)fold.disabled=this.folded;
-        const go=document.getElementById("goToWindowButton");if(go)go.hidden=!this.folded;
-    },
-    reset(){this.folded=false;document.getElementById("finalLetter")?.classList.remove("is-folded");const f=document.getElementById("foldFinalLetterButton");if(f)f.disabled=false;const g=document.getElementById("goToWindowButton");if(g)g.hidden=true},
-    init(){if(this.initialized)return;document.getElementById("foldFinalLetterButton")?.addEventListener("click",()=>this.fold());document.getElementById("goToWindowButton")?.addEventListener("click",async()=>{EndingPlaneController.reset();await window.SceneManager.changeScene("ending-plane",{fadeOutTime:800,blackTime:450,fadeInTime:900})});this.initialized=true}
-};
+/* 黒い画面で変身動画を再生するコントローラー。旧名を維持します。 */
+const FinalLetterController = {
+    initialized: false,
+    finishing: false,
 
-/* 最後の紙飛行機 */
-const EndingPlaneController={
-    initialized:false,pointerId:null,startX:0,startY:0,currentX:0,currentY:0,completed:false,
-    reset(){this.pointerId=null;this.completed=false;const p=document.getElementById("endingPlane"),t=document.getElementById("endingPlaneTrail");if(p){p.classList.remove("is-dragging","is-flying");p.style.transform="rotate(-18deg)";p.style.opacity="";p.disabled=false}t?.classList.remove("is-visible");const m=document.getElementById("endingPlaneMessage");if(m){m.textContent="紙飛行機に触れて、そのまま右上へ。";m.classList.remove("is-error","is-success")}},
-    finish(){
-        if(this.pointerId===null||this.completed)return;const dx=this.currentX-this.startX,dy=this.currentY-this.startY;this.pointerId=null;const p=document.getElementById("endingPlane");p?.classList.remove("is-dragging");
-        if(dx>=120&&dy<=-100){this.complete();return}
-        if(p)p.style.transform="rotate(-18deg)";const m=document.getElementById("endingPlaneMessage");if(m){m.textContent="もう少し大きく、右上へ飛ばそう。";m.classList.add("is-error")}
+    elements() {
+        return {
+            video: document.getElementById("goddessTransformationVideo"),
+            playButton: document.getElementById("finalVideoPlayButton"),
+            message: document.getElementById("finalVideoMessage")
+        };
     },
-    async complete(){
-        if(this.completed)return;this.completed=true;const p=document.getElementById("endingPlane"),a=document.getElementById("endingPlaneArea"),t=document.getElementById("endingPlaneTrail");if(!p||!a)return;
-        p.disabled=true;p.classList.add("is-flying");t?.classList.add("is-visible");const r=a.getBoundingClientRect();p.style.transform=`translate3d(${r.width*.82}px,-${r.height*.82}px,0) rotate(-29deg)`;
-        const m=document.getElementById("endingPlaneMessage");if(m){m.textContent="紙飛行機は、背景の向こうへ飛んでいった。";m.classList.add("is-success")}
-        window.saveStage6State?.({ended:true});await window.wait(1100);await window.SceneManager.changeScene("end",{fadeOutTime:1000,blackTime:900,fadeInTime:1500});updateEndSecretBadge();
+
+    setMessage(text) {
+        const { message } = this.elements();
+        if (message) message.textContent = text;
     },
-    init(){
-        if(this.initialized)return;const p=document.getElementById("endingPlane");if(!p)return;
-        p.addEventListener("pointerdown",e=>{if(this.completed)return;e.preventDefault();this.pointerId=e.pointerId;this.startX=this.currentX=e.clientX;this.startY=this.currentY=e.clientY;p.setPointerCapture(e.pointerId);p.classList.add("is-dragging")});
-        p.addEventListener("pointermove",e=>{if(this.pointerId!==e.pointerId||this.completed)return;e.preventDefault();this.currentX=e.clientX;this.currentY=e.clientY;p.style.transform=`translate3d(${this.currentX-this.startX}px,${this.currentY-this.startY}px,0) rotate(-24deg)`});
-        p.addEventListener("pointerup",e=>{if(this.pointerId!==e.pointerId)return;e.preventDefault();this.finish()});p.addEventListener("pointercancel",()=>this.finish());this.initialized=true;
+
+    showPlayButton(label = "動画を再生") {
+        const { playButton } = this.elements();
+        if (!playButton) return;
+        playButton.textContent = label;
+        playButton.hidden = false;
+        playButton.disabled = false;
+    },
+
+    start() {
+        const { video, playButton } = this.elements();
+        if (!video) {
+            this.showPlayButton("物語の続きを見る");
+            this.setMessage("動画を読み込めませんでした。");
+            return;
+        }
+
+        this.finishing = false;
+        document.body.classList.add("is-final-video-playing");
+        if (playButton) playButton.hidden = true;
+        this.setMessage("");
+
+        try {
+            video.pause();
+            video.currentTime = 0;
+            video.volume = 1;
+            video.muted = false;
+            const promise = video.play();
+            if (promise && typeof promise.catch === "function") {
+                promise.catch(() => {
+                    this.showPlayButton("タップして動画を再生");
+                    this.setMessage("再生ボタンをタップしてください。");
+                });
+            }
+        } catch (error) {
+            console.warn("変身動画を再生できませんでした。", error);
+            this.showPlayButton("タップして動画を再生");
+            this.setMessage("再生ボタンをタップしてください。");
+        }
+    },
+
+    async finish() {
+        if (this.finishing) return;
+        this.finishing = true;
+
+        const { video, playButton } = this.elements();
+        document.body.classList.remove("is-final-video-playing");
+        try {
+            video?.pause();
+        } catch (_) {}
+        if (playButton) playButton.disabled = true;
+
+        window.saveStage6State?.({
+            endingVideoWatched: true,
+            endingStoryStep: 1
+        });
+
+        EndingPlaneController.reset({ forceFirst: true });
+
+        if (window.SceneManager?.changeScene) {
+            await window.SceneManager.changeScene("ending-plane", {
+                fadeOutTime: 300,
+                blackTime: 120,
+                fadeInTime: 520
+            });
+        } else {
+            window.SceneManager?.showImmediately?.("ending-plane");
+        }
+
+        this.finishing = false;
+    },
+
+    restore() {
+        const state = window.getStage6State?.() || {};
+        document.body.classList.add("is-final-video-playing");
+        const { video } = this.elements();
+        if (video) {
+            try {
+                video.pause();
+                video.currentTime = 0;
+            } catch (_) {}
+        }
+
+        if (state.endingVideoWatched) {
+            this.showPlayButton("物語の続きを見る");
+            this.setMessage("動画は再生済みです。");
+        } else {
+            this.showPlayButton("動画を再生");
+            this.setMessage("タップして動画を再生してください。");
+        }
+    },
+
+    reset() {
+        this.finishing = false;
+        document.body.classList.remove("is-final-video-playing");
+        const { video, playButton } = this.elements();
+        if (video) {
+            try {
+                video.pause();
+                video.currentTime = 0;
+            } catch (_) {}
+        }
+        if (playButton) {
+            playButton.hidden = true;
+            playButton.disabled = false;
+        }
+        this.setMessage("");
+    },
+
+    init() {
+        if (this.initialized) return;
+
+        const { video, playButton } = this.elements();
+        video?.addEventListener("ended", () => this.finish());
+        video?.addEventListener("error", () => {
+            this.showPlayButton("物語の続きを見る");
+            this.setMessage("動画を再生できませんでした。");
+        });
+
+        playButton?.addEventListener("click", () => {
+            const state = window.getStage6State?.() || {};
+            if (state.endingVideoWatched || video?.error) {
+                this.finish();
+                return;
+            }
+            this.start();
+        });
+
+        this.initialized = true;
     }
 };
+
+/* 二つのストーリーシートを順番に表示するコントローラー。旧名を維持します。 */
+const EndingPlaneController = {
+    initialized: false,
+    transitioning: false,
+    step: 1,
+
+    showStep(step, animate = false) {
+        const first = document.getElementById("girlEndingStory");
+        const second = document.getElementById("reflectionEndingStory");
+        if (!first || !second) return;
+
+        this.step = step === 2 ? 2 : 1;
+
+        [first, second].forEach(sheet => {
+            sheet.classList.remove("is-visible", "is-leaving");
+            sheet.hidden = true;
+        });
+
+        const active = this.step === 1 ? first : second;
+        active.hidden = false;
+
+        const reveal = () => active.classList.add("is-visible");
+        if (animate) {
+            window.requestAnimationFrame(() => window.requestAnimationFrame(reveal));
+        } else {
+            reveal();
+        }
+    },
+
+    reset({ forceFirst = false } = {}) {
+        this.transitioning = false;
+        document.body.classList.add("is-conclusion-story");
+        const state = window.getStage6State?.() || {};
+        const step = forceFirst ? 1 : Number(state.endingStoryStep) === 2 ? 2 : 1;
+        this.showStep(step, true);
+        window.saveStage6State?.({ endingStoryStep: step });
+    },
+
+    async next() {
+        if (this.transitioning) return;
+        this.transitioning = true;
+
+        if (this.step === 1) {
+            const first = document.getElementById("girlEndingStory");
+            first?.classList.remove("is-visible");
+            first?.classList.add("is-leaving");
+            await window.wait(330);
+            this.showStep(2, true);
+            window.saveStage6State?.({ endingStoryStep: 2 });
+            this.transitioning = false;
+            return;
+        }
+
+        window.saveStage6State?.({ ended: true });
+        document.body.classList.remove("is-conclusion-story");
+        if (window.SceneManager?.changeScene) {
+            await window.SceneManager.changeScene("end", {
+                fadeOutTime: 620,
+                blackTime: 280,
+                fadeInTime: 900
+            });
+        } else {
+            window.SceneManager?.showImmediately?.("end");
+        }
+        updateEndSecretBadge();
+        this.transitioning = false;
+    },
+
+    init() {
+        if (this.initialized) return;
+        document.getElementById("girlEndingNextButton")?.addEventListener("click", () => this.next());
+        document.getElementById("reflectionEndingNextButton")?.addEventListener("click", () => this.next());
+        this.initialized = true;
+    }
+};
+
 function updateEndSecretBadge(){const badge=document.getElementById("ibushiginEndBadge");if(badge)badge.hidden=!(typeof window.hasItem==="function"&&window.hasItem("いぶしぎん"))}
 
 const initializeBeforeV010=window.initializePuzzles;
 window.initializePuzzles=function initializePuzzlesV010(){initializeBeforeV010?.();Stage6Controller.init();FinalLetterController.init();EndingPlaneController.init()};
 window.Stage6Controller=Stage6Controller;window.FinalLetterController=FinalLetterController;window.EndingPlaneController=EndingPlaneController;window.updateEndSecretBadge=updateEndSecretBadge;
-
-
-/* =========================================================
-   Version 0.10.1：最終手紙ナビゲーション修正
-   ========================================================= */
-
-(function installFinalLetterButtonFix() {
-
-    "use strict";
-
-    if (window.__finalLetterButtonFixV0101) {
-        return;
-    }
-
-    window.__finalLetterButtonFixV0101 = true;
-
-
-    /**
-     * 「窓辺へ」ボタンを確実に表示して操作可能にします。
-     */
-    function revealWindowButton() {
-
-        const button =
-            document.getElementById(
-                "goToWindowButton"
-            );
-
-        if (!button) {
-            return;
-        }
-
-        button.hidden = false;
-        button.removeAttribute("hidden");
-        button.disabled = false;
-        button.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-        button.style.display =
-            "inline-flex";
-
-        button.style.pointerEvents =
-            "auto";
-
-        /*
-            スマートフォンで画面外に現れた場合、
-            ボタンが見える位置まで自動で移動します。
-        */
-        window.setTimeout(
-            function scrollToWindowButton() {
-
-                button.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                    inline: "nearest"
-                });
-            },
-            180
-        );
-    }
-
-
-    /**
-     * 手紙を紙飛行機へ折った状態にします。
-     */
-    function foldFinalLetter() {
-
-        const letter =
-            document.getElementById(
-                "finalLetter"
-            );
-
-        const foldButton =
-            document.getElementById(
-                "foldFinalLetterButton"
-            );
-
-        if (letter) {
-            letter.classList.add(
-                "is-folded"
-            );
-        }
-
-        if (foldButton) {
-            foldButton.disabled = true;
-        }
-
-        revealWindowButton();
-
-        if (
-            typeof window.saveStage6State ===
-            "function"
-        ) {
-            window.saveStage6State({
-                letterFolded: true
-            });
-        }
-    }
-
-
-    /**
-     * 紙飛行機を飛ばす画面へ移動します。
-     */
-    async function goToEndingPlane(
-        button
-    ) {
-
-        if (
-            button.dataset.transitioning ===
-            "true"
-        ) {
-            return;
-        }
-
-        button.dataset.transitioning =
-            "true";
-
-        button.disabled = true;
-
-        try {
-
-            if (
-                window.EndingPlaneController &&
-                typeof window.EndingPlaneController.reset ===
-                    "function"
-            ) {
-                window.EndingPlaneController.reset();
-            }
-
-            if (
-                window.SceneManager &&
-                typeof window.SceneManager.changeScene ===
-                    "function"
-            ) {
-
-                await window.SceneManager.changeScene(
-                    "ending-plane",
-                    {
-                        fadeOutTime: 800,
-                        blackTime: 450,
-                        fadeInTime: 900
-                    }
-                );
-
-                return;
-            }
-
-            throw new Error(
-                "SceneManager.changeScene is unavailable."
-            );
-
-        } catch (error) {
-
-            console.error(
-                "窓辺への遷移に失敗しました。",
-                error
-            );
-
-            /*
-                アニメーション遷移が失敗した場合も、
-                最終手段として画面を直接表示します。
-            */
-            if (
-                window.SceneManager &&
-                typeof window.SceneManager.showImmediately ===
-                    "function"
-            ) {
-                window.SceneManager.showImmediately(
-                    "ending-plane"
-                );
-            }
-
-        } finally {
-
-            button.disabled = false;
-
-            button.dataset.transitioning =
-                "false";
-        }
-    }
-
-
-    /*
-        個別イベントの初期化順に依存しないよう、
-        document全体でクリックを捕捉します。
-    */
-    document.addEventListener(
-        "click",
-        async function finalLetterNavigationFix(
-            event
-        ) {
-
-            const target = event.target;
-
-            if (
-                !target ||
-                typeof target.closest !==
-                    "function"
-            ) {
-                return;
-            }
-
-
-            const foldButton =
-                target.closest(
-                    "#foldFinalLetterButton"
-                );
-
-            if (foldButton) {
-
-                event.preventDefault();
-                event.stopImmediatePropagation();
-
-                foldFinalLetter();
-
-                return;
-            }
-
-
-            const windowButton =
-                target.closest(
-                    "#goToWindowButton"
-                );
-
-            if (!windowButton) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-
-            await goToEndingPlane(
-                windowButton
-            );
-        },
-        true
-    );
-
-
-    /**
-     * リロード復帰時にもボタン状態を同期します。
-     */
-    function restoreFinalLetterButton() {
-
-        if (
-            typeof window.getStage6State !==
-            "function"
-        ) {
-            return;
-        }
-
-        const state =
-            window.getStage6State() || {};
-
-        if (state.letterFolded) {
-
-            document
-                .getElementById(
-                    "finalLetter"
-                )
-                ?.classList.add(
-                    "is-folded"
-                );
-
-            const foldButton =
-                document.getElementById(
-                    "foldFinalLetterButton"
-                );
-
-            if (foldButton) {
-                foldButton.disabled = true;
-            }
-
-            revealWindowButton();
-        }
-    }
-
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-        document.addEventListener(
-            "DOMContentLoaded",
-            restoreFinalLetterButton
-        );
-
-    } else {
-        restoreFinalLetterButton();
-    }
-
-    window.addEventListener(
-        "pageshow",
-        restoreFinalLetterButton
-    );
-
-})();
