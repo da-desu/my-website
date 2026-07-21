@@ -4848,3 +4848,81 @@ button {
         width: 100%;
     }
 }
+
+
+/* =========================================================
+   Version 0.11.9.6：FINAL前ストーリーの操作改善
+   ・中央のボタン以外をタップしてもFINALへ進める
+   ・進行可能であることを画面上に明示
+   ・遷移ボタンを画面下部で見失いにくくする
+   ========================================================= */
+
+#scene-pre-final-story.is-active {
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#scene-pre-final-story.is-transitioning {
+    pointer-events: none;
+}
+
+.pre-final-story-sheet {
+    cursor: pointer;
+}
+
+#preFinalContinueButton {
+    position: sticky;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 20;
+    min-height: 52px;
+    touch-action: manipulation;
+}
+
+.pre-final-story-tap-hint {
+    margin: 14px 0 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    line-height: 1.7;
+    animation: pre-final-tap-hint-pulse 1.7s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes pre-final-tap-hint-pulse {
+    0%, 100% { opacity: 0.48; }
+    50% { opacity: 1; }
+}
+
+
+/* =========================================================
+   Version 0.11.9.6：FINAL前ストーリーの表示保証
+   ========================================================= */
+
+/*
+   共通の.story-sheetは初期状態がopacity:0です。
+   JavaScriptの表示クラス付与が間に合わない場合や、
+   セーブデータから直接再開した場合にも本文を必ず表示します。
+*/
+#scene-pre-final-story.is-active
+.pre-final-story-sheet:not(.is-visible) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 表示アニメーション中の誤タップを防ぎます。 */
+#scene-pre-final-story[data-ready-to-advance="false"] {
+    cursor: default;
+}
+
+#scene-pre-final-story[data-ready-to-advance="false"]
+#preFinalContinueButton {
+    opacity: 0.62;
+    pointer-events: none;
+}
+
+#scene-pre-final-story[data-ready-to-advance="true"]
+#preFinalContinueButton {
+    opacity: 1;
+    pointer-events: auto;
+}
