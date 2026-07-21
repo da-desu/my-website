@@ -1285,7 +1285,7 @@ continueSavedGame=async function(){
     await continueSavedGameBeforeV010();
     if(sceneName==="stage6")window.Stage6Controller?.restore();
     if(sceneName==="stage6-clear")window.FinalLetterController?.restore();
-    if(sceneName==="ending-plane")window.EndingPlaneController?.reset();
+    if(sceneName==="ending-plane"||sceneName==="ending-reflection")window.EndingPlaneController?.reset();
     if(sceneName==="end")window.updateEndSecretBadge?.();
 };
 
@@ -2837,7 +2837,7 @@ document.addEventListener("DOMContentLoaded",initializeStage1ClearReward);
             window.Stage6Controller?.restore?.();
         }else if(sceneName === "stage6-clear"){
             window.FinalLetterController?.restore?.();
-        }else if(sceneName === "ending-plane"){
+        }else if(sceneName === "ending-plane" || sceneName === "ending-reflection"){
             window.EndingPlaneController?.reset?.();
         }else if(sceneName === "end"){
             window.updateEndSecretBadge?.();
