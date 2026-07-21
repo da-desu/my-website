@@ -12,7 +12,7 @@
 
     <title>世界は姿を変える</title>
 
-    <link rel="stylesheet" href="css/style.css?v=01111">
+    <link rel="stylesheet" href="css/style.css?v=01112">
 </head>
 
 <body>
@@ -868,14 +868,12 @@
                 </figure>
 
                 <form id="stage3Form" class="answer-form stage3-answer-form" novalidate>
-                    <label class="answer-form__label" for="stage3Answer">正解の方向はどこ？</label>
+                    <label class="answer-form__label" for="stage3Answer">正解の方角は？</label>
                     <input id="stage3Answer" class="answer-form__input" type="text" inputmode="text" autocomplete="off" maxlength="4" placeholder="漢字一文字">
                     <button id="stage3SubmitButton" class="answer-form__submit" type="submit">送信</button>
                 </form>
 
                 <p id="stage3Message" class="stage3-answer-message" aria-live="polite"></p>
-                <button id="stage3HintButton" class="hint-button" type="button">ヒントを見る</button>
-                <p id="stage3Hint" class="stage2-hint" hidden>看板の答えは、進むべき方角を表している。</p>
             </div>
         </section>
 
@@ -1345,12 +1343,9 @@
                 <p class="scene-label">FINAL STAGE</p>
 
                 <h1 id="stage6-title" class="final-stage-scene__title">
-                    世界を照らす自由の像
+                    世界を照らす像
                 </h1>
 
-                <p class="final-stage-scene__lead">
-                    知っているはずの姿を、もう一度よく見よう。
-                </p>
 
                 <!-- 自由の女神：CSSだけで描く仮ビジュアル -->
                 <div id="finalStatueCard" class="final-statue-card">
@@ -1488,7 +1483,7 @@
                     <div class="ending-girl-portrait" role="img" aria-label="満開の桜の木の下にいた女の子"></div>
 
                     <button id="girlEndingNextButton" class="start-button story-sheet__button" type="button">
-                        その言葉を聞く
+                        画面を閉じる
                     </button>
                 </article>
 
@@ -1511,9 +1506,32 @@
                         </p>
                     </div>
 
-                    <button id="reflectionEndingNextButton" class="start-button story-sheet__button" type="button">
-                        紙飛行機を見送る
-                    </button>
+                    <div
+                        id="endingPlaneArea"
+                        class="ending-plane-area reflection-ending-plane-area"
+                        aria-label="紙飛行機を左下から右上へ飛ばす操作"
+                    >
+                        <div class="ending-plane-area__night" aria-hidden="true"></div>
+                        <div class="ending-plane-area__stars" aria-hidden="true"></div>
+                        <div id="endingPlaneTrail" class="ending-plane-trail" aria-hidden="true"></div>
+
+                        <button
+                            id="endingPlane"
+                            class="ending-plane"
+                            type="button"
+                            aria-describedby="endingPlaneMessage"
+                            aria-label="紙飛行機。左下から右上へ大きくスワイプして飛ばす"
+                        >
+                            <span aria-hidden="true">➤</span>
+                        </button>
+
+                        <span class="ending-plane-area__start" aria-hidden="true">START</span>
+                        <span class="ending-plane-area__goal" aria-hidden="true">MOON</span>
+                    </div>
+
+                    <p id="endingPlaneMessage" class="ending-plane-message" aria-live="polite">
+                        紙飛行機に触れて、そのまま右上へ。
+                    </p>
                 </article>
             </div>
         </section>
@@ -1561,11 +1579,11 @@
     <!--
         セーブ管理は、ゲーム本体より先に読み込みます。
     -->
-    <script src="js/save.js?v=01111"></script>
-    <script src="js/inventory.js?v=01111"></script>
-    <script src="js/game.js?v=01111"></script>
-    <script src="js/puzzle.js?v=01111"></script>
-    <script src="js/scenes.js?v=01111"></script>
+    <script src="js/save.js?v=01112"></script>
+    <script src="js/inventory.js?v=01112"></script>
+    <script src="js/game.js?v=01112"></script>
+    <script src="js/puzzle.js?v=01112"></script>
+    <script src="js/scenes.js?v=01112"></script>
 
 </body>
 </html>
