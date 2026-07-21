@@ -5548,3 +5548,34 @@ body.is-conclusion-story .log-return-button {
     scroll-margin-top: max(20px, calc(env(safe-area-inset-top) + 12px));
 }
 
+
+
+/* =========================================================
+   Version 0.11.15：「帰り道」初期位置のSafari対策
+   ========================================================= */
+
+/*
+   1枚目を隠して2枚目を表示した際、ブラウザのスクロールアンカーが
+   画面下部の紙飛行機付近を維持しないようにします。
+*/
+.conclusion-story-scene,
+.conclusion-story-scene__inner,
+.conclusion-story-sheet,
+#girlEndingStory,
+#reflectionEndingStory {
+    overflow-anchor: none;
+}
+
+/*
+   表示切り替え直後だけスクロールを固定します。
+   JavaScriptがレイアウト確定後にこのクラスを外します。
+*/
+.conclusion-story-scene.is-pinning-story-top {
+    overflow-y: hidden !important;
+    scroll-behavior: auto !important;
+    overscroll-behavior: none;
+}
+
+#reflection-ending-title:focus {
+    outline: none;
+}
