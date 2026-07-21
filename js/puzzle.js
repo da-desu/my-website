@@ -1573,31 +1573,33 @@ const EndingPlaneController = {
     scrollPinToken: 0,
 
     /**
-     * iPhone / iPad Safariが、非表示になったボタンの次のフォーカス先として
-     * 画面下部の紙飛行機へ移動し、スクロール位置まで下へ動かす現象を防ぎます。
-     * 一定時間だけ結末シーンを先頭に固定し、レイアウト確定後に解除します。
+     * Version 0.11.16
+     * 2枚の物語を別々のスクロール領域に分けています。
+     * 前の画面の最下部位置を次の画面へ引き継がないよう、
+     * 現在表示するviewportだけを先頭へ固定します。
      */
-    pinStoryToTop({ focusTitle = false, duration = 980 } = {}) {
+    pinStoryToTop({ step = this.step, duration = 1100 } = {}) {
         const token = ++this.scrollPinToken;
+        const viewport = document.getElementById(
+            step === 2 ? "reflectionEndingViewport" : "girlEndingViewport"
+        );
         const storyScene = document.getElementById("scene-ending-plane");
-        const storyInner = storyScene?.querySelector(".conclusion-story-scene__inner");
-        const reflectionTitle = document.getElementById("reflection-ending-title");
         const plane = document.getElementById("endingPlane");
 
-        if (!storyScene) return;
+        if (!viewport) return;
 
-        storyScene.classList.add("is-pinning-story-top");
+        viewport.classList.add("is-pinning-story-top");
 
         const resetTop = () => {
             if (token !== this.scrollPinToken) return;
 
-            storyScene.scrollTop = 0;
-            storyScene.scrollLeft = 0;
-            storyScene.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
+            viewport.scrollTop = 0;
+            viewport.scrollLeft = 0;
+            viewport.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
 
-            if (storyInner) {
-                storyInner.scrollTop = 0;
-                storyInner.scrollLeft = 0;
+            if (storyScene) {
+                storyScene.scrollTop = 0;
+                storyScene.scrollLeft = 0;
             }
 
             const scrollingElement = document.scrollingElement;
@@ -1617,32 +1619,21 @@ const EndingPlaneController = {
             window.requestAnimationFrame(resetTop);
         });
 
-        [60, 160, 360, 720].forEach(delay => {
+        [40, 120, 260, 520, 860].forEach(delay => {
             window.setTimeout(resetTop, delay);
         });
 
-        if (focusTitle && reflectionTitle) {
-            window.setTimeout(() => {
-                if (token !== this.scrollPinToken) return;
-                try {
-                    reflectionTitle.focus({ preventScroll: true });
-                } catch (_) {
-                    reflectionTitle.focus();
-                    resetTop();
-                }
-            }, 40);
-        }
-
         window.setTimeout(() => {
             if (token !== this.scrollPinToken) return;
+
             resetTop();
-            storyScene.classList.remove("is-pinning-story-top");
+            viewport.classList.remove("is-pinning-story-top");
             resetTop();
             window.requestAnimationFrame(resetTop);
-            window.setTimeout(resetTop, 80);
 
             if (this.step === 2 && !this.completed && plane) {
                 plane.disabled = false;
+                plane.removeAttribute("tabindex");
             }
         }, duration);
     },
@@ -1650,47 +1641,67 @@ const EndingPlaneController = {
     showStep(step, animate = false) {
         const first = document.getElementById("girlEndingStory");
         const second = document.getElementById("reflectionEndingStory");
-        if (!first || !second) return;
+        const firstViewport = document.getElementById("girlEndingViewport");
+        const secondViewport = document.getElementById("reflectionEndingViewport");
+        const storyScene = document.getElementById("scene-ending-plane");
+        const nextButton = document.getElementById("girlEndingNextButton");
+        const plane = document.getElementById("endingPlane");
+
+        if (!first || !second || !firstViewport || !secondViewport) return;
 
         this.step = step === 2 ? 2 : 1;
 
         /*
-           「画面を閉じる」を押したボタンへフォーカスが残ったまま親要素を隠すと、
-           Safariが次のフォーカス可能要素（画面下部の紙飛行機）まで自動スクロールする
-           場合があります。内容を切り替える前に必ずフォーカスを外します。
+           画面下部の紙飛行機を、帰り道を表示するより前に無効化します。
+           Safariがフォーカス先として選び、下端へ自動スクロールする隙を作りません。
         */
+        if (plane) {
+            plane.disabled = true;
+            plane.setAttribute("tabindex", "-1");
+        }
+
         const focused = document.activeElement;
         if (focused && focused !== document.body && typeof focused.blur === "function") {
             focused.blur();
         }
 
-        const storyScene = document.getElementById("scene-ending-plane");
-        if (storyScene) {
-            storyScene.scrollTop = 0;
-            storyScene.scrollLeft = 0;
-        }
+        [firstViewport, secondViewport].forEach(viewport => {
+            viewport.classList.remove("is-pinning-story-top");
+            viewport.scrollTop = 0;
+            viewport.scrollLeft = 0;
+            viewport.hidden = true;
+        });
 
         [first, second].forEach(sheet => {
             sheet.classList.remove("is-visible", "is-leaving");
             sheet.hidden = true;
         });
 
-        const active = this.step === 1 ? first : second;
-        active.hidden = false;
+        const activeViewport = this.step === 1 ? firstViewport : secondViewport;
+        const activeSheet = this.step === 1 ? first : second;
+
+        if (this.step === 2) {
+            this.resetPlane({ temporarilyDisabled: true });
+            if (nextButton) nextButton.disabled = true;
+            storyScene?.setAttribute("aria-labelledby", "reflection-ending-title");
+        } else {
+            if (nextButton) nextButton.disabled = false;
+            storyScene?.setAttribute("aria-labelledby", "girl-ending-title");
+        }
+
+        activeSheet.hidden = false;
+        activeViewport.scrollTop = 0;
+        activeViewport.scrollLeft = 0;
+        activeViewport.hidden = false;
+        activeViewport.scrollTop = 0;
 
         const reveal = () => {
-            active.classList.add("is-visible");
-
-            if (this.step === 2) {
-                /*
-                   紙飛行機を一時的に無効化し、Safariが自動フォーカスして
-                   画面下部へ移動する経路を遮断します。
-                */
-                this.resetPlane({ temporarilyDisabled: true });
-                this.pinStoryToTop({ focusTitle: true, duration: 980 });
-            } else {
-                this.pinStoryToTop({ focusTitle: false, duration: 420 });
-            }
+            activeViewport.scrollTop = 0;
+            activeSheet.classList.add("is-visible");
+            this.pinStoryToTop({
+                step: this.step,
+                duration: this.step === 2 ? 1100 : 480
+            });
         };
 
         if (animate) {
@@ -1717,6 +1728,12 @@ const EndingPlaneController = {
             plane.style.transform = "rotate(-18deg)";
             plane.style.opacity = "";
             plane.disabled = temporarilyDisabled;
+
+            if (temporarilyDisabled) {
+                plane.setAttribute("tabindex", "-1");
+            } else {
+                plane.removeAttribute("tabindex");
+            }
         }
 
         trail?.classList.remove("is-visible");
@@ -1738,15 +1755,24 @@ const EndingPlaneController = {
 
     async next(event) {
         event?.preventDefault?.();
-        event?.currentTarget?.blur?.();
+        const button = event?.currentTarget;
+        button?.blur?.();
 
         if (this.transitioning || this.step !== 1) return;
         this.transitioning = true;
+        if (button) button.disabled = true;
+
+        const plane = document.getElementById("endingPlane");
+        if (plane) {
+            plane.disabled = true;
+            plane.setAttribute("tabindex", "-1");
+        }
 
         const first = document.getElementById("girlEndingStory");
         first?.classList.remove("is-visible");
         first?.classList.add("is-leaving");
         await window.wait(330);
+
         this.showStep(2, true);
         window.saveStage6State?.({ endingStoryStep: 2 });
         this.transitioning = false;
