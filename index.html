@@ -10,9 +10,9 @@
 
     <meta name="theme-color" content="#000000">
 
-    <title>知るたびに世界は姿を変える</title>
+    <title>世界は姿を変える</title>
 
-    <link rel="stylesheet" href="css/style.css?v=01196">
+    <link rel="stylesheet" href="css/style.css?v=01110">
 </head>
 
 <body>
@@ -32,6 +32,46 @@
                 <button id="inventoryCloseButton" class="sub-button" type="button">閉じる</button>
             </div>
         </div>
+
+        <!-- =======================================================
+             進行ログ
+        ======================================================== -->
+        <button
+            id="logButton"
+            class="log-button"
+            type="button"
+            aria-label="進行ログを開く"
+            hidden
+        >
+            <span class="log-button__label">LOG</span>
+            <span id="logCount" class="log-button__count">0/7</span>
+        </button>
+
+        <div
+            id="logPanel"
+            class="log-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="log-title"
+            aria-hidden="true"
+            hidden
+        >
+            <div id="logBackdrop" class="log-panel__backdrop" aria-hidden="true"></div>
+            <div class="log-panel__body">
+                <p class="scene-label">LOG</p>
+                <h2 id="log-title" class="log-panel__title">これまでの記録</h2>
+                <p class="log-panel__guide">
+                    解放済みの場面へ戻れます。<br>
+                    取り逃したアイテムも、その場面で取得できます。
+                </p>
+                <div id="logList" class="log-list" role="list"></div>
+                <button id="logCloseButton" class="sub-button log-panel__close" type="button">閉じる</button>
+            </div>
+        </div>
+
+        <button id="logReturnButton" class="log-return-button" type="button" hidden>
+            現在地点へ戻る
+        </button>
 
 
 
@@ -98,10 +138,6 @@
             aria-labelledby="top-message"
         >
             <div class="scene__inner top-scene__inner">
-
-                <p class="top-scene__lead">
-                    知るたびに
-                </p>
 
                 <p id="top-message" class="top-scene__message">
                     <span
@@ -170,7 +206,7 @@
                         </p>
 
                         <p>
-                            そんな中、何か転機を待っているのに、降ってくるのは、雨や仕事ばかり。「今日は早めに帰ろう」と積もらぬ思いを空に馳せていた時、紙飛行機が春の風に流され、落ちてきた。
+                            そんな中、何か転機を待っているのに、降ってくるのは、雨や仕事ばかり。そんな思いを空に馳せていた時、紙飛行機が春の風に流され、落ちてきた。
                         </p>
 
                         <p>
@@ -191,6 +227,15 @@
                 <!-- =================================================
                      手紙：表／裏
                 ================================================== -->
+                <div id="letterHeading" class="letter-heading" hidden>
+                    <p class="letter-card__eyebrow">
+                        見知らぬ手紙
+                    </p>
+                    <h2 class="letter-card__title">
+                        紙飛行機を広げると、文字が現れた。
+                    </h2>
+                </div>
+
                 <article
                     id="letterCard"
                     class="letter-card letter-flip-card"
@@ -206,14 +251,6 @@
                             class="letter-flip-card__face letter-flip-card__front"
                             aria-label="手紙の表"
                         >
-                            <p class="letter-card__eyebrow">
-                                見知らぬ手紙
-                            </p>
-
-                            <h2 class="letter-card__title">
-                                紙飛行機を広げると、文字が現れた。
-                            </h2>
-
                             <div class="letter-card__body">
                                 <p
                                     id="typewriterText"
@@ -286,7 +323,7 @@
 
                     <div class="story-sheet__body">
                         <p>
-                            世界を照らす自由の像とはなんだろうか。私は知らなかった。ただ、そこにはQRコードが貼られていた。
+                            世界を照らす像とはなんだろうか。私は知らなかった。ただ、そこにはQRコードが貼られていた。
                         </p>
 
                         <p>
@@ -651,7 +688,7 @@
 
                 <p class="stage2-scene__lead">
                     桜の木の向こうには、<br>
-                    青い世界が広がっていた。
+                    別の世界が広がっていた。
                 </p>
 
                 <!--
@@ -1217,7 +1254,6 @@
             class="scene pre-final-story-scene"
             data-scene="pre-final-story"
             aria-labelledby="pre-final-story-title"
-            aria-describedby="pre-final-story-tap-hint"
             hidden
         >
             <div class="scene__inner pre-final-story-scene__inner">
@@ -1227,7 +1263,7 @@
 
                     <div class="story-sheet__body">
                         <p>
-                            “女神”…“世界を照らす自由の像”…つまり、
+                            “女神”…“世界を照らす像”…つまり、
                             “自由の女神”に会いに行けということなのか。
                         </p>
                         <p>
@@ -1243,10 +1279,6 @@
                     <button id="preFinalContinueButton" class="start-button story-sheet__button" type="button">
                         女神のもとへ向かう
                     </button>
-
-                    <p id="pre-final-story-tap-hint" class="pre-final-story-tap-hint">
-                        画面のどこをタップしても進みます
-                    </p>
                 </article>
             </div>
         </section>
@@ -1336,7 +1368,7 @@
                 <!-- 持ち物から二つを選ぶ最終指示 -->
                 <section id="stage6PurplePanel" class="final-panel final-purple-panel" hidden>
                     <p class="final-purple-panel__eyebrow">LAST INSTRUCTION</p>
-                    <h2 class="final-purple-panel__command">むらさきを２つかけろ</h2>
+                    <h2 class="final-purple-panel__command">むらさきを、<br>２つかけろ</h2>
 
                     <div class="final-inventory-picker">
                         <p class="final-inventory-picker__title">アイテムから２つを選択</p>
@@ -1509,11 +1541,11 @@
     <!--
         セーブ管理は、ゲーム本体より先に読み込みます。
     -->
-    <script src="js/save.js?v=01196"></script>
-    <script src="js/inventory.js?v=01196"></script>
-    <script src="js/game.js?v=01196"></script>
-    <script src="js/puzzle.js?v=01196"></script>
-    <script src="js/scenes.js?v=01196"></script>
+    <script src="js/save.js?v=01110"></script>
+    <script src="js/inventory.js?v=01110"></script>
+    <script src="js/game.js?v=01110"></script>
+    <script src="js/puzzle.js?v=01110"></script>
+    <script src="js/scenes.js?v=01110"></script>
 
 </body>
 </html>
