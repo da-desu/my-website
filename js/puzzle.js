@@ -1012,23 +1012,9 @@ async function verifyStage5Answer(event) {
     stage5Clearing = false;
 }
 
-function toggleStage5Hint() {
-    const hint = document.getElementById("stage5Hint");
-    const button = document.getElementById("stage5HintButton");
-
-    if (!hint || !button) {
-        return;
-    }
-
-    hint.hidden = !hint.hidden;
-    button.textContent = hint.hidden ? "ヒントを見る" : "ヒントを閉じる";
-}
-
 function resetStage5Puzzle() {
     const input = document.getElementById("stage5Answer");
     const submitButton = document.getElementById("stage5SubmitButton");
-    const hint = document.getElementById("stage5Hint");
-    const hintButton = document.getElementById("stage5HintButton");
     const reward = document.getElementById("ibushiginReward");
 
     if (input) {
@@ -1040,13 +1026,6 @@ function resetStage5Puzzle() {
         submitButton.disabled = false;
     }
 
-    if (hint) {
-        hint.hidden = true;
-    }
-
-    if (hintButton) {
-        hintButton.textContent = "ヒントを見る";
-    }
 
     const ownsIbushigin =
         typeof window.hasItem === "function" &&
@@ -1067,7 +1046,6 @@ function initializeStage5Puzzle() {
     }
 
     document.getElementById("stage5Form")?.addEventListener("submit", verifyStage5Answer);
-    document.getElementById("stage5HintButton")?.addEventListener("click", toggleStage5Hint);
     stage5Initialized = true;
 }
 
@@ -1413,11 +1391,62 @@ const FinalLetterController = {
         this.finishing = true;
 
         const { video, playButton } = this.elements();
+        let transitionLayer = document.getElementById("transitionLayer");
+        let temporaryLayer = false;
 
         /*
-           動画終了直後は、動画専用UIの状態を保ったまま暗転を開始します。
-           暗転完了前に通常UIが一瞬見えることを防ぎます。
+           通常は共通の暗転レイヤーを使用します。
+           万一HTML側のレイヤーが見つからない場合も、
+           動画の最終フレームから黒へ移れるよう一時レイヤーを生成します。
         */
+        if (!transitionLayer) {
+            transitionLayer = document.createElement("div");
+            transitionLayer.setAttribute("aria-hidden", "true");
+            Object.assign(transitionLayer.style, {
+                position: "fixed",
+                inset: "0",
+                zIndex: "10000",
+                background: "#000",
+                opacity: "0",
+                visibility: "visible",
+                pointerEvents: "none",
+                transition: "opacity 650ms ease"
+            });
+            document.body.appendChild(transitionLayer);
+            temporaryLayer = true;
+        }
+
+        const showEndingStoryScene = () => {
+            if (
+                window.SceneManager &&
+                typeof window.SceneManager.showImmediately === "function"
+            ) {
+                window.SceneManager.showImmediately("ending-plane");
+                return true;
+            }
+
+            const target = document.querySelector('[data-scene="ending-plane"]');
+            if (!target) return false;
+
+            document.querySelectorAll(".scene").forEach(scene => {
+                scene.classList.remove("is-active");
+                scene.hidden = true;
+                scene.setAttribute("aria-hidden", "true");
+            });
+
+            target.hidden = false;
+            target.setAttribute("aria-hidden", "false");
+            target.classList.add("is-active");
+            target.scrollTop = 0;
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+            if (window.SceneManager) {
+                window.SceneManager.currentScene = "ending-plane";
+            }
+            window.saveCurrentScene?.("ending-plane");
+            return true;
+        };
+
         try {
             video?.pause();
         } catch (_) {}
@@ -1428,39 +1457,46 @@ const FinalLetterController = {
             endingStoryStep: 1
         });
 
-        EndingPlaneController.reset({ forceFirst: true });
+        try {
+            /* 動画の最終フレームから650msかけて黒へ。 */
+            transitionLayer.style.transitionDuration = "650ms";
+            transitionLayer.classList.add("is-visible");
+            if (temporaryLayer) transitionLayer.style.opacity = "1";
+            await window.wait(680);
 
-        if (window.SceneManager?.changeScene) {
-            await window.SceneManager.changeScene("ending-plane", {
-                /* 動画の最終フレームから、ゆっくり黒へフェードします。 */
-                fadeOutTime: 650,
-
-                /* 完全な黒画面を1秒間維持します。 */
-                blackTime: 1000,
-
-                /* 黒から「ゲームの終わり」へフェードインします。 */
-                fadeInTime: 650
-            });
-        } else {
-            /* SceneManagerが使えない場合も、1秒の黒画面を挟みます。 */
-            const transitionLayer = document.getElementById("transitionLayer");
-            if (transitionLayer) {
-                transitionLayer.style.transitionDuration = "650ms";
-                transitionLayer.classList.add("is-visible");
-                await window.wait(670);
-                window.SceneManager?.showImmediately?.("ending-plane");
-                await window.wait(1000);
-                transitionLayer.style.transitionDuration = "650ms";
-                transitionLayer.classList.remove("is-visible");
-                await window.wait(670);
-            } else {
-                await window.wait(1000);
-                window.SceneManager?.showImmediately?.("ending-plane");
+            /*
+               完全に黒くなった後で背面のシーンを切り替えます。
+               ここで切り替えるため、ストーリーが一瞬先に見えることはありません。
+            */
+            if (!showEndingStoryScene()) {
+                throw new Error("ending-plane scene was not found.");
             }
-        }
+            EndingPlaneController.reset({ forceFirst: true });
 
-        document.body.classList.remove("is-final-video-playing");
-        this.finishing = false;
+            /* 完全な黒画面を1秒間維持します。 */
+            await window.wait(1000);
+
+            /* 黒から「ゲームの終わり」へ650msかけてフェードします。 */
+            transitionLayer.style.transitionDuration = "650ms";
+            transitionLayer.classList.remove("is-visible");
+            if (temporaryLayer) transitionLayer.style.opacity = "0";
+            await window.wait(680);
+
+        } catch (error) {
+            console.error("動画終了後の画面遷移に失敗しました。", error);
+
+            /* 演出に失敗しても、ゲームが停止しないよう最終表示を保証します。 */
+            showEndingStoryScene();
+            EndingPlaneController.reset({ forceFirst: true });
+            transitionLayer.classList.remove("is-visible");
+            if (temporaryLayer) transitionLayer.style.opacity = "0";
+
+        } finally {
+            document.body.classList.remove("is-final-video-playing");
+            if (playButton) playButton.disabled = false;
+            if (temporaryLayer) transitionLayer.remove();
+            this.finishing = false;
+        }
     },
 
     restore() {
@@ -1558,12 +1594,24 @@ const EndingPlaneController = {
                iPhone / iPad Safariでも「帰り道」のタイトルから表示します。
             */
             const storyScene = document.getElementById("scene-ending-plane");
-            if (storyScene) storyScene.scrollTop = 0;
-            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            const resetStoryScroll = () => {
+                if (storyScene) {
+                    storyScene.scrollTop = 0;
+                    storyScene.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
+                }
+                window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            };
 
+            /*
+               hidden解除・表示アニメーション・画像レイアウトの各段階で
+               スクロール位置が復元される端末があるため、複数回先頭へ戻します。
+            */
+            resetStoryScroll();
             window.requestAnimationFrame(() => {
-                if (storyScene) storyScene.scrollTop = 0;
+                resetStoryScroll();
+                window.requestAnimationFrame(resetStoryScroll);
             });
+            window.setTimeout(resetStoryScroll, 100);
 
             if (this.step === 2) this.resetPlane();
         };
