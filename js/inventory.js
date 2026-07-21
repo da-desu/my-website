@@ -229,8 +229,15 @@ function combineInventoryItems(first, second) {
 
         window.setTimeout(() => {
             closeInventory();
-            document.dispatchEvent(new CustomEvent("inventory:finalReceiptReady"));
-        }, 1150);
+
+            if (typeof window.goToPreFinalStory === "function") {
+                void window.goToPreFinalStory();
+            } else {
+                document.dispatchEvent(
+                    new CustomEvent("inventory:finalReceiptReady")
+                );
+            }
+        }, 900);
 
         return true;
     }
@@ -462,11 +469,15 @@ function openInventory() {
     renderInventory();
     setInventoryMessage("", "");
     panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
 }
 
 function closeInventory() {
     const panel = document.getElementById("inventoryPanel");
-    if (panel) panel.hidden = true;
+    if (panel) {
+        panel.hidden = true;
+        panel.setAttribute("aria-hidden", "true");
+    }
 }
 
 function initializeInventory() {
