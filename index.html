@@ -1135,10 +1135,29 @@
                 <h1 id="sushi-return-title" class="stage4-scene__title">寿司屋の扉</h1>
 
                 <p class="sushi-return-scene__lead">
-                    どこへ向かえばいいんだろう。<br>
-                    近くに看板等は見当たらない。<br>
-                    どこかに記されているのだろうか。
+                    近くに案内は見当たらない。<br>
+                    どこかに行き先が記されているのだろうか。
                 </p>
+
+                <form id="sushiReturnAnswerForm" class="answer-form sushi-return-answer-form" novalidate>
+                    <label class="answer-form__label" for="sushiReturnAnswer">
+                        どこへ向かえばよいだろう
+                    </label>
+                    <input
+                        id="sushiReturnAnswer"
+                        class="answer-form__input"
+                        type="text"
+                        inputmode="text"
+                        autocomplete="off"
+                        maxlength="20"
+                        placeholder="答えを入力"
+                    >
+                    <button id="sushiReturnSubmitButton" class="answer-form__submit" type="submit">
+                        決定
+                    </button>
+                </form>
+
+                <p id="sushiReturnAnswerMessage" class="sushi-return-answer-message" aria-live="polite"></p>
 
                 <div class="stage4-street stage4-street--return">
                     <aside class="stage4-pole" aria-label="電柱に貼られた広告">
@@ -1485,11 +1504,11 @@
     <!--
         セーブ管理は、ゲーム本体より先に読み込みます。
     -->
-    <script src="js/save.js?v=01192"></script>
-    <script src="js/inventory.js?v=01192"></script>
-    <script src="js/game.js?v=01192"></script>
-    <script src="js/puzzle.js?v=01192"></script>
-    <script src="js/scenes.js?v=01192"></script>
+    <script src="js/save.js?v=01193"></script>
+    <script src="js/inventory.js?v=01193"></script>
+    <script src="js/game.js?v=01193"></script>
+    <script src="js/puzzle.js?v=01193"></script>
+    <script src="js/scenes.js?v=01193"></script>
 
 </body>
 </html>
