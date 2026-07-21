@@ -4926,3 +4926,249 @@ button {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* =========================================================
+   Version 0.11.10：タイトル／手紙見出し／進行ログ
+   ========================================================= */
+
+/* 手紙の見出しを紙の外側、手紙の上に表示します。 */
+.letter-heading {
+    width: min(100%, 590px);
+    margin: 0 auto 16px;
+    padding-inline: 8px;
+    color: rgba(255,255,255,.92);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.letter-heading.is-visible {
+    animation: letter-heading-appear 520ms ease forwards;
+}
+
+.letter-heading.is-leaving {
+    animation: letter-heading-leave 320ms ease forwards;
+}
+
+.letter-heading .letter-card__eyebrow {
+    margin: 0 0 8px;
+    color: rgba(255,255,255,.58);
+}
+
+.letter-heading .letter-card__title {
+    color: rgba(255,255,255,.94);
+    text-shadow: 0 4px 18px rgba(0,0,0,.42);
+}
+
+@keyframes letter-heading-appear {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes letter-heading-leave {
+    to { opacity: 0; transform: translateY(-8px); }
+}
+
+/* LOGボタン */
+.log-button {
+    appearance: none;
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+    z-index: 1300;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 7px 12px;
+    border: 1px solid rgba(255,255,255,.26);
+    border-radius: 999px;
+    background: rgba(0,0,0,.56);
+    color: #fff;
+    font-family: "Courier New", monospace;
+    cursor: pointer;
+    touch-action: manipulation;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.log-button__label {
+    font-size: .72rem;
+    letter-spacing: .16em;
+}
+
+.log-button__count {
+    display: grid;
+    place-items: center;
+    min-width: 33px;
+    min-height: 24px;
+    padding-inline: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.13);
+    font-size: .68rem;
+}
+
+.log-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 1900;
+    display: grid;
+    place-items: center;
+    padding: max(20px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom));
+}
+
+.log-panel[hidden],
+.log-panel[aria-hidden="true"] {
+    display: none !important;
+}
+
+.log-panel__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.82);
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+.log-panel__body {
+    position: relative;
+    z-index: 2;
+    width: min(100%, 480px);
+    max-height: min(88svh, 760px);
+    overflow-y: auto;
+    padding: 27px 20px 22px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 17px;
+    background: linear-gradient(180deg, #15191d, #0b0d0f);
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 28px 80px rgba(0,0,0,.65);
+    opacity: 0;
+    transform: translateY(14px) scale(.985);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.log-panel.is-open .log-panel__backdrop { opacity: 1; }
+.log-panel.is-open .log-panel__body { opacity: 1; transform: translateY(0) scale(1); }
+
+.log-panel__title {
+    margin: 0;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(1.35rem, 5vw, 1.75rem);
+    font-weight: 500;
+    letter-spacing: .1em;
+}
+
+.log-panel__guide {
+    margin: 14px 0 0;
+    color: rgba(255,255,255,.65);
+    font-size: .78rem;
+    line-height: 1.8;
+}
+
+.log-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.log-entry {
+    appearance: none;
+    display: grid;
+    grid-template-columns: 64px minmax(0,1fr);
+    grid-template-areas:
+        "number title"
+        "number status";
+    gap: 4px 12px;
+    align-items: center;
+    width: 100%;
+    min-height: 68px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 12px;
+    background: rgba(255,255,255,.055);
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.log-entry.is-unlocked:active { transform: scale(.985); }
+.log-entry.is-unlocked:hover { background: rgba(255,255,255,.09); }
+
+.log-entry.is-locked {
+    opacity: .42;
+    cursor: default;
+}
+
+.log-entry__number {
+    grid-area: number;
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+    border-right: 1px solid rgba(255,255,255,.13);
+    color: rgba(255,255,255,.5);
+    font-family: "Courier New", monospace;
+    font-size: .68rem;
+    letter-spacing: .06em;
+}
+
+.log-entry__title {
+    grid-area: title;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: .94rem;
+    line-height: 1.45;
+}
+
+.log-entry__status {
+    grid-area: status;
+    color: rgba(255,255,255,.5);
+    font-size: .67rem;
+}
+
+.log-panel__close {
+    margin-top: 22px;
+}
+
+.log-return-button {
+    appearance: none;
+    position: fixed;
+    left: 50%;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 1850;
+    min-width: min(82vw, 280px);
+    min-height: 50px;
+    padding: 10px 20px;
+    border: 1px solid rgba(255,255,255,.38);
+    border-radius: 999px;
+    background: rgba(10,12,14,.9);
+    color: #fff;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: .86rem;
+    letter-spacing: .08em;
+    box-shadow: 0 12px 36px rgba(0,0,0,.5);
+    transform: translateX(-50%);
+    cursor: pointer;
+    touch-action: manipulation;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+body.is-log-replay .scene__inner {
+    padding-bottom: max(92px, calc(72px + env(safe-area-inset-bottom)));
+}
+
+@media (max-width: 390px) {
+    .log-button,
+    .inventory-button {
+        top: max(9px, env(safe-area-inset-top));
+    }
+
+    .log-button { left: max(9px, env(safe-area-inset-left)); }
+    .inventory-button { right: max(9px, env(safe-area-inset-right)); }
+
+    .log-entry {
+        grid-template-columns: 56px minmax(0,1fr);
+        padding-inline: 10px;
+    }
+}
+
