@@ -1473,8 +1473,11 @@ const FinalLetterController = {
             }
             EndingPlaneController.reset({ forceFirst: true });
 
-            /* 完全な黒画面を1秒間維持します。 */
-            await window.wait(1000);
+            /*
+               Version 0.11.18
+               完全な黒画面の1秒待機は行わず、
+               背面の「ゲームの終わり」へ直ちにフェードを開始します。
+            */
 
             /* 黒から「ゲームの終わり」へ650msかけてフェードします。 */
             transitionLayer.style.transitionDuration = "650ms";
