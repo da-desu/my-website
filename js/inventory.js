@@ -1,7 +1,7 @@
 /*
 ============================================================
 inventory.js
-Version 0.11.9.3.2
+Version 0.11.11
 
 役割
 ・取得済みアイテムの表示
@@ -25,7 +25,7 @@ const ITEM_PRESENTATIONS = {
     },
     "醤油": {
         icon: "瓶",
-        description: "大将から受け取った醤油。寿司屋では「むらさき」とも呼ばれる。"
+        description: "大将から受け取った醤油。"
     },
     "赤ペン": {
         icon: "赤",
@@ -41,7 +41,7 @@ const ITEM_PRESENTATIONS = {
     },
     "ハンドクリーム": {
         icon: "香",
-        description: "電柱の看板から受け取った、ノスタルジックな香りのハンドクリーム。"
+        description: "電柱の看板から手に入れた、ノスタルジックな香りのハンドクリーム。"
     },
     "レシート": {
         icon: "紙",
@@ -177,6 +177,152 @@ function normalizeRecipePair(first, second) {
 
 
 
+let pendingInventoryRecipe = null;
+
+const INVENTORY_RECIPES = {
+    pens: {
+        title: "赤ペンと青ペンを混ぜる",
+        question: "？に共通して入る数字は？",
+        image: "img/items/pen_mix_puzzle.jpeg",
+        alt: "赤と青のベン図。左に八、右に一と三、重なりに二つのクエスチョンマークがある一枚謎",
+        answers: ["11", "十一"]
+    },
+    receipt: {
+        title: "レシートの印字を消す",
+        question: "これが表す単語は？",
+        image: "img/items/receipt_mix_puzzle.jpeg",
+        alt: "白いご飯の中央にイクラがあり、その下に30/32と17/32が書かれた一枚謎",
+        answers: ["すし", "寿司"]
+    }
+};
+
+function normalizeRecipeAnswer(value) {
+    return String(value || "")
+        .normalize("NFKC")
+        .trim()
+        .replace(/[\s\u3000、。・,，.．!！?？「」『』（）()]/g, "")
+        .replace(/[ァ-ヶ]/g, char => String.fromCharCode(char.charCodeAt(0) - 0x60))
+        .toLowerCase();
+}
+
+function setRecipePuzzleMessage(text, type = "") {
+    const message = document.getElementById("inventoryRecipeMessage");
+    if (!message) return;
+    message.textContent = text;
+    message.classList.remove("is-error", "is-success");
+    if (type) message.classList.add(`is-${type}`);
+}
+
+function openInventoryRecipePuzzle(recipeKey) {
+    const recipe = INVENTORY_RECIPES[recipeKey];
+    const panel = document.getElementById("inventoryRecipePuzzle");
+    const title = document.getElementById("inventoryRecipeTitle");
+    const question = document.getElementById("inventoryRecipeQuestion");
+    const image = document.getElementById("inventoryRecipeImage");
+    const input = document.getElementById("inventoryRecipeAnswer");
+
+    if (!recipe || !panel || !title || !question || !image || !input) {
+        console.error("合成用の一枚謎を表示できませんでした。", recipeKey);
+        return false;
+    }
+
+    pendingInventoryRecipe = recipeKey;
+    title.textContent = recipe.title;
+    question.textContent = recipe.question;
+    image.src = recipe.image;
+    image.alt = recipe.alt;
+    input.value = "";
+    input.disabled = false;
+    setRecipePuzzleMessage("");
+
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("is-recipe-puzzle-open");
+
+    window.setTimeout(() => input.focus(), 80);
+    return true;
+}
+
+function closeInventoryRecipePuzzle() {
+    const panel = document.getElementById("inventoryRecipePuzzle");
+    if (panel) {
+        panel.hidden = true;
+        panel.setAttribute("aria-hidden", "true");
+    }
+    document.body.classList.remove("is-recipe-puzzle-open");
+    pendingInventoryRecipe = null;
+}
+
+function createPurpleInk() {
+    const meta = readInventoryMeta();
+    const firstIndex = Math.min(
+        meta.order.indexOf("赤ペン") === -1 ? Number.MAX_SAFE_INTEGER : meta.order.indexOf("赤ペン"),
+        meta.order.indexOf("青ペン") === -1 ? Number.MAX_SAFE_INTEGER : meta.order.indexOf("青ペン")
+    );
+
+    consumeInventoryItems(["赤ペン", "青ペン"]);
+    addInventoryItem("紫のインク");
+
+    const nextMeta = readInventoryMeta();
+    nextMeta.order = nextMeta.order.filter(name => name !== "紫のインク");
+    nextMeta.order.splice(Number.isFinite(firstIndex) ? firstIndex : nextMeta.order.length, 0, "紫のインク");
+    writeInventoryMeta(nextMeta);
+
+    setInventoryMessage("謎が解けた。赤と青が重なり、「紫のインク」ができた。", "success");
+    renderInventory();
+    document.dispatchEvent(new CustomEvent("inventory:changed"));
+}
+
+function createGoddessReceipt() {
+    const meta = readInventoryMeta();
+    const receiptIndex = meta.order.indexOf("レシート");
+
+    consumeInventoryItems(["レシート"]);
+    addInventoryItem("女神へのレシート");
+
+    const nextMeta = readInventoryMeta();
+    nextMeta.order = nextMeta.order.filter(name => name !== "女神へのレシート");
+    nextMeta.order.splice(receiptIndex >= 0 ? receiptIndex : nextMeta.order.length, 0, "女神へのレシート");
+    writeInventoryMeta(nextMeta);
+
+    setInventoryMessage("謎が解けた。印字が消え、レシートに「自由の女神」と表示された。", "success");
+    renderInventory();
+    document.dispatchEvent(new CustomEvent("inventory:changed"));
+}
+
+function solveInventoryRecipePuzzle(event) {
+    event?.preventDefault?.();
+
+    const recipeKey = pendingInventoryRecipe;
+    const recipe = INVENTORY_RECIPES[recipeKey];
+    const input = document.getElementById("inventoryRecipeAnswer");
+    const answer = normalizeRecipeAnswer(input?.value || "");
+
+    if (!recipe || !input) return;
+
+    if (!answer) {
+        setRecipePuzzleMessage("答えを入力しよう。", "error");
+        input.focus();
+        return;
+    }
+
+    const accepted = recipe.answers.map(normalizeRecipeAnswer);
+    if (!accepted.includes(answer)) {
+        setRecipePuzzleMessage("違うようだ。画像をもう一度よく見よう。", "error");
+        input.select();
+        return;
+    }
+
+    input.disabled = true;
+    setRecipePuzzleMessage("正解。アイテムを合成する。", "success");
+
+    window.setTimeout(() => {
+        closeInventoryRecipePuzzle();
+        if (recipeKey === "pens") createPurpleInk();
+        if (recipeKey === "receipt") createGoddessReceipt();
+    }, 420);
+}
+
 function combineInventoryItems(first, second) {
     const pair = normalizeRecipePair(first, second);
     const penPair = normalizeRecipePair("赤ペン", "青ペン");
@@ -187,25 +333,7 @@ function combineInventoryItems(first, second) {
             setInventoryMessage("紫のインクは、すでに作ってある。", "success");
             return true;
         }
-
-        const meta = readInventoryMeta();
-        const firstIndex = Math.min(
-            meta.order.indexOf("赤ペン") === -1 ? Number.MAX_SAFE_INTEGER : meta.order.indexOf("赤ペン"),
-            meta.order.indexOf("青ペン") === -1 ? Number.MAX_SAFE_INTEGER : meta.order.indexOf("青ペン")
-        );
-
-        consumeInventoryItems(["赤ペン", "青ペン"]);
-        addInventoryItem("紫のインク");
-
-        const nextMeta = readInventoryMeta();
-        nextMeta.order = nextMeta.order.filter(name => name !== "紫のインク");
-        nextMeta.order.splice(Number.isFinite(firstIndex) ? firstIndex : nextMeta.order.length, 0, "紫のインク");
-        writeInventoryMeta(nextMeta);
-
-        setInventoryMessage("赤と青が重なり、「紫のインク」ができた。", "success");
-        renderInventory();
-        document.dispatchEvent(new CustomEvent("inventory:changed"));
-        return true;
+        return openInventoryRecipePuzzle("pens");
     }
 
     if (pair === receiptPair) {
@@ -213,23 +341,7 @@ function combineInventoryItems(first, second) {
             setInventoryMessage("印字が消えたレシートには、「自由の女神」と表示されている。", "success");
             return true;
         }
-
-        const meta = readInventoryMeta();
-        const receiptIndex = meta.order.indexOf("レシート");
-
-        consumeInventoryItems(["レシート"]);
-        addInventoryItem("女神へのレシート");
-
-        const nextMeta = readInventoryMeta();
-        nextMeta.order = nextMeta.order.filter(name => name !== "女神へのレシート");
-        nextMeta.order.splice(receiptIndex >= 0 ? receiptIndex : nextMeta.order.length, 0, "女神へのレシート");
-        writeInventoryMeta(nextMeta);
-
-        setInventoryMessage("印字が消え、レシートに「自由の女神」と表示された。", "success");
-        renderInventory();
-        document.dispatchEvent(new CustomEvent("inventory:changed"));
-
-        return true;
+        return openInventoryRecipePuzzle("receipt");
     }
 
     return false;
@@ -473,6 +585,9 @@ function closeInventory() {
 
 function initializeInventory() {
     document.getElementById("inventoryButton")?.addEventListener("click", openInventory);
+    document.getElementById("inventoryRecipeForm")?.addEventListener("submit", solveInventoryRecipePuzzle);
+    document.getElementById("inventoryRecipeCancel")?.addEventListener("click", closeInventoryRecipePuzzle);
+    document.getElementById("inventoryRecipeBackdrop")?.addEventListener("click", closeInventoryRecipePuzzle);
     document.getElementById("inventoryCloseButton")?.addEventListener("click", closeInventory);
     document.getElementById("inventoryBackdrop")?.addEventListener("click", closeInventory);
     renderInventory();
@@ -495,4 +610,5 @@ window.renderInventory = renderInventory;
 window.getUsableInventoryItems = getInventoryItems;
 window.hasUsableItem = hasUsableItem;
 window.combineInventoryItems = combineInventoryItems;
+window.solveInventoryRecipePuzzle = solveInventoryRecipePuzzle;
 window.closeInventory = closeInventory;
